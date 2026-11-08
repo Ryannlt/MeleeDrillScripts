@@ -1,0 +1,31 @@
+namespace MDS.ConfigVariables
+{
+    public enum ConfigCommandEnum
+    {
+        EnableDebugLogging,
+        EnableMeleeLog,
+        EnableAdminOnly,
+        SetArena,
+        AddArena,
+        SetArenaCorner1,
+        SetArenaCorner2,
+        SetOpenMeleeSpacing,
+        SetOpenMeleeOffset,
+        SetXvXDistance,
+        SetXvXSpacing,
+        SetXvXStrategy,
+        SetGroupfightDistance,
+        SetGroupfightSpacing,
+        SetGroupfightStrategy,
+        SetOrientation,
+        SetBotDefaultAi,
+        SetBotDefaultDeathPolicy,
+        SetBotKickDelay,
+        SetBotReplaceDelay,
+        SetGlobalAi,
+        SpawnBot,
+        SetLineBotCount,
+        SetLineSpacing,
+        SpawnLine
+    }
+}

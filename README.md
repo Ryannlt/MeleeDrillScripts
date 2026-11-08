@@ -1,4 +1,4 @@
-# Melee Drill System (MDS)
+# MDS (Melee Drill Scripts)
 
 *A utility mod with commands and scripts to assist, enhance, and automate melee drills in **Holdfast: Nations At War***
 
@@ -149,6 +149,18 @@ All commands must be prefixed with `rc` and require admin.
 
 * Toggle. Turns infinite firearm ammo and firearm trajectory lines on, and off again on the next call.
 * Takes no arguments. Replies with the new state.
+
+### `meleelog` *(dev tool)*
+
+**Usage:** `rc meleelog [on|off]` or `rc meleelog frames <on|off>`
+
+* Records what the melee actually did in the server log. Off by default. Toggles if no state is given.
+* Each melee hit writes one `hit` line: the attacker, friendly fire, weapon, damage, the distance and bearing to the victim, and whether a friendly stood nearer to the attacker than the nearest enemy.
+* `src` says who named the attacker. `score` is the game's scorable action, `kill` is the kill callback, and `unknown` means neither arrived within a second.
+* Blocks and clashes write one `block` or `clash` line each.
+* Players under `rc bot probe` write one `probe` line per tick with position, facing, pitch, health and their nearest friend and enemy.
+* `frames` keeps the last second of every player and prints it on each melee hit, about 20 lines per hit.
+* `atk~`, `hold~`, `block~` and `strike~` are inferred from packets. `cmd` is the last action MDS ordered for a bot.
 
 
 ### `bot`
@@ -806,6 +818,7 @@ Use **global** `mod_variable` or **per‑map** `mod_variable_local` to set MDS o
 ### General
 
 * **EnableDebugLogging**: `true | false`
+* **EnableMeleeLog**: `true | false | frames`
 * **EnableAdminOnly**: `true | false`
 
 ### Arena

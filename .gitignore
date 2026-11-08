@@ -108,3 +108,8 @@ InitTestScene*.unity*
 *.meta
 Editor/
 .claude/
+# HBox build output and in-place editor leftovers
+Build~/
+*.bak
+*.tmp
+*.orig
