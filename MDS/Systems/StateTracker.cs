@@ -28,6 +28,15 @@ namespace MDS.Systems
         // Password logins seen before the player's join event, handed over when it arrives.
         private static readonly HashSet<int> _pendingAdmins = new();
 
+        // What the game named each bot, held from its join event until its first spawn registers it.
+        private sealed class BotName
+        {
+            public string Name;
+            public string RegimentTag;
+        }
+
+        private static readonly Dictionary<int, BotName> _botNames = new();
+
         private static IServerModQueries _queries;
         private static readonly List<int> _connectedBuffer = new();
 
@@ -80,6 +89,7 @@ namespace MDS.Systems
             Logger.Log("Cleaning up for new round. Clearing bot data and resetting team lists.", LogLevel.INFO);
 
             _allPlayers.RemoveAll(p => p.IsBot);
+            _botNames.Clear();
             DropDisconnectedPlayers();
             _attackingPlayers.Clear();
             _defendingPlayers.Clear();
@@ -112,7 +122,7 @@ namespace MDS.Systems
             }
         }
 
-        // Humans only: bots raise no join event and are registered at their first spawn. Fires again every round.
+        // Humans only: OnServerPlayerJoined skips bots, which are registered at their first spawn. Fires again every round.
         public static void OnPlayerJoined(int playerId, ulong steamId, string playerName, string regimentTag, bool isServerAdmin)
         {
             if (!IsServer) return;
@@ -133,6 +143,17 @@ namespace MDS.Systems
             Logger.Log($"Player Joined: {newPlayer}", LogLevel.DEBUG);
         }
 
+        public static void OnBotNamed(int playerId, string name, string regimentTag)
+        {
+            if (GetPlayerById(playerId) is Bot bot)
+            {
+                bot.UpdateName(name, regimentTag);
+                return;
+            }
+
+            _botNames[playerId] = new BotName { Name = name, RegimentTag = regimentTag };
+        }
+
         public static void OnDisplayNameChanged(int playerId, string displayName, string regimentTag)
         {
             if (GetPlayerById(playerId) is Player player)
@@ -143,6 +164,7 @@ namespace MDS.Systems
         {
             // Everything keyed purely by id is dropped first, before the object lookups that may already be gone.
             _pendingAdmins.Remove(playerId);
+            _botNames.Remove(playerId);
             CombatTracker.Clear(playerId);
             CharacterTracker.Clear(playerId);
 
@@ -165,10 +187,13 @@ namespace MDS.Systems
         {
             var player = GetPlayerById(playerId);
 
-            // A bot's first spawn is the first the game says of it. Its name is never reported, so this one is ours.
+            // A bot is registered at its first spawn, under the name from its join event if one arrived.
             if (player == null && isBot)
             {
-                player = new Bot(playerId, $"Bot {playerId}", string.Empty);
+                _botNames.TryGetValue(playerId, out BotName known);
+                _botNames.Remove(playerId);
+
+                player = new Bot(playerId, known?.Name ?? $"Bot {playerId}", known?.RegimentTag ?? string.Empty);
                 _allPlayers.Add(player);
                 BotManager.OnBotJoined(player);
                 Logger.Log($"Player Joined: {player}", LogLevel.DEBUG);

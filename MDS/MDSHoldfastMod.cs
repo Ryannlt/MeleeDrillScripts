@@ -1,5 +1,4 @@
 using Holdfast.Modding;
-using MDS.Client;
 using MDS.ConfigVariables;
 using MDS.ConsoleCommands;
 using MDS.Core;
@@ -58,6 +57,12 @@ namespace MDS
             if (isServer) StateTracker.OnPlayerJoined(playerId, steamId, details.DisplayName, details.RegimentTag, details.IsServerAdmin);
         }
 
+        // Obsolete, but the only callback that names a bot: OnServerPlayerJoined skips them.
+        public void OnPlayerJoined(int playerId, ulong steamId, string name, string regimentTag, bool isBot)
+        {
+            if (isServer && isBot) StateTracker.OnBotNamed(playerId, name, regimentTag);
+        }
+
         public void OnServerPlayerDisplayNameChanged(int playerId, string previousDisplayName, string newDisplayName, string previousRegimentTag, string newRegimentTag)
         {
             if (isServer) StateTracker.OnDisplayNameChanged(playerId, newDisplayName, newRegimentTag);
@@ -66,7 +71,6 @@ namespace MDS
         public void OnPlayerSpawned(int playerId, GameObject playerObject, PlayerSpawnDetails details)
         {
             if (isServer) StateTracker.OnPlayerSpawned(playerId, details.SpawnSectionId, details.Faction, details.PlayerClass, details.UniformId, playerObject, details.IsBot);
-            if (!isServer) ClientAdminDetection.TrySpawnAdminCheck();
         }
 
         public void OnRoundDetails(int roundId, string serverName, string mapName, FactionCountry attackingFaction, FactionCountry defendingFaction, GameplayMode gameplayMode, GameType gameType)
@@ -88,8 +92,8 @@ namespace MDS
         {
             if (isServer)
             {
-                ConsoleCommandHandler.ProcessConsoleCommand(playerId, input, output, success);
                 StateTracker.OnRCCommand(playerId, input, output, success);
+                ConsoleCommandHandler.ProcessConsoleCommand(playerId, input, output, success);
             }
         }
 
@@ -121,13 +125,11 @@ namespace MDS
         public void OnStartSpectate(int playerId, int spectatedPlayerId)
         {
             if (isServer) StateTracker.OnPlayerEnterSpectatorMode(playerId);
-            if (!isServer) ClientAdminDetection.TrySpawnAdminCheck();
         }
 
         public void OnStartFreeflight(int playerId)
         {
             if (isServer) StateTracker.OnPlayerEnterSpectatorMode(playerId); //Spectator mode logic is the same as freeflight mode
-            if (!isServer) ClientAdminDetection.TrySpawnAdminCheck();
         }
 
         public void OnPlayerDisconnected(int playerId)

@@ -33,6 +33,8 @@ namespace MDS.Systems
         private const float FeintPunishWindow = 1f;
         // A committed stab occupies the bot this long whether it misses or is blocked. Timed from release.
         private const float MissedStabDuration = 1.5f;
+        // A chamber stuns both players for characterMeleeBlockStunTime, 0.8 by default. The next windup starts just before that ends.
+        private const float ClashStunSeconds = 0.75f;
         // Extra time we refuse to block after throwing first. Nerve, not geometry - not part of blade-live time.
         private const float FirstStrikeCommitBonus = 0.4f; // extra commit time when we threw first, so we back our stab instead of flinching into a guard
         private const float MinBlockHold = 0.35f;      // keep a raised guard up at least this long so it reads and animates
@@ -122,6 +124,7 @@ namespace MDS.Systems
         // Stab-priority state: after our guard absorbs an attack we get a brief riposte window (Decide).
         private bool _blockBaselinePending = true; // take the current block history as the baseline on the first tick
         private float _lastConsumedBlock;     // last block we reacted to as defender (dedupe)
+        private float _lastConsumedClash;     // last chamber we reacted to (dedupe)
         private float _riposteReadyAt;        // realtime before which we hold the guard (reaction beat) before countering
         private float _priorityUntil;         // while now < this: riposte immediately, don't re-block
         private float _strikeCommittedUntil;  // while now < this: don't block (it'd cancel our own swing). Includes the first-strike nerve bonus.
@@ -168,6 +171,7 @@ namespace MDS.Systems
             {
                 _blockBaselinePending = false;
                 _lastConsumedBlock = CombatTracker.LastBlockTime(self.PlayerId);
+                _lastConsumedClash = CombatTracker.LastClashTime(self.PlayerId);
                 _lastEngageBlock = _lastConsumedBlock;
                 _lastProvokeBlock = _lastConsumedBlock;
             }
@@ -180,6 +184,19 @@ namespace MDS.Systems
                 _lastProvokeBlock = provokeBlock;
                 if (CombatTracker.LastBlockAttacker(self.PlayerId) is int attacker)
                     _provokedBy = attacker;
+            }
+
+            // A chamber ended our swing, so the next stab waits on the stun rather than on a full swing. The game
+            // reports a block alongside it, which was no guard of ours and must not open a riposte: nobody has
+            // priority, because both sides recover together. It still counts as being attacked, above.
+            float clash = CombatTracker.LastClashTime(self.PlayerId);
+            if (clash > _lastConsumedClash)
+            {
+                _lastConsumedClash = clash;
+                _attackCooldownUntil = clash + ClashStunSeconds + Random.Range(0f, _attackReadBeat);
+                _lastConsumedBlock = Mathf.Max(_lastConsumedBlock, CombatTracker.LastBlockTime(self.PlayerId));
+                _strikeCommittedUntil = 0f;
+                _bladeLiveUntil = 0f;
             }
 
             // A provocation lasts only as long as the player who made it.
@@ -1309,6 +1326,7 @@ namespace MDS.Systems
             _lastProvokeBlock = CombatTracker.LastBlockTime(_selfId);
             _lastEngageBlock = _lastProvokeBlock;
             _lastConsumedBlock = _lastProvokeBlock;
+            _lastConsumedClash = CombatTracker.LastClashTime(_selfId);
 
             AbandonChamber();
         }

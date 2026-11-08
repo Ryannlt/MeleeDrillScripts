@@ -41,6 +41,7 @@ namespace MDS.Systems
             public float OldHp;
             public float NewHp;
             public EntityHealthChangedReason Reason;
+            public int KillerId = -1;
             public float At;
             public List<BodySnapshot> Bodies;
         }
@@ -191,6 +192,7 @@ namespace MDS.Systems
         }
 
         // Second best to a scorable action: it names the real killer, but says nothing of friendly fire or damage.
+        // It can arrive first, so the hit keeps waiting and only falls back to this when no scorable action comes.
         public static void OnKill(int killerId, int victimId, EntityHealthChangedReason reason)
         {
             if (!_enabled || !IsMelee(reason)) return;
@@ -199,8 +201,7 @@ namespace MDS.Systems
             {
                 if (_pendingHits[i].VictimId != victimId) continue;
 
-                WriteLine(_pendingHits[i], killerId, "kill", "?", "?", "?");
-                _pendingHits.RemoveAt(i);
+                _pendingHits[i].KillerId = killerId;
                 return;
             }
         }
@@ -233,7 +234,8 @@ namespace MDS.Systems
             {
                 if (_pendingHits[i].At > cutoff) continue;
 
-                WriteLine(_pendingHits[i], -1, "unknown", "?", "?", "?");
+                int killerId = _pendingHits[i].KillerId;
+                WriteLine(_pendingHits[i], killerId, killerId >= 0 ? "kill" : "unknown", "?", "?", "?");
                 _pendingHits.RemoveAt(i);
             }
 

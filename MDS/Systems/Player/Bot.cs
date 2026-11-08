@@ -35,6 +35,12 @@ namespace MDS.Systems
             IsAlive = true;
         }
 
+        public void UpdateName(string playerName, string regimentTag)
+        {
+            PlayerName = playerName;
+            RegimentTag = regimentTag;
+        }
+
         public void MarkDead() => IsAlive = false;
         public void MarkAlive() => IsAlive = true;
 

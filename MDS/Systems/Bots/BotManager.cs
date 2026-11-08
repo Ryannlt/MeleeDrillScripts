@@ -391,8 +391,8 @@ namespace MDS.Systems
                 SpawnBots(1, replacementSpec, ai, death, placement, predecessor, groupId: groupId);
         }
 
-        // Builds the Replace spec: the requested faction, class, name and regtag, but the uniform it actually wore.
-        // The game never reports a bot's own name, so an unnamed bot's replacement is given a new one.
+        // Builds the Replace spec: intended faction and class, but the bot's actual name, regtag and uniform. The name
+        // has to be real: passing the uniform fills the name slot, and the game shows whatever is in it.
         private static BotSpawnSpec BuildReplacementSpec(BotController controller)
         {
             var spec = controller.Spec;
@@ -402,8 +402,8 @@ namespace MDS.Systems
             return new BotSpawnSpec(
                 spec.Faction,
                 spec.Class,
-                spec.Name,
-                spec.RegTag,
+                bot.PlayerName,
+                bot.RegimentTag,
                 bot.UniformId);
         }
 

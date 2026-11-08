@@ -92,7 +92,9 @@ namespace MDS.Systems
         // Removes a bot from the world.
         public static void Despawn(int playerId)
         {
-            CommandExecutor.ExecuteCommand($"serverAdmin kick {playerId}");
+            // The game reports failure here even when the bot leaves, so a refusal says nothing useful.
+            if (!CommandExecutor.TryExecute($"serverAdmin kick {playerId}", out string output))
+                Logger.Log($"Kick of bot {playerId} reported: '{output}'", LogLevel.DEBUG);
         }
 
         // Teleports a player or bot to a world position. 'teleport' is a general console command, not

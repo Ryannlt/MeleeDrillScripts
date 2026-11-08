@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bb4e08fcfd00ce64abdcaec9f2e2150c, type: 3}
   m_Name: mod
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   modName: MDS (Melee Drill Scripts)
   author: Ryan
   modType: 4
@@ -19,9 +19,14 @@ MonoBehaviour:
   ownServerConfig: 0
   noAutoAdmin: 0
   overrideServerPassword: 0
-  serverPassword:
+  serverPassword: 
   overrideAdminPassword: 0
-  adminPassword:
+  adminPassword: 
+  testGameMode: 
+  testMap: 
+  playClientCount: 0
   companionMods: []
   companionsBefore: 0
-  builtWith:
+  disableTerrainFootstepBake: 0
+  builtWith: HBox 0.3 (1cbd827e, main, built 2026-11-04 14:16 UTC) - Unity 2022.3.62f2
+  levelDesignWizard: []
