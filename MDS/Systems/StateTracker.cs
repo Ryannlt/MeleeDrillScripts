@@ -79,7 +79,6 @@ namespace MDS.Systems
 
             NewRoundCleanup();
             ArenaManager.ApplyStagedArenas();
-            LineManager.SpawnStagedLines(); // map-load auto-populate (after BotManager was reset above)
 
             Logger.Log($"Round {roundId} on {mapName}. Mode: {gameplayMode}, Type: {gameType}. Attacking: {FactionTokens.DisplayName(attackingFaction)}, Defending: {FactionTokens.DisplayName(defendingFaction)}.", LogLevel.INFO);
         }
@@ -102,7 +101,6 @@ namespace MDS.Systems
 
             XvXCommand.Reset();
             GroupfightCommand.Reset();
-            BotManager.Reset();
         }
 
         // The registry can only outlive a player who left if a disconnect was missed, and a round start is cheap to check.
@@ -165,8 +163,6 @@ namespace MDS.Systems
             // Everything keyed purely by id is dropped first, before the object lookups that may already be gone.
             _pendingAdmins.Remove(playerId);
             _botNames.Remove(playerId);
-            CombatTracker.Clear(playerId);
-            CharacterTracker.Clear(playerId);
 
             var player = GetPlayerById(playerId);
             if (player == null) return;
@@ -176,11 +172,6 @@ namespace MDS.Systems
             _attackingPlayers.Remove(player);
             _defendingPlayers.Remove(player);
             _spectatorPlayers.Remove(player);
-
-            if (player.IsBot)
-            {
-                BotManager.OnBotDisconnected(playerId);
-            }
         }
 
         public static void OnPlayerSpawned(int playerId, int spawnSectionId, FactionCountry faction, PlayerClass playerClass, int uniformId, GameObject playerObject, bool isBot = false)
@@ -195,7 +186,6 @@ namespace MDS.Systems
 
                 player = new Bot(playerId, known?.Name ?? $"Bot {playerId}", known?.RegimentTag ?? string.Empty);
                 _allPlayers.Add(player);
-                BotManager.OnBotJoined(player);
                 Logger.Log($"Player Joined: {player}", LogLevel.DEBUG);
             }
 
@@ -233,15 +223,6 @@ namespace MDS.Systems
             }
 
             Logger.Log($"Player Spawned: {player}", LogLevel.DEBUG);
-
-            // Whoever this is, anyone fighting them was fighting the body that just stopped existing. A first
-            // spawn is a no-op here, since nothing can be targeting a player who has not been in the world yet.
-            BotManager.OnTargetRespawned(playerId);
-
-            if (player.IsBot)
-            {
-                BotManager.OnBotSpawned(player);
-            }
         }
 
         public static void OnPlayerDied(int playerId)
@@ -251,13 +232,10 @@ namespace MDS.Systems
 
             // A death is reported by both the hurt and the kill event, in either order. Only the first one counts.
             bool wasAlive = player.IsAlive;
-            player.MarkDead(); // the corpse's PlayerObject lingers, so flag death explicitly (bot AIs skip the dead)
+            player.MarkDead(); // the corpse's PlayerObject lingers, so flag death explicitly
             if (!wasAlive) return;
 
             Logger.Log($"Player {playerId} died.", LogLevel.DEBUG);
-
-            if (player.IsBot)
-                BotManager.OnBotDied(player);
         }
 
         // Proof of life: a hurt event that left this player above zero health.
@@ -278,7 +256,6 @@ namespace MDS.Systems
         public static void OnPlayerKilled(int killerPlayerId, int victimPlayerId)
         {
             OnPlayerDied(victimPlayerId);
-            BotManager.OnPlayerKilled(killerPlayerId, victimPlayerId);
         }
 
         public static void OnPlayerEnterSpectatorMode(int playerId)

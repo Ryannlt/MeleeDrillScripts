@@ -59,13 +59,6 @@ namespace MDS.ConfigVariables
             RegisterConfigurable(new GroupfightSpacingConfigurable());
             RegisterConfigurable(new GroupfightStrategyConfigurable());
             RegisterConfigurable(new OrientationConfigurable());
-            RegisterConfigurable(new BotDefaultAiConfigurable());
-            RegisterConfigurable(new BotDefaultDeathConfigurable());
-            RegisterConfigurable(new BotKickDelayConfigurable());
-            RegisterConfigurable(new BotReplaceDelayConfigurable());
-            RegisterConfigurable(new GlobalAiConfigurable());
-            RegisterConfigurable(new LineBotCountConfigurable());
-            RegisterConfigurable(new LineSpacingConfigurable());
 
             Logger.Log($"Total configurables registered: {registry.Count}", LogLevel.INFO);
         }

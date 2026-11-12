@@ -21,13 +21,6 @@ namespace MDS.Events
             Register(EventEnum.OpenMelee, new OpenMeleeEvent());
             Register(EventEnum.XvX, new XvXEvent());
             Register(EventEnum.ShootingTraining, new ShootingTrainingEvent());
-            Register(EventEnum.SpawnBots, new SpawnBotsEvent());
-            Register(EventEnum.RemoveBots, new RemoveBotsEvent());
-            Register(EventEnum.SetBotAi, new SetBotAiEvent());
-            Register(EventEnum.SetBotDeathPolicy, new SetBotDeathPolicyEvent());
-            Register(EventEnum.RotateBots, new RotateBotsEvent());
-            Register(EventEnum.SpawnLine, new SpawnLineEvent());
-            Register(EventEnum.SetBotMoveOrder, new SetBotMoveOrderEvent());
 
             Logger.Log($"Registered {eventRegistry.Count} predefined events.", LogLevel.INFO);
         }

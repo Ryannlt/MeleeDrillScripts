@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using MDS.Systems;
 
 // The ConfigManager handles custom config variables by parsing data from method PassConfigVariables for our own custom commands.
 
@@ -18,7 +17,6 @@ namespace MDS.ConfigVariables
         private static void RegisterAllConfigVariables()
         {
             RegisterConfigVariable(ConfigCommandEnum.EnableDebugLogging, new EnableDebugLogging());
-            RegisterConfigVariable(ConfigCommandEnum.EnableMeleeLog, new EnableMeleeLog());
             RegisterConfigVariable(ConfigCommandEnum.EnableAdminOnly, new EnableAdminOnly());
             RegisterConfigVariable(ConfigCommandEnum.SetArena, new SetArena());
             RegisterConfigVariable(ConfigCommandEnum.AddArena, new AddArena());
@@ -33,15 +31,6 @@ namespace MDS.ConfigVariables
             RegisterConfigVariable(ConfigCommandEnum.SetGroupfightSpacing, new SetGroupfightSpacing());
             RegisterConfigVariable(ConfigCommandEnum.SetGroupfightStrategy, new SetGroupfightStrategy());
             RegisterConfigVariable(ConfigCommandEnum.SetOrientation, new SetOrientation());
-            RegisterConfigVariable(ConfigCommandEnum.SetBotDefaultAi, new SetBotDefaultAi());
-            RegisterConfigVariable(ConfigCommandEnum.SetBotDefaultDeathPolicy, new SetBotDefaultDeathPolicy());
-            RegisterConfigVariable(ConfigCommandEnum.SetBotKickDelay, new SetBotKickDelay());
-            RegisterConfigVariable(ConfigCommandEnum.SetBotReplaceDelay, new SetBotReplaceDelay());
-            RegisterConfigVariable(ConfigCommandEnum.SetGlobalAi, new SetGlobalAi());
-            RegisterConfigVariable(ConfigCommandEnum.SpawnBot, new SpawnBot());
-            RegisterConfigVariable(ConfigCommandEnum.SetLineBotCount, new SetLineBotCount());
-            RegisterConfigVariable(ConfigCommandEnum.SetLineSpacing, new SetLineSpacing());
-            RegisterConfigVariable(ConfigCommandEnum.SpawnLine, new SpawnLine());
 
             Logger.Log($"Registered {configCommands.Count} config variables.", LogLevel.DEBUG);
         }
@@ -63,10 +52,6 @@ namespace MDS.ConfigVariables
                 Logger.Log("Received empty config array. Ignoring.", LogLevel.DEBUG);
                 return;
             }
-
-            // Each non-empty config batch fully rebuilds the staged spawn lines, so re-passing the same
-            // map config every round doesn't accumulate duplicate lines.
-            LineManager.ClearStaged();
 
             foreach (string entry in configEntries)
             {
