@@ -6,8 +6,7 @@ using MDS.Shared.Settings;
 
 namespace MDS.Features.Drills.Settings
 {
-    // The drill defaults, each one an rc set/get key and a config key of the same name. The defaults are tuned for
-    // Palisade Arena A1.
+    // The defaults are tuned for Palisade Arena A1.
     public sealed class DrillSettings
     {
         private const float XvXDistanceDefault = 20f;
@@ -25,7 +24,7 @@ namespace MDS.Features.Drills.Settings
             GroupfightSpacing = new NumberSetting("groupfightSpacing", LineSpacingDefault, replies);
             GroupfightStrategy = new StrategySetting("groupfightStrategy", groupfight.Allowed, replies);
             OpenMeleeSpacing = new NumberSetting("openMeleeSpacing", OpenMeleeSpacingDefault, replies);
-            OpenMeleeOffset = new NumberSetting("openMeleeOffset", OpenMeleeOffsetDefault, replies);
+            OpenMeleeOffset = new OffsetSetting("openMeleeOffset", OpenMeleeOffsetDefault, replies);
             Orientation = new FacingSetting(replies);
         }
 
@@ -43,7 +42,7 @@ namespace MDS.Features.Drills.Settings
 
         public NumberSetting OpenMeleeSpacing { get; }
 
-        public NumberSetting OpenMeleeOffset { get; }
+        public OffsetSetting OpenMeleeOffset { get; }
 
         public FacingSetting Orientation { get; }
 

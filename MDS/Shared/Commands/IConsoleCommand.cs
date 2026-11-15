@@ -1,6 +1,5 @@
 namespace MDS.Shared.Commands
 {
-    // One rc command (the Command pattern). Validate checks the parameters, Execute does the work.
     public interface IConsoleCommand
     {
         string Name { get; }

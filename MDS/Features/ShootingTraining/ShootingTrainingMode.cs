@@ -2,9 +2,11 @@ using MDS.Shared.Game;
 
 namespace MDS.Features.ShootingTraining
 {
-    // Infinite firearm ammo and drawn bullet trajectories, switched together for the current map only.
     public sealed class ShootingTrainingMode
     {
+        private const string Ammo = "characterInfiniteFirearmAmmo";
+        private const string Trajectories = "drawFirearmTrajectories";
+
         private readonly GameConsole _console;
 
         public ShootingTrainingMode(GameConsole console)
@@ -14,16 +16,21 @@ namespace MDS.Features.ShootingTraining
 
         public bool IsOn { get; private set; }
 
-        // The state only changes when the game takes both settings.
+        // Infinite ammo without the trajectories, or the reverse, would stay out of step for the rest of the map.
         public bool TrySet(bool on)
         {
-            string value = on ? "true" : "false";
-            bool ammo = _console.ExecuteForCurrentRound($"set characterInfiniteFirearmAmmo {value}");
-            bool trajectories = _console.ExecuteForCurrentRound($"set drawFirearmTrajectories {value}");
-            if (!ammo || !trajectories) return false;
+            if (!Set(Ammo, on)) return false;
+
+            if (!Set(Trajectories, on))
+            {
+                Set(Ammo, IsOn);
+                return false;
+            }
 
             IsOn = on;
             return true;
         }
+
+        private bool Set(string setting, bool on) => _console.ExecuteForCurrentRound($"set {setting} {(on ? "true" : "false")}");
     }
 }

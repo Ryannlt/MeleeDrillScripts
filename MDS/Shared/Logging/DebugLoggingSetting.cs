@@ -3,7 +3,6 @@ using MDS.Shared.Settings;
 
 namespace MDS.Shared.Logging
 {
-    // rc set/get MDSDebugLogging: turns this mod's debug lines on or off while the server runs.
     public sealed class DebugLoggingSetting : ISetting
     {
         private readonly ModLog _log;

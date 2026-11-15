@@ -3,7 +3,6 @@ using MDS.Shared.Players;
 
 namespace MDS.Features.Drills.Picking
 {
-    // The players a drill picked, each side in the order they are placed along its line.
     public sealed class Lineup
     {
         public Lineup(IReadOnlyList<IPlayer> attackers, IReadOnlyList<IPlayer> defenders)

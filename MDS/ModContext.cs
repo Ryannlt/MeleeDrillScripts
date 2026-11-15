@@ -16,9 +16,8 @@ using MDS.Shared.Settings;
 
 namespace MDS
 {
-    // The composition root: builds the shared services and every feature once per mod load, and throws them all away
-    // on unload. Nothing outlives the mod instance, so nothing leaks across a map change. What needs the engine comes
-    // from the runtime, so the unit tests build this whole context with their own.
+    // Nothing outlives the mod instance, so nothing leaks across a map change.
+    // What needs the engine comes from the runtime, so the unit tests can build this whole context with their own.
     public sealed class ModContext : IDisposable
     {
         private const string ConfigPrefix = "MDS";
@@ -83,7 +82,7 @@ namespace MDS
             Players.Dispose();
         }
 
-        // Shared commands and keys first, then one line per feature. Drills read the arena, so it comes first.
+        // Drills read the arena, so the arena feature is built first.
         private void BuildFeatures()
         {
             Commands.Register(new GetCommand(Settings));

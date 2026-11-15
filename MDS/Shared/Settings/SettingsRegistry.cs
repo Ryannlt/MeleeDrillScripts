@@ -27,8 +27,7 @@ namespace MDS.Shared.Settings
             _settings[setting.Key] = setting;
         }
 
-        // Finds the setting named by the first rc get/set parameter and hands back the rest as its arguments. A key
-        // that isn't this mod's belongs to the game or another mod, so it fails without a message.
+        // A key that isn't this mod's belongs to the game or another mod, so it fails without a message.
         public bool TryFind(string[] parameters, out ISetting setting, out string[] args)
         {
             setting = null;

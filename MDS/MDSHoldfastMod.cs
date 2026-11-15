@@ -5,8 +5,7 @@ using MDS.Shared.Players;
 using MDS.Shared.Rounds;
 using MDS.Shared.Runtime;
 
-// Host adapter: turns game callbacks into calls on the mod, with no logic of its own. Every callback has a default
-// empty body on IHoldfastMod, so only the ones this mod uses are implemented.
+// Every callback has a default empty body on IHoldfastMod, so only the ones this mod uses are implemented.
 
 namespace MDS
 {

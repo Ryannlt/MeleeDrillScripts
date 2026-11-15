@@ -72,9 +72,9 @@ rc openmelee spacing=2 offset=3
 | `attackers`, `defenders` | whole number | Players on each line |
 | `strategy` | see below | How players are picked |
 | `distance` | meters | Distance between the two lines |
-| `spacing` | meters | Distance between neighbors on a line. For `openmelee`, the least distance between any two players |
-| `facing` | `NorthSouth`, `EastWest`, `SouthNorth`, `WestEast`, `Random` or 0 to 359 | Compass direction from the attackers' line to the defenders' |
-| `offset` | meters | How far in from the arena edges `openmelee` keeps everyone |
+| `spacing` | meters | Distance between neighbors on a line. For `openmelee`, the least distance between any two players, at least 0.5 |
+| `facing` | `NorthSouth`, `EastWest`, `SouthNorth`, `WestEast`, `Random` (or `-1`) or 0 to 359 | Compass direction from the attackers' line to the defenders' |
+| `offset` | meters, 0 or more | How far in from the arena edges `openmelee` keeps everyone. 0 uses the arena edge to edge |
 
 Any option left out uses its setting.
 
@@ -98,7 +98,7 @@ Each setting is changed with `rc set`, read with `rc get`, and can be set from t
 | `groupfightSpacing` | 2 | meters |
 | `groupfightStrategy` | Random | Random, Repeat |
 | `openMeleeSpacing` | 1.5 | meters |
-| `openMeleeOffset` | 2 | meters |
+| `openMeleeOffset` | 2 | meters, 0 or more |
 | `DrillOrientation` | NorthSouth | a facing |
 | `MDSDebugLogging` | false | true, false |
 

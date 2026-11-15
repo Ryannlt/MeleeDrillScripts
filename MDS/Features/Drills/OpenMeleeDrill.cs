@@ -8,17 +8,20 @@ using UnityEngine;
 
 namespace MDS.Features.Drills
 {
-    // rc openmelee: a 3-2-1 countdown, then everyone on the field scattered over the arena, at least `spacing` apart and
-    // at least `offset` in from its edges. God mode is on from just before the move until 2 s after it.
     public sealed class OpenMeleeDrill
     {
         private const int CountdownSeconds = 3;
         private const float CountdownStepSeconds = 1f;
         private const float GodModeAfterMoveSeconds = 2f;
 
+        // About a player's width.
+        // Below it players would stand inside each other.
+        private const float MinimumSpacing = 0.5f;
+
         private readonly DrillKit _kit;
         private readonly Routines _routines;
         private readonly PoissonSampler _sampler;
+        private Routine _running;
 
         public OpenMeleeDrill(DrillKit kit, Routines routines)
         {
@@ -27,7 +30,6 @@ namespace MDS.Features.Drills
             _sampler = new PoissonSampler(kit.Random);
         }
 
-        // The arena shrunk by the offset on every side. Empty when that leaves no room.
         public static Rect Area(Arena arena, float offset)
         {
             Vector2 min = arena.Min + Vector2.one * offset;
@@ -35,20 +37,30 @@ namespace MDS.Features.Drills
             return min.x < max.x && min.y < max.y ? Rect.MinMaxRect(min.x, min.y, max.x, max.y) : Rect.zero;
         }
 
-        // Whether everyone on the field would get a spot now. The spots are drawn again at the move, for whoever is
-        // on the field then.
+        // The spots are drawn again at the move, for whoever is on the field by then.
         public bool CanPlace(float spacing, float offset, out string error)
         {
-            int players = Field().Count;
-            Rect area = Area(_kit.Arenas.Current, offset);
-            int spots = area.width > 0f ? _sampler.Generate(area, spacing, players).Count : 0;
-            if (players == 0) error = "Nobody is on the field for an open melee.";
-            else if (spots < players) error = $"The arena has room for {spots} of {players} players {Numbers.Format(spacing)} m apart and {Numbers.Format(offset)} m in from the edges.";
-            else error = string.Empty;
+            error = Refusal(spacing, offset);
             return error.Length == 0;
         }
 
-        public void Start(float spacing, float offset) => _routines.Start(Run(spacing, offset), "open melee");
+        public void Start(float spacing, float offset) => _running = _routines.Start(Run(spacing, offset), "open melee");
+
+        // The size checks come before any spot is drawn: a tiny spacing over a big arena needs a grid too large to build.
+        private string Refusal(float spacing, float offset)
+        {
+            int players = Field().Count;
+            Rect area = Area(_kit.Arenas.Current, offset);
+            if (_running != null && !_running.IsFinished) return "An open melee is already counting down.";
+            if (players == 0) return "Nobody is on the field for an open melee.";
+            if (spacing < MinimumSpacing) return $"Spacing must be at least {Numbers.Format(MinimumSpacing)} m.";
+            if (!PoissonGrid.Fits(area, spacing)) return "The arena is too big for that spacing.";
+
+            int spots = area.width > 0f ? _sampler.Generate(area, spacing, players).Count : 0;
+            if (spots >= players) return string.Empty;
+
+            return $"The arena has room for {spots} of {players} players {Numbers.Format(spacing)} m apart and {Numbers.Format(offset)} m in from the edges.";
+        }
 
         private IEnumerator Run(float spacing, float offset)
         {

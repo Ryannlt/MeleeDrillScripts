@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MDS.Shared.Game
 {
-    // Adapter over the game's live server queries. Without queries (a client, a unit test) it finds nothing.
+    // Without queries (on a client, in a unit test) it finds nothing.
     public sealed class PlayerQueries
     {
         private readonly IServerModQueries _queries;
@@ -16,7 +16,7 @@ namespace MDS.Shared.Game
 
         public bool CanQuery => _queries != null;
 
-        // A spawned player's live state. False when they have no body right now.
+        // False when the player has no body right now.
         public bool TryGetStatus(int playerId, out QueryServerPlayerStatus status)
         {
             status = default;

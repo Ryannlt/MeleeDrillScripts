@@ -4,7 +4,6 @@ using MDS.Shared.Players;
 
 namespace MDS.Features.Drills.Picking
 {
-    // What the strategies share: a fair shuffle and the wording when a side is short.
     public static class PickRules
     {
         // Fisher-Yates, so every order is equally likely.

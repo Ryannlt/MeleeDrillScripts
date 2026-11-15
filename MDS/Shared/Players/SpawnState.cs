@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MDS.Shared.Players
 {
-    // Where and as what a player last spawned. Built from the game's PlayerSpawnDetails, which tests can't create.
+    // Built from the game's PlayerSpawnDetails, which tests can't create.
     public sealed class SpawnState
     {
         public int SpawnSectionId { get; set; }

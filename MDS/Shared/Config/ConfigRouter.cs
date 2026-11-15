@@ -4,8 +4,8 @@ using MDS.Shared.Logging;
 
 namespace MDS.Shared.Config
 {
-    // Applies this mod's mod_variable lines. The game hands every mod every line, so lines with another prefix are
-    // skipped without a word. The value keeps any further colons, so URLs survive.
+    // The game hands every mod every line, so lines with another prefix are skipped without a word.
+    // The value keeps any further colons, so URLs survive.
     public sealed class ConfigRouter
     {
         private const int PartCount = 3;

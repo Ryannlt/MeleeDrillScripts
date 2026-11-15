@@ -4,12 +4,11 @@ using UnityEngine;
 
 namespace MDS.Features.Drills
 {
-    // Spots spread over an area at least `spacing` apart, grown outward from a random first spot (Bridson's Poisson
-    // disc sampling). Each new spot is tried within a reach of a quarter of the area's width plus height, so the spread
-    // looks scattered rather than packed.
+    // Bridson's Poisson disc sampling, grown outward from a random first spot.
     public sealed class PoissonSampler
     {
         private const int AttemptsPerSpot = 30;
+        // A reach of a quarter of the area's width plus height scatters the spots instead of packing them.
         private const float ReachPerAreaSize = 0.25f;
         private const double FullTurn = 2 * Math.PI;
 
@@ -60,12 +59,14 @@ namespace MDS.Features.Drills
         private float Between(float from, float to) => from + (to - from) * (float)_random.NextDouble();
     }
 
-    // Cells of spacing / sqrt(2), so each holds at most one spot, and a new spot only needs checking against the 5 x 5
-    // cells around its own.
+    // Cells of spacing / sqrt(2) hold at most one spot each, so a new spot only needs checking against the 5 x 5 cells around its own.
     public sealed class PoissonGrid
     {
         private const int Neighborhood = 2;
         private const float CellPerSpacing = 0.70710678f;
+
+        // About 12 MB of cells: a 350 m arena at 0.5 m spacing.
+        private const long MaxCells = 1000000;
 
         private readonly Rect _area;
         private readonly float _cellSize;
@@ -83,6 +84,13 @@ namespace MDS.Features.Drills
         public float Spacing { get; }
 
         public float Reach { get; }
+
+        public static bool Fits(Rect area, float spacing)
+        {
+            float cellSize = spacing * CellPerSpacing;
+            long cells = (long)Math.Ceiling(area.width / cellSize) * (long)Math.Ceiling(area.height / cellSize);
+            return cells <= MaxCells;
+        }
 
         public List<Vector2> Spots { get; } = new();
 

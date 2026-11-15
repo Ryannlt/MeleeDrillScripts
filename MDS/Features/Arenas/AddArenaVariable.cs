@@ -2,7 +2,6 @@ using MDS.Shared.Config;
 
 namespace MDS.Features.Arenas
 {
-    // MDS:AddArena:(x,z),(x,z) lists one more arena after the first.
     public sealed class AddArenaVariable : IConfigVariable
     {
         private readonly ArenaStore _store;

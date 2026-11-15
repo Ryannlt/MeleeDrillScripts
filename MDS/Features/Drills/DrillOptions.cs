@@ -4,8 +4,7 @@ using MDS.Shared;
 
 namespace MDS.Features.Drills
 {
-    // The options one drill command was given, already checked by DrillSyntax. Anything not given falls back to the
-    // drill's configured default.
+    // DrillSyntax has already checked every value, so the getters parse without guarding.
     public sealed class DrillOptions
     {
         private readonly Dictionary<DrillOption, string> _values = new();

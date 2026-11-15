@@ -7,8 +7,7 @@ using MDS.Shared.Rounds;
 
 namespace MDS.Shared.Players
 {
-    // Who is on the server and on which side, fed only by game callbacks (server side). Features read it and subscribe
-    // to its events; it never calls a feature, so adding or removing one never touches this class.
+    // It never calls a feature, so adding or removing one never touches this class.
     public sealed class PlayerRegistry : IDisposable
     {
         private readonly RoundTracker _round;
@@ -35,6 +34,9 @@ namespace MDS.Shared.Players
 
         public event Action<IPlayer> PlayerLeft;
 
+        // Every disconnect, tracked or not: an id can carry state (an admin login) from before its join event.
+        public event Action<int> IdFreed;
+
         // Killer id, victim id.
         public event Action<int, int> PlayerKilled;
 
@@ -48,7 +50,8 @@ namespace MDS.Shared.Players
 
         public void Dispose() => _round.RoundStarted -= OnRoundStarted;
 
-        // Humans only: OnServerPlayerJoined skips bots, which register at their first spawn. Fires again every round.
+        // OnServerPlayerJoined skips bots, which register at their first spawn.
+        // It fires again every round.
         public void OnPlayerJoined(int playerId, ulong steamId, string name, string regimentTag)
         {
             PlayerBase player = FindBase(playerId);
@@ -79,6 +82,7 @@ namespace MDS.Shared.Players
         public void OnPlayerDisconnected(int playerId)
         {
             _pendingBotNames.Remove(playerId);
+            IdFreed?.Invoke(playerId);
             PlayerBase player = FindBase(playerId);
             if (player == null) return;
 
@@ -103,7 +107,8 @@ namespace MDS.Shared.Players
             PlayerSpawned?.Invoke(player);
         }
 
-        // A death is reported by both the hurt and the kill event, in either order. Only the first one counts.
+        // A death is reported by both the hurt and the kill event, in either order.
+        // Only the first one counts.
         public void OnPlayerDied(int playerId)
         {
             PlayerBase player = FindBase(playerId);
@@ -195,6 +200,7 @@ namespace MDS.Shared.Players
             _defending.Clear();
             _spectating.Clear();
             _spectating.AddRange(_all);
+            foreach (PlayerBase player in _all) player.ClearSpawn();
         }
 
         // A player who left can only linger if a disconnect was missed, and a round start is a cheap time to check.

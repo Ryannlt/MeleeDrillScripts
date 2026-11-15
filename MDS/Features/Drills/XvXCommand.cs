@@ -3,8 +3,6 @@ using MDS.Shared.Commands;
 
 namespace MDS.Features.Drills
 {
-    // rc xvx <attackers> <defenders> [strategy] [distance] [spacing] [facing]: two picked lines facing each other in the
-    // arena.
     public sealed class XvXCommand : IConsoleCommand
     {
         // Attackers and defenders.

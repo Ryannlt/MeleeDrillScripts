@@ -1,6 +1,5 @@
 namespace MDS.Features.Drills.Picking
 {
-    // How many players each side of a drill needs. Everyone means each whole team, as a groupfight takes.
     public readonly struct Headcount
     {
         private const int WholeTeam = -1;

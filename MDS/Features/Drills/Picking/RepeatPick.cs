@@ -3,7 +3,6 @@ using MDS.Shared.Players;
 
 namespace MDS.Features.Drills.Picking
 {
-    // Repeat: the same players as this drill's last pick, as long as all of them are still here.
     public sealed class RepeatPick : ISelectionStrategy
     {
         private readonly LineupMemory _memory;
@@ -26,11 +25,12 @@ namespace MDS.Features.Drills.Picking
             return gone == null ? PickResult.Ok(last) : PickResult.Failed($"Can't repeat: {gone} has left.");
         }
 
+        // Ids are reused network slots, so the same id can be someone new: only the same player object counts.
         private IPlayer FirstGone(IReadOnlyList<IPlayer> side)
         {
             foreach (IPlayer player in side)
             {
-                if (_players.Find(player.PlayerId) == null) return player;
+                if (!ReferenceEquals(_players.Find(player.PlayerId), player)) return player;
             }
             return null;
         }

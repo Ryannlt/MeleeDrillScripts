@@ -4,7 +4,6 @@ using MDS.Shared.Logging;
 
 namespace MDS.Shared.Game
 {
-    // Adapter over the game console: the only class that runs console commands.
     public sealed class GameConsole
     {
         public const int ModDriven = -1;
@@ -33,8 +32,8 @@ namespace MDS.Shared.Game
             return result.Success;
         }
 
-        // logResult false marks a high-frequency command so its failures don't flood the log. adminId attributes the
-        // command to that admin in the game's admin feed.
+        // logResult false is for high-frequency commands, so their failures don't flood the log.
+        // adminId credits the command to that admin in the game's admin feed.
         public bool Execute(string command, bool logResult = true, int adminId = ModDriven)
         {
             var result = Run(command, false, adminId);

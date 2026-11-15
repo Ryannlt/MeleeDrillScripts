@@ -1,6 +1,5 @@
 namespace MDS.Shared.Players
 {
-    // A human: joins with a Steam id and stays tracked from round to round.
     public sealed class Player : PlayerBase
     {
         public Player(int playerId, ulong steamId)

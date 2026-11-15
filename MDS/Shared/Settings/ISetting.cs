@@ -1,6 +1,6 @@
 namespace MDS.Shared.Settings
 {
-    // One key for rc get and rc set. Keys must be unique across every mod loaded together.
+    // Keys must be unique across every mod loaded together.
     public interface ISetting
     {
         string Key { get; }

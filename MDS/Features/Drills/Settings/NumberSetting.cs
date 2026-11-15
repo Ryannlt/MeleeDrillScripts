@@ -3,7 +3,6 @@ using MDS.Shared.Game;
 
 namespace MDS.Features.Drills.Settings
 {
-    // A distance in meters, above zero.
     public sealed class NumberSetting : DrillSetting<float>
     {
         public NumberSetting(string key, float value, Replies replies)

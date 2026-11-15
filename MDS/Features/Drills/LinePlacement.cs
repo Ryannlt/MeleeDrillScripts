@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace MDS.Features.Drills
 {
-    // Two lines facing each other across a center point, Distance apart, each player Spacing from the next.
     public sealed class LineShape
     {
         public Vector2 Center { get; set; }
@@ -16,7 +15,6 @@ namespace MDS.Features.Drills
         public float Degrees { get; set; }
     }
 
-    // Where each player of a line stands. Pure geometry, shared by xvx and groupfight.
     public static class LinePlacement
     {
         private const float AttackerSide = -1f;
@@ -27,8 +25,6 @@ namespace MDS.Features.Drills
 
         public static List<Vector2> DefenderSpots(LineShape shape, int count) => Spots(shape, count, DefenderSide);
 
-        // Each line is centered on its own midpoint, half the distance out from the center, and runs at right angles
-        // to the facing.
         private static List<Vector2> Spots(LineShape shape, int count, float side)
         {
             float radians = shape.Degrees * Mathf.Deg2Rad;

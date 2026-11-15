@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace MDS.Features.Drills
 {
-    // Moves players onto map positions, standing on the ground there (Adapter over the teleport command).
     public sealed class Teleporter
     {
         private readonly GameConsole _console;
@@ -19,7 +18,6 @@ namespace MDS.Features.Drills
             _ground = ground;
         }
 
-        // Pairs players with spots in order. Returns how many the game moved.
         public int MoveAll(IReadOnlyList<IPlayer> players, IReadOnlyList<Vector2> spots)
         {
             int moved = 0;

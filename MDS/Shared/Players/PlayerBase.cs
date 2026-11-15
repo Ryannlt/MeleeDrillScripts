@@ -2,7 +2,7 @@ using Holdfast.Modding;
 
 namespace MDS.Shared.Players
 {
-    // What humans and bots share. Where they differ, the registry asks the subclass instead of checking IsBot.
+    // Where humans and bots differ, the registry asks the subclass instead of checking IsBot.
     public abstract class PlayerBase : IPlayer
     {
         protected PlayerBase(int playerId)
@@ -18,7 +18,6 @@ namespace MDS.Shared.Players
 
         public abstract bool IsBot { get; }
 
-        // Whether the registry still tracks this player once a new round starts.
         public abstract bool KeptAcrossRounds { get; }
 
         public bool IsAlive { get; private set; }
@@ -37,6 +36,13 @@ namespace MDS.Shared.Players
         {
             Spawn = spawn;
             IsAlive = true;
+        }
+
+        // A new round: nobody has a body or a side until they spawn again.
+        public void ClearSpawn()
+        {
+            Spawn = null;
+            IsAlive = false;
         }
 
         public void MarkDead() => IsAlive = false;

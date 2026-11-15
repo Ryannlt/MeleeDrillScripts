@@ -2,9 +2,7 @@ using System;
 
 namespace MDS.Features.Drills
 {
-    // How one drill command reads its options. Positional, named (key=value) and bare words all work: a bare token
-    // fills the first empty slot, in order, that accepts it. So "rc xvx 3 3 next 4 1 northsouth",
-    // "rc xvx 3 3 eastwest spacing=1" and "rc groupfight 25" all read as meant.
+    // A bare token fills the first empty slot that accepts it, so the old positional form and words in any order both work.
     public sealed class DrillSyntax
     {
         private const char NameSeparator = '=';

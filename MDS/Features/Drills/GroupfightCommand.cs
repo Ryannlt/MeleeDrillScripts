@@ -3,7 +3,6 @@ using MDS.Shared.Commands;
 
 namespace MDS.Features.Drills
 {
-    // rc groupfight [strategy] [distance] [spacing] [facing]: each whole team in a line, facing the other.
     public sealed class GroupfightCommand : IConsoleCommand
     {
         private static readonly DrillSyntax Syntax = new DrillSyntax(

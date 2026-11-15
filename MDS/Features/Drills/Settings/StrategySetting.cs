@@ -5,7 +5,6 @@ using MDS.Shared.Game;
 
 namespace MDS.Features.Drills.Settings
 {
-    // How a drill picks its players by default: one of the strategies that drill allows, the first being the default.
     public sealed class StrategySetting : DrillSetting<PickStrategy>
     {
         private readonly List<PickStrategy> _allowed;

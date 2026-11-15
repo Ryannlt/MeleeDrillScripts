@@ -4,7 +4,6 @@ using MDS.Shared.Players;
 
 namespace MDS.Features.Drills.Picking
 {
-    // Any: everyone on the field in one pool, whatever their team. The first picks attack, the next defend.
     public sealed class AnyPick : ISelectionStrategy
     {
         private readonly PlayerRegistry _players;

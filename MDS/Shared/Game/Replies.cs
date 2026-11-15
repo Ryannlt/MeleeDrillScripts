@@ -4,8 +4,7 @@ using MDS.Shared.Logging;
 
 namespace MDS.Shared.Game
 {
-    // Answers the player who ran a command: a private message on screen, plus a mod message that lands in their F2
-    // client log. No HBox API writes to the F1 console yet.
+    // No HBox API writes to the F1 console yet, so a reply goes out as a private message on screen and as a mod message for the F2 client log.
     public sealed class Replies
     {
         private const string ReplyMessage = "MDS.Reply";
@@ -27,7 +26,7 @@ namespace MDS.Shared.Game
             LogOnClient(playerId, text);
         }
 
-        // A line for the player's client log only, for things not worth interrupting them on screen.
+        // For things not worth interrupting the player on screen.
         public void LogOnClient(int playerId, string text)
         {
             _networking?.SendModMessageToPlayer(playerId, ReplyMessage, Encoding.UTF8.GetBytes(text));

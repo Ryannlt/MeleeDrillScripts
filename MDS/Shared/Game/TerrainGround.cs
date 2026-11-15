@@ -3,16 +3,14 @@ using UnityEngine;
 
 namespace MDS.Shared.Game
 {
-    // The highest terrain at a position, then a ray down onto whatever walkable surface is there (a wall walk, a
-    // platform), so players land on top of map objects and not inside them.
+    // The ray down from above the highest terrain lands players on top of map objects (a wall walk, a platform), not inside them.
     public sealed class TerrainGround : IGround
     {
-        // The probe ray starts this far above the highest terrain sample and travels this far down, so the search
-        // window spans 20 m above to 20 m below that sample.
+        // The search window spans 20 m above to 20 m below the highest terrain sample.
         private const float RayHeightAboveTerrain = 20f;
         private const float RayLength = 40f;
 
-        // Surfaces the probe may land on. Players and props are left out on purpose.
+        // Players and props are left out on purpose.
         private static readonly string[] GroundLayerNames = { "Terrain", "Static Environment", "WalkablePlatform" };
 
         private readonly ModLog _log;

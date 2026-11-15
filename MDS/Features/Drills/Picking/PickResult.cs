@@ -1,6 +1,5 @@
 namespace MDS.Features.Drills.Picking
 {
-    // A lineup, or the reason there isn't one, worded for the admin who ran the drill.
     public sealed class PickResult
     {
         private PickResult(Lineup lineup, string error)

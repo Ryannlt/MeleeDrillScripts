@@ -2,7 +2,6 @@ using Holdfast.Modding;
 
 namespace MDS.Shared.Rounds
 {
-    // The round as OnRoundDetails describes it.
     public sealed class RoundInfo
     {
         public int RoundId { get; set; }

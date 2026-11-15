@@ -16,7 +16,6 @@ namespace MDS.Features.Drills
 
     public static class DrillOptionValues
     {
-        // Whether the text is a value this option can take. Counts are whole and above zero, distances above zero.
         public static bool Accepts(DrillOption option, string text)
         {
             switch (option)
@@ -28,12 +27,14 @@ namespace MDS.Features.Drills
                     return EnumParser.TryParseStrict(text, out PickStrategy _);
                 case DrillOption.Facing:
                     return Facing.TryParse(text, out _);
+                case DrillOption.Offset:
+                    // Zero uses the arena edge to edge, as the old offset setting allowed.
+                    return Numbers.TryParseZeroOrMore(text, out _);
                 default:
                     return Numbers.TryParsePositive(text, out _);
             }
         }
 
-        // The key used in key=value: the option's name in lower case.
         public static string KeyOf(DrillOption option) => option.ToString().ToLowerInvariant();
     }
 }

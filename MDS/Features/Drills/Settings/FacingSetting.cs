@@ -2,7 +2,6 @@ using MDS.Shared.Game;
 
 namespace MDS.Features.Drills.Settings
 {
-    // DrillOrientation: which way xvx and groupfight lines face when the command doesn't say.
     public sealed class FacingSetting : DrillSetting<Facing>
     {
         public FacingSetting(Replies replies)

@@ -2,7 +2,6 @@ using MDS.Shared.Config;
 
 namespace MDS.Features.Arenas
 {
-    // MDS:Arena:(x,z),(x,z) sets the drill arena for this map.
     public sealed class ArenaVariable : IConfigVariable
     {
         private readonly ArenaStore _store;

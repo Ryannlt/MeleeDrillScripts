@@ -6,8 +6,7 @@ using MDS.Shared.Rounds;
 
 namespace MDS.Shared.Players
 {
-    // Faction names in commands and config: a real faction, "attacking"/"defending" for this round's sides, or one of
-    // the extension factions the FactionCountry enum doesn't name.
+    // ARBritish and ARAmerican are real factions the FactionCountry enum doesn't name.
     public sealed class FactionResolver
     {
         private const FactionCountry ArBritish = (FactionCountry)11;

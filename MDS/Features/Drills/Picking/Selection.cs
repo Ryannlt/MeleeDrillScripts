@@ -12,8 +12,7 @@ namespace MDS.Features.Drills.Picking
         Repeat
     }
 
-    // One drill's ways of picking players, and its memory of the last pick for Repeat. Each drill has its own, so an
-    // xvx repeat never replays a groupfight.
+    // Each drill has its own, so an xvx repeat never replays a groupfight.
     public sealed class Selection
     {
         private readonly Dictionary<PickStrategy, ISelectionStrategy> _strategies = new();
@@ -26,7 +25,6 @@ namespace MDS.Features.Drills.Picking
             _strategies[PickStrategy.Random] = new RandomPick(players, random);
         }
 
-        // Random (the default), Any, Next or Repeat.
         public static Selection ForXvX(PlayerRegistry players, Random random)
         {
             var selection = new Selection(players, random);
@@ -36,7 +34,7 @@ namespace MDS.Features.Drills.Picking
             return selection;
         }
 
-        // Random (the default) or Repeat: a groupfight takes everyone, so there is nothing for Any or Next to choose.
+        // A groupfight takes everyone, so there is nothing for Any or Next to choose.
         public static Selection ForGroupfight(PlayerRegistry players, Random random)
         {
             var selection = new Selection(players, random);
@@ -44,7 +42,7 @@ namespace MDS.Features.Drills.Picking
             return selection;
         }
 
-        // In the order they were added, the default first.
+        // StrategySetting takes the first as the default, so the order matters.
         public IEnumerable<PickStrategy> Allowed => _strategies.Keys;
 
         public bool Allows(PickStrategy strategy) => _strategies.ContainsKey(strategy);

@@ -2,7 +2,6 @@ using MDS.Shared.Config;
 
 namespace MDS.Shared.Logging
 {
-    // MDS:EnableDebugLogging:true in a server config turns debug lines on from map load.
     public sealed class DebugLoggingVariable : IConfigVariable
     {
         private readonly ModLog _log;

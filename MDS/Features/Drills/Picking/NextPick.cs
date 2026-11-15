@@ -4,9 +4,8 @@ using MDS.Shared.Players;
 
 namespace MDS.Features.Drills.Picking
 {
-    // Next: each side takes the next players in its team's order, carrying on where the last pick stopped and wrapping
-    // round, so repeated drills rotate through everyone. The picks are shuffled before placing, so nobody keeps the
-    // same spot on the line.
+    // Carrying on from the last pick makes repeated drills rotate through everyone.
+    // The picks are shuffled so nobody keeps the same spot on the line.
     public sealed class NextPick : ISelectionStrategy
     {
         private readonly PlayerRegistry _players;

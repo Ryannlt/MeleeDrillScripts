@@ -5,8 +5,6 @@ using UnityEngine;
 
 namespace MDS.Features.Arenas
 {
-    // rc arena shows the drill arena. rc arena corner1|corner2 [x z] sets a corner, where you stand when no
-    // coordinates are given.
     public sealed class ArenaCommand : IConsoleCommand
     {
         public const string Usage = "Usage: rc arena [corner1|corner2] [x z]";

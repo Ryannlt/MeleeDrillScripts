@@ -6,7 +6,6 @@ using MDS.Shared.Rounds;
 
 namespace MDS.Features.Status
 {
-    // rc mds, and a line in the server log for each round.
     public sealed class StatusFeature : IDisposable
     {
         private readonly RoundTracker _round;

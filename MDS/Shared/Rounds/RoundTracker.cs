@@ -2,8 +2,7 @@ using System;
 
 namespace MDS.Shared.Rounds
 {
-    // The round as the game last described it. Anything that resets per round subscribes to RoundStarted, in the order
-    // it was built, so the player registry (built first) is ready before any feature hears of the round.
+    // Subscribers hear of a new round in the order they were built, so the player registry (built first) is ready before any feature.
     public sealed class RoundTracker
     {
         public event Action<RoundInfo> RoundStarted;

@@ -1,7 +1,6 @@
 namespace MDS.Shared.Players
 {
-    // A carbon bot: it raises no join event, so it registers at its first spawn, and it's dropped when a new round
-    // starts.
+    // A carbon bot raises no join event, so it registers at its first spawn.
     public sealed class Bot : PlayerBase
     {
         public Bot(int playerId)

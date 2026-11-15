@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using MDS.Shared.Logging;
 
-// Delayed work, stepped from OnUpdateElapsedTime. Engine coroutines would need a MonoBehaviour kept alive across map
-// changes and run outside the game's mod guard; these stop with the mod, and a failing one is logged and dropped.
+// Engine coroutines would need a MonoBehaviour kept alive across map changes, and would run outside the game's mod guard.
+// These stop with the mod, and a failing one is logged and dropped.
 
 namespace MDS.Shared.Game
 {
@@ -48,7 +48,6 @@ namespace MDS.Shared.Game
             _clock = clock;
         }
 
-        // In a routine, `yield return null` waits one frame and `yield return Routines.Wait(s)` waits s seconds.
         public static object Wait(float seconds) => new SecondsWait(seconds);
 
         // Runs from the next tick on.

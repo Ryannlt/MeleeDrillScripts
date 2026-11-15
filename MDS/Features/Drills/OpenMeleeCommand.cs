@@ -2,7 +2,6 @@ using MDS.Shared.Commands;
 
 namespace MDS.Features.Drills
 {
-    // rc openmelee [spacing] [offset]: everyone on the field scattered over the arena after a countdown.
     public sealed class OpenMeleeCommand : IConsoleCommand
     {
         private static readonly DrillSyntax Syntax = new DrillSyntax(

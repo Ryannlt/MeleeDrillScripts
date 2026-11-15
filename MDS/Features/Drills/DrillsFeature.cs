@@ -6,8 +6,6 @@ using MDS.Shared.Rounds;
 
 namespace MDS.Features.Drills
 {
-    // xvx, groupfight and openmelee, with their defaults. Each line drill keeps its own picking memory, cleared when a
-    // new round brings new teams.
     public sealed class DrillsFeature : IDisposable
     {
         private readonly RoundTracker _round;

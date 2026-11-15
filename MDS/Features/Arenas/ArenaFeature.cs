@@ -2,7 +2,6 @@ using System;
 
 namespace MDS.Features.Arenas
 {
-    // The drill arena: rc arena and the arena config lines. Drills read it through Store.
     public sealed class ArenaFeature : IDisposable
     {
         public ArenaFeature(ModContext context)

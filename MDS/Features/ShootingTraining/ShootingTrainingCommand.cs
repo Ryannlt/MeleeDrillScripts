@@ -5,7 +5,6 @@ using MDS.Shared.Game;
 
 namespace MDS.Features.ShootingTraining
 {
-    // rc shootingTraining [on|off]: turns shooting training on or off, or switches it over with no argument.
     public sealed class ShootingTrainingCommand : IConsoleCommand
     {
         private static readonly Dictionary<string, bool> States = new(StringComparer.OrdinalIgnoreCase)

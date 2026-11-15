@@ -4,7 +4,7 @@ namespace MDS.Shared
 {
     public static class EnumParser
     {
-        // Names only, ignoring case. Numbers are refused, so "3" can't silently pick the fourth value.
+        // Numbers are refused, so "3" can't silently pick the fourth value.
         public static bool TryParseStrict<T>(string input, out T result) where T : struct, Enum
         {
             result = default;

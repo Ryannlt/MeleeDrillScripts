@@ -3,7 +3,6 @@ using MDS.Shared.Players;
 
 namespace MDS.Features.Drills.Picking
 {
-    // Random: each side picked at random from its own team. With Everyone, each whole team in a random order.
     public sealed class RandomPick : ISelectionStrategy
     {
         private readonly PlayerRegistry _players;

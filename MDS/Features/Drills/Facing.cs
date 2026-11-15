@@ -4,11 +4,12 @@ using MDS.Shared;
 
 namespace MDS.Features.Drills
 {
-    // Which way two lines face each other: the compass direction from the attackers toward the defenders, in degrees,
-    // or a fresh random direction for each drill.
     public readonly struct Facing
     {
         private const string RandomName = "Random";
+
+        // What the old orientation setting took for random, still read so existing configs keep working.
+        private const string OldRandom = "-1";
         private const float FullTurn = 360f;
         private const float WestEastDegrees = 0f;
         private const float NorthSouthDegrees = 90f;
@@ -37,11 +38,10 @@ namespace MDS.Features.Drills
 
         public bool IsRandom { get; }
 
-        // A name (NorthSouth, EastWest, SouthNorth, WestEast, Random) or degrees from 0 up to 360.
         public static bool TryParse(string text, out Facing facing)
         {
             facing = default;
-            if (string.Equals(text, RandomName, StringComparison.OrdinalIgnoreCase)) facing = Random;
+            if (string.Equals(text, RandomName, StringComparison.OrdinalIgnoreCase) || text == OldRandom) facing = Random;
             else if (Named.TryGetValue(text ?? string.Empty, out float named)) facing = new Facing(named, false);
             else if (Numbers.TryParse(text, out float degrees) && degrees >= 0f && degrees < FullTurn) facing = new Facing(degrees, false);
             else return false;

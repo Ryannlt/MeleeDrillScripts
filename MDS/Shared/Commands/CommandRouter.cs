@@ -6,9 +6,8 @@ using MDS.Shared.Players;
 
 namespace MDS.Shared.Commands
 {
-    // Routes a command to the feature that registered it. A command that isn't this mod's (the game's own, or another
-    // mod's) passes silently, which is what lets several mods share the console. Every entry point goes through
-    // Handle, so the admin check here covers rc today and a UI later.
+    // A command that isn't this mod's passes silently, which is what lets several mods share the console.
+    // Every entry point goes through Handle, so the admin check here covers rc today and a UI later.
     public sealed class CommandRouter
     {
         public const string AdminsOnly = "Only logged-in admins can run this.";

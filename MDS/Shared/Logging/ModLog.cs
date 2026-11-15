@@ -10,8 +10,7 @@ namespace MDS.Shared.Logging
         Error
     }
 
-    // Tagged, timestamped lines, handed to the sink the runtime made. A feature logs through its own child from For,
-    // which shares the sink and the debug switch and names the feature after the level.
+    // A child from For shares the root's sink and debug switch.
     public sealed class ModLog
     {
         private readonly string _tag;

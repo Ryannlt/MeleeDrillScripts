@@ -4,13 +4,10 @@ using UnityEngine;
 
 namespace MDS.Features.Arenas
 {
-    // Coordinates the way config lines and commands write them: a corner "x,z" (or "x z" as two arguments), an arena
-    // "(x,z),(x,z)".
     public static class ArenaParser
     {
         private const string BetweenCorners = "),(";
 
-        // Two numbers make a corner, two corners an arena.
         private const int Pair = 2;
 
         public static bool TryParseCorner(string text, out Vector2 corner)

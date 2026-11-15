@@ -16,7 +16,6 @@ namespace MDS.Features.Status
         Spectator
     }
 
-    // What rc mds reports, worded for an admin.
     public sealed class StatusReport
     {
         private readonly RoundTracker _round;

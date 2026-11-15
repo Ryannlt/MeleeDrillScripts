@@ -7,8 +7,6 @@ using MDS.Shared.Players;
 
 namespace MDS.Features.Status
 {
-    // rc mds: the round, the arena and team sizes. rc mds players [all|attacking|defending|spectator] [count],
-    // rc mds player <id> and rc mds round give more.
     public sealed class MdsCommand : IConsoleCommand
     {
         public const string Usage = "Usage: rc mds [players [all|attacking|defending|spectator] [count] | player <id> | round]";
@@ -75,7 +73,7 @@ namespace MDS.Features.Status
 
         private static bool IsCountOnly(string[] args) => args.Length == GroupAndCount && args[1].Equals(CountOnly, StringComparison.OrdinalIgnoreCase);
 
-        // A full list goes to the F2 client log, one line each, so a big server doesn't flood the screen.
+        // The full list goes to the F2 client log so a big server doesn't flood the screen.
         private void ListPlayers(int playerId, string[] args)
         {
             PlayerGroup group = PlayerGroup.All;

@@ -9,8 +9,6 @@ using MDS.Shared.Players;
 
 namespace MDS.Features.Drills
 {
-    // What every drill command uses, built once by DrillsFeature (a Facade over the arena, the defaults, the console
-    // and the teleporter).
     public sealed class DrillKit
     {
         public DrillKit(ModContext context, ArenaStore arenas, DrillSettings settings)
@@ -48,7 +46,6 @@ namespace MDS.Features.Drills
             return usable;
         }
 
-        // The given options over the drill's own defaults, facing over DrillOrientation.
         public LineShape ShapeFor(DrillOptions options, NumberSetting distance, NumberSetting spacing)
         {
             return new LineShape

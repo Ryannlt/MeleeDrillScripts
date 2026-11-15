@@ -4,8 +4,7 @@ using MDS.Shared.Settings;
 
 namespace MDS.Features.Drills.Settings
 {
-    // A drill default that rc set/get and a config line both change, under one name: rc set xvxDistance 5 and
-    // MDS:XvXDistance:5 are the same setting. Subclasses only say how to read and show a value.
+    // One name for rc set/get and the config, so rc set xvxDistance 5 and MDS:XvXDistance:5 change the same value.
     public abstract class DrillSetting<T> : ISetting, IConfigVariable
     {
         private readonly Replies _replies;
@@ -49,7 +48,6 @@ namespace MDS.Features.Drills.Settings
 
         public void Get(int playerId, string[] args) => _replies.Send(playerId, $"{Key} is {Show(Value)}.");
 
-        // What the usage line lists as valid values.
         protected abstract string Accepted { get; }
 
         protected abstract bool TryRead(string text, out T value);

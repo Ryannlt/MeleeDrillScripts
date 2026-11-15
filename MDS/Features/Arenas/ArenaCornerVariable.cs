@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace MDS.Features.Arenas
 {
-    // MDS:ArenaCorner1:x,z and MDS:ArenaCorner2:x,z set one corner of the drill arena.
     public sealed class ArenaCornerVariable : IConfigVariable
     {
         private readonly ArenaCorner _corner;
