@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MDS.Features.Drills.Picking;
+using MDS.Shared;
 using MDS.Shared.Players;
 using UnityEngine;
 
@@ -30,6 +31,15 @@ namespace MDS.Features.Drills.Spawning
             _even = even;
             _organic = organic;
             _random = random;
+        }
+
+        // Only the centers cover the area, and each group's own box is 4 m across.
+        public bool CanCover(SpawnRequest request) => _even.CanCover(request.Area, request.Spacing + CenterClearance);
+
+        // A narrow arena runs out of room for the boxes, not the spacing, so the reply names both.
+        public string DescribeSpacing(SpawnRequest request)
+        {
+            return $"in groups of {SmallestGroup} to {LargestGroup} that each need a {Numbers.Format(GroupReach + GroupReach)} m box, the groups {Numbers.Format(request.Spacing)} m apart";
         }
 
         public SpawnPlan Plan(Lineup field, SpawnRequest request)

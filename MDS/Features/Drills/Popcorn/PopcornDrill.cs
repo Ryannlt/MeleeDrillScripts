@@ -14,6 +14,10 @@ namespace MDS.Features.Drills.Popcorn
         // Just long enough that nobody is hit as the fights land.
         private const float GodModeAfterMoveSeconds = 1f;
 
+        // Six halvings find the largest distance that fits to within a sixty-fourth of the range, under 9 cm at the default of 6 m.
+        private const int SearchSteps = 6;
+        private const float Half = 0.5f;
+
         private readonly DrillKit _kit;
         private readonly DrillCountdown _countdown;
         private readonly PopcornFights _fights;
@@ -30,7 +34,7 @@ namespace MDS.Features.Drills.Popcorn
         public string Name => "popcorn";
 
         public DrillSyntax Syntax { get; } = new DrillSyntax(
-            "Usage: rc popcorn [scatter|spread|tight|random] [min] [max] [distance] [lineDistance] [spacing] [arena=N], or by name: strategy=tight min=2v1 max=5v5 distance=10",
+            "Usage: rc popcorn [scatter|spread|tight|random] [min] [max] [distance] [lineDistance] [spacing] [arena], numbers in that order, or by name: strategy=tight min=2v1 max=5v5 distance=10",
             0, DrillOption.Layout, DrillOption.Min, DrillOption.Max, DrillOption.Distance, DrillOption.LineDistance, DrillOption.Spacing);
 
         // Everyone on the field fights.
@@ -51,12 +55,12 @@ namespace MDS.Features.Drills.Popcorn
         public bool TryStart(DrillOptions options, out DrillRun run, out string error)
         {
             run = null;
+            error = _countdown.IsRunning ? _countdown.Busy : string.Empty;
             PopcornRequest request = RequestFor(options);
-            if (_countdown.IsRunning) error = _countdown.Busy;
-            else TryDraw(request, out _, out error);
-            if (error.Length > 0) return false;
+            if (error.Length > 0 || !TryDraw(request, out Draw draw, out error)) return false;
 
-            DrillRun started = new DrillRun(Name, _kit.ArenaFor(options));
+            var started = new DrillRun(Name, _kit.ArenaFor(options));
+            started.Note = NoteFor(started.Arena.Number, request, draw);
             _countdown.Start(Title, () => Place(started, request), GodModeAfterMoveSeconds);
             run = started;
             return true;
@@ -65,9 +69,11 @@ namespace MDS.Features.Drills.Popcorn
         public bool TryPreview(DrillOptions options, out DrillPreview preview, out string error)
         {
             preview = null;
-            if (!TryDraw(RequestFor(options), out Draw draw, out error)) return false;
+            PopcornRequest request = RequestFor(options);
+            if (!TryDraw(request, out Draw draw, out error)) return false;
 
             preview = new DrillPreview { IsSample = true, Detail = $"{draw.LayoutName}, {draw.Fights.Count} fights: {draw.Sizes}" };
+            preview.Note = NoteFor(_kit.ArenaFor(options).Number, request, draw);
             preview.AddSpots(_kit.Field(), draw.Plan);
             return true;
         }
@@ -77,23 +83,52 @@ namespace MDS.Features.Drills.Popcorn
             return request.Distance < DrillKit.MinimumSpacing || request.LineDistance < DrillKit.MinimumSpacing || request.Spacing < DrillKit.MinimumSpacing;
         }
 
+        private static string NoteFor(int arena, PopcornRequest request, Draw draw)
+        {
+            if (draw.Distance >= request.Distance) return string.Empty;
+            return FitNote.Of(arena, new[] { FitNote.Change("distance", request.Distance, draw.Distance) });
+        }
+
         private void Place(DrillRun run, PopcornRequest request)
         {
             TryDraw(request, out Draw draw, out string error);
             int moved = _kit.Teleporter.MoveAll(draw.Plan.Players, draw.Plan.Spots);
             run.Placed(_kit.Field(), draw.Plan.Spots);
-            _kit.Log.Info($"popcorn ({draw.LayoutName}) in arena {run.Arena.Number}: {draw.Fights.Count} fights ({draw.Sizes}); {moved} of {draw.Plan.Total} moved.");
-            if (error.Length > 0) _kit.Log.Warning($"popcorn: {error} The rest stay where they are.");
+            _kit.Log.Info($"popcorn ({draw.LayoutName}) in arena {run.Arena.Number}: {draw.Fights.Count} fights ({draw.Sizes}); {moved} of {draw.Plan.Total} moved. {NoteFor(run.Arena.Number, request, draw)}".TrimEnd());
+            if (error.Length > 0) _kit.Warn(run, $"{error} The rest stay where they are.");
         }
 
+        // A deal that doesn't fit at the asked distance takes the largest distance that does.
         private bool TryDraw(PopcornRequest request, out Draw draw, out string error)
         {
             List<Lineup> fights = _fights.Deal(_kit.Field(), request.Smallest, request.Largest);
-            SpawnPlan plan = SpawnPlan.Fullest(() => _layout.Place(fights, request));
+            draw = DrawAt(fights, request);
+            if (!draw.Plan.PlacesEveryone) draw = Closest(fights, request);
 
-            draw = new Draw(fights, plan, request.Layout);
-            error = plan.PlacesEveryone ? string.Empty : $"The arena has room for {plan.Spots.Count} of {plan.Total} players in {fights.Count} fights: lower distance, lineDistance or spacing, or use a bigger arena.";
+            SpawnPlan plan = draw.Plan;
+            error = plan.PlacesEveryone ? string.Empty : $"The arena has room for {plan.Spots.Count} of {plan.Total} players in {fights.Count} fights, even at distance {Numbers.Format(DrillKit.MinimumSpacing)}: lower lineDistance or spacing, or use a bigger arena.";
             return error.Length == 0;
+        }
+
+        private Draw DrawAt(List<Lineup> fights, PopcornRequest request)
+        {
+            return new Draw(fights, SpawnPlan.Fullest(() => _layout.Place(fights, request)), request);
+        }
+
+        // Starts at the smallest distance, then halves the gap between the largest that fit and the smallest that didn't.
+        private Draw Closest(List<Lineup> fights, PopcornRequest request)
+        {
+            Draw best = DrawAt(fights, request.WithDistance(DrillKit.MinimumSpacing));
+            float fits = DrillKit.MinimumSpacing;
+            float fails = request.Distance;
+            for (int step = 0; step < SearchSteps && best.Plan.PlacesEveryone; step++)
+            {
+                float middle = Numbers.RoundDown((fits + fails) * Half);
+                Draw draw = DrawAt(fights, request.WithDistance(middle));
+                if (draw.Plan.PlacesEveryone) (best, fits) = (draw, middle);
+                else fails = middle;
+            }
+            return best;
         }
 
         private PopcornRequest RequestFor(DrillOptions options)
@@ -112,14 +147,17 @@ namespace MDS.Features.Drills.Popcorn
 
         private sealed class Draw
         {
-            public Draw(List<Lineup> fights, SpawnPlan plan, FightLayout layout)
+            public Draw(List<Lineup> fights, SpawnPlan plan, PopcornRequest used)
             {
                 Fights = fights;
                 Plan = plan;
-                LayoutName = layout.ToString().ToLowerInvariant();
+                LayoutName = used.Layout.ToString().ToLowerInvariant();
+                Distance = used.Distance;
             }
 
             public string LayoutName { get; }
+
+            public float Distance { get; }
 
             public List<Lineup> Fights { get; }
 

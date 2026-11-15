@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MDS.Shared;
 using UnityEngine;
 
 namespace MDS.Features.Drills.Spawning
@@ -22,13 +23,15 @@ namespace MDS.Features.Drills.Spawning
         // No spots when the grid for that spacing over the area would be too large to build.
         public List<Vector2> Generate(SpotArea area, float spacing, int count)
         {
-            if (count <= 0 || !PoissonGrid.Fits(area.Bounds, spacing) || !area.TryDraw(_random, out Vector2 first)) return new List<Vector2>();
+            if (count <= 0 || !CanCover(area.Bounds, spacing) || !area.TryDraw(_random, out Vector2 first)) return new List<Vector2>();
 
             float reach = Mathf.Max(spacing, (area.Bounds.width + area.Bounds.height) * ReachPerAreaSize);
             var grid = new PoissonGrid(area, spacing, reach);
             grid.Add(first);
             return Grow(grid, count);
         }
+
+        public bool CanCover(Rect area, float spacing) => PoissonGrid.Fits(area, spacing);
 
         private List<Vector2> Grow(PoissonGrid grid, int count)
         {
@@ -51,7 +54,7 @@ namespace MDS.Features.Drills.Spawning
             for (int attempt = 0; attempt < AttemptsPerSpot; attempt++)
             {
                 float angle = (float)(_random.NextDouble() * FullTurn);
-                float radius = grid.Spacing + (grid.Reach - grid.Spacing) * (float)_random.NextDouble();
+                float radius = _random.Between(grid.Spacing, grid.Reach);
                 spot = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
                 if (grid.Fits(spot)) return true;
             }

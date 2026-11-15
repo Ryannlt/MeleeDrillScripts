@@ -26,7 +26,7 @@ namespace MDS.Features.Drills
         public void Execute(int playerId, string[] parameters)
         {
             _drill.Syntax.TryParse(parameters, out DrillOptions options, out _);
-            if (!_runner.TryStart(_drill, options, out string error)) _replies.Send(playerId, error);
+            _runner.TryStart(_drill, options, reply => _replies.Send(playerId, reply));
         }
     }
 }

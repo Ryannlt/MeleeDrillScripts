@@ -16,6 +16,11 @@ namespace MDS.Features.Drills
 
         // Degrees was drawn at random, so the next run faces another way.
         public bool FacingIsRandom { get; set; }
+
+        public LineShape Resized(float distance, float spacing)
+        {
+            return new LineShape { Center = Center, Distance = distance, Spacing = spacing, Degrees = Degrees, FacingIsRandom = FacingIsRandom };
+        }
     }
 
     public static class LinePlacement

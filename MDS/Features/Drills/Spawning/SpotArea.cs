@@ -1,3 +1,4 @@
+using MDS.Shared;
 using UnityEngine;
 
 namespace MDS.Features.Drills.Spawning
@@ -44,14 +45,12 @@ namespace MDS.Features.Drills.Spawning
         {
             for (int draw = 0; draw < MaxDraws; draw++)
             {
-                spot = new Vector2(Between(random, Bounds.xMin, Bounds.xMax), Between(random, Bounds.yMin, Bounds.yMax));
+                spot = new Vector2(random.Between(Bounds.xMin, Bounds.xMax), random.Between(Bounds.yMin, Bounds.yMax));
                 if (Contains(spot)) return true;
             }
 
             spot = default;
             return false;
         }
-
-        private static float Between(System.Random random, float from, float to) => from + (to - from) * (float)random.NextDouble();
     }
 }

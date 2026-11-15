@@ -1,4 +1,5 @@
 using MDS.Features.Drills.Picking;
+using MDS.Shared;
 using UnityEngine;
 
 namespace MDS.Features.Drills.Spawning
@@ -15,6 +16,11 @@ namespace MDS.Features.Drills.Spawning
         {
             _generator = generator;
         }
+
+        // Each half keeps the whole area's bounds, so its grid is as big as the area's.
+        public bool CanCover(SpawnRequest request) => _generator.CanCover(request.Area, request.Spacing);
+
+        public string DescribeSpacing(SpawnRequest request) => $"{Numbers.Format(request.Spacing)} m apart";
 
         public SpawnPlan Plan(Lineup field, SpawnRequest request)
         {

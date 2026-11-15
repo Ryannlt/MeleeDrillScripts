@@ -24,14 +24,27 @@ namespace MDS.Features.Drills.Popcorn
 
         // Between neighbors on a line.
         public float Spacing { get; set; }
+
+        public PopcornRequest WithDistance(float distance)
+        {
+            return new PopcornRequest { Layout = Layout, Smallest = Smallest, Largest = Largest, Area = Area, Distance = distance, LineDistance = LineDistance, Spacing = Spacing };
+        }
     }
 
-    // Each fight is two facing lines turned a random way around its own center.
-    // Centers sit two fight reaches plus the distance apart and a reach in from the arena's edges, so different fights stay the distance apart and every fight stays in the arena.
+    // Each fight is two facing lines turned a random way around its own center, and reaches as far as the half diagonal of its lines.
+    // Two centers sit both fights' reaches plus the distance apart and each a reach in from the arena's edges, so fights stay the distance apart and inside the arena.
+    // The layout's generator lays out spare centers at the smallest fight's spacing, and the fights take them biggest first, so a big fight doesn't push the small ones apart.
     public sealed class PopcornLayout
     {
         private const float FullTurn = 360f;
         private const float Half = 0.5f;
+
+        // Spares for the centers a bigger neighbor crowds out.
+        private const int CentersPerFight = 6;
+
+        // At the smallest fight's spacing a big fight blocks the whole ring of comb points around it, and the next fight lands two rings out.
+        // A comb three times finer lets each fight sit as close to a big neighbor as the distance allows.
+        private const int TightFineness = 3;
 
         private static readonly FightLayout[] Drawable = { FightLayout.Scatter, FightLayout.Spread, FightLayout.Tight };
 
@@ -54,26 +67,29 @@ namespace MDS.Features.Drills.Popcorn
         // Fights without room are left unplaced in the plan.
         public SpawnPlan Place(List<Lineup> fights, PopcornRequest request)
         {
-            float reach = ReachOf(fights, request);
-            List<Vector2> centers = FitsAFight(request.Area, reach)
-                ? _centers[request.Layout].Generate(SpotArea.Whole(SpotArea.Shrunk(request.Area, reach)), request.Distance + reach + reach, fights.Count)
-                : new List<Vector2>();
+            List<SizedFight> sized = BiggestFirst(fights, request);
+            var centers = new Centers(Candidates(sized, request), request);
             var plan = new SpawnPlan();
-            for (int i = 0; i < fights.Count; i++)
+            foreach (SizedFight fight in sized)
             {
-                if (i < centers.Count) AddFight(plan, fights[i], ShapeAt(centers[i], request));
-                else plan.Add(fights[i].Everyone(), new List<Vector2>());
+                if (centers.TryTake(fight)) AddFight(plan, fight.Lineup, ShapeAt(fight.Center, request));
+                else plan.Add(fight.Lineup.Everyone(), new List<Vector2>());
             }
             return plan;
         }
 
         private static bool FitsAFight(Rect area, float reach) => area.width >= reach + reach && area.height >= reach + reach;
 
-        // The half diagonal of the biggest fight's lines, so a fight turned any way fits within it.
-        private static float ReachOf(List<Lineup> fights, PopcornRequest request)
+        private static List<SizedFight> BiggestFirst(List<Lineup> fights, PopcornRequest request)
         {
-            int longest = 1;
-            foreach (Lineup fight in fights) longest = Mathf.Max(longest, Mathf.Max(fight.Attackers.Count, fight.Defenders.Count));
+            List<SizedFight> sized = fights.ConvertAll(fight => new SizedFight(fight, ReachOf(fight, request)));
+            sized.Sort((a, b) => b.Reach.CompareTo(a.Reach));
+            return sized;
+        }
+
+        private static float ReachOf(Lineup fight, PopcornRequest request)
+        {
+            int longest = Mathf.Max(1, Mathf.Max(fight.Attackers.Count, fight.Defenders.Count));
             return new Vector2((longest - 1) * request.Spacing * Half, request.LineDistance * Half).magnitude;
         }
 
@@ -81,6 +97,16 @@ namespace MDS.Features.Drills.Popcorn
         {
             plan.Add(fight.Attackers, LinePlacement.AttackerSpots(shape, fight.Attackers.Count));
             plan.Add(fight.Defenders, LinePlacement.DefenderSpots(shape, fight.Defenders.Count));
+        }
+
+        private List<Vector2> Candidates(List<SizedFight> sized, PopcornRequest request)
+        {
+            float smallest = sized.Count > 0 ? sized[sized.Count - 1].Reach : 0f;
+            if (sized.Count == 0 || !FitsAFight(request.Area, smallest)) return new List<Vector2>();
+
+            SpotArea area = SpotArea.Whole(SpotArea.Shrunk(request.Area, smallest));
+            int fineness = request.Layout == FightLayout.Tight ? TightFineness : 1;
+            return _centers[request.Layout].Generate(area, (request.Distance + smallest + smallest) / fineness, sized.Count * CentersPerFight * fineness * fineness);
         }
 
         private LineShape ShapeAt(Vector2 center, PopcornRequest request)
@@ -92,6 +118,58 @@ namespace MDS.Features.Drills.Popcorn
                 Spacing = request.Spacing,
                 Degrees = (float)(_random.NextDouble() * FullTurn),
             };
+        }
+
+        private sealed class SizedFight
+        {
+            public SizedFight(Lineup lineup, float reach)
+            {
+                Lineup = lineup;
+                Reach = reach;
+            }
+
+            public Lineup Lineup { get; }
+
+            public float Reach { get; }
+
+            public Vector2 Center { get; set; }
+        }
+
+        // Candidates in the generator's order, each taken by the first fight it is free for.
+        private sealed class Centers
+        {
+            // Tight's comb puts equal fights exactly the separation apart, which float rounding can land a hair under.
+            private const float Slack = 0.001f;
+
+            private readonly List<Vector2> _candidates;
+            private readonly List<SizedFight> _taken = new();
+            private readonly Rect _area;
+            private readonly float _distance;
+
+            public Centers(List<Vector2> candidates, PopcornRequest request)
+            {
+                _candidates = candidates;
+                _area = request.Area;
+                _distance = request.Distance;
+            }
+
+            public bool TryTake(SizedFight fight)
+            {
+                int index = _candidates.FindIndex(candidate => IsFree(candidate, fight.Reach));
+                if (index < 0) return false;
+
+                fight.Center = _candidates[index];
+                _candidates.RemoveAt(index);
+                _taken.Add(fight);
+                return true;
+            }
+
+            private bool IsFree(Vector2 center, float reach)
+            {
+                if (!FitsAFight(_area, reach) || !SpotArea.Whole(SpotArea.Shrunk(_area, reach)).Contains(center)) return false;
+
+                return _taken.TrueForAll(other => Vector2.Distance(center, other.Center) + Slack >= _distance + reach + other.Reach);
+            }
         }
     }
 }

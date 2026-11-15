@@ -23,6 +23,9 @@ namespace MDS.Features.Drills.Spawning
             _random = random;
         }
 
+        // It keeps no grid, so any area works.
+        public bool CanCover(Rect area, float spacing) => true;
+
         // The honeycomb is built only as far out as the count needs, and twice as far each time the area cuts it short.
         public List<Vector2> Generate(SpotArea area, float spacing, int count)
         {

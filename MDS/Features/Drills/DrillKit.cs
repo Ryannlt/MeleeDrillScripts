@@ -69,22 +69,30 @@ namespace MDS.Features.Drills
             };
         }
 
-        public DrillPreview PreviewLines(LineShape shape, int attackers, int defenders)
+        public DrillPreview PreviewLines(LineFit lines, int attackers, int defenders)
         {
-            var preview = new DrillPreview { IsSample = shape.FacingIsRandom };
-            preview.Attackers.AddRange(LinePlacement.AttackerSpots(shape, attackers));
-            preview.Defenders.AddRange(LinePlacement.DefenderSpots(shape, defenders));
+            var preview = new DrillPreview { IsSample = lines.Shape.FacingIsRandom, Note = lines.Note };
+            preview.Attackers.AddRange(LinePlacement.AttackerSpots(lines.Shape, attackers));
+            preview.Defenders.AddRange(LinePlacement.DefenderSpots(lines.Shape, defenders));
             return preview;
         }
 
-        public void PlaceLines(DrillRun run, Lineup lineup, LineShape shape)
+        public void Warn(DrillRun run, string text)
         {
-            List<Vector2> attackerSpots = LinePlacement.AttackerSpots(shape, lineup.Attackers.Count);
-            List<Vector2> defenderSpots = LinePlacement.DefenderSpots(shape, lineup.Defenders.Count);
+            string line = $"{run.Drill}: {text}";
+            Log.Warning(line);
+            run.Notice(line);
+        }
+
+        public void PlaceLines(DrillRun run, Lineup lineup, LineFit lines)
+        {
+            List<Vector2> attackerSpots = LinePlacement.AttackerSpots(lines.Shape, lineup.Attackers.Count);
+            List<Vector2> defenderSpots = LinePlacement.DefenderSpots(lines.Shape, lineup.Defenders.Count);
             int moved = Teleporter.MoveAll(lineup.Attackers, attackerSpots) + Teleporter.MoveAll(lineup.Defenders, defenderSpots);
             attackerSpots.AddRange(defenderSpots);
             run.Placed(lineup, attackerSpots);
-            Log.Info($"{run.Drill} in arena {run.Arena.Number}: {lineup.Attackers.Count} attackers vs {lineup.Defenders.Count} defenders, facing {Numbers.Format(shape.Degrees)} degrees; {moved} moved.");
+            run.Note = lines.Note;
+            Log.Info($"{run.Drill} in arena {run.Arena.Number}: {lineup.Attackers.Count} attackers vs {lineup.Defenders.Count} defenders, facing {Numbers.Format(lines.Shape.Degrees)} degrees; {moved} moved. {lines.Note}".TrimEnd());
         }
     }
 }

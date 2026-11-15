@@ -1,3 +1,4 @@
+using System;
 using MDS.Features.Drills.Picking;
 using MDS.Features.Drills.Preview;
 
@@ -17,7 +18,7 @@ namespace MDS.Features.Drills
         public string Name => "groupfight";
 
         public DrillSyntax Syntax { get; } = new DrillSyntax(
-            "Usage: rc groupfight [random|repeat] [distance] [spacing] [facing] [arena=N], or by name: distance=25 facing=eastwest",
+            "Usage: rc groupfight [random|repeat] [distance] [spacing] [facing] [arena], numbers in that order, or by name: distance=25 facing=eastwest",
             0, DrillOption.Strategy, DrillOption.Distance, DrillOption.Spacing, DrillOption.Facing);
 
         // Everyone on the field is placed.
@@ -35,22 +36,34 @@ namespace MDS.Features.Drills
 
         public bool TryPreview(DrillOptions options, out DrillPreview preview, out string error)
         {
-            error = string.Empty;
-            LineShape shape = _kit.ShapeFor(options, _kit.Settings.GroupfightDistance, _kit.Settings.GroupfightSpacing);
-            preview = _kit.PreviewLines(shape, _kit.Players.Attacking.Count, _kit.Players.Defending.Count);
-            return true;
+            LineFit lines = LinesFor(options);
+            error = lines.Error;
+            preview = lines.Fits ? _kit.PreviewLines(lines, _kit.Players.Attacking.Count, _kit.Players.Defending.Count) : null;
+            return lines.Fits;
         }
 
         public bool TryStart(DrillOptions options, out DrillRun run, out string error)
         {
             run = null;
+            LineFit lines = LinesFor(options);
+            error = lines.Error;
+            if (!lines.Fits) return false;
+
             PickResult pick = _selection.Pick(options.GetStrategy(_kit.Settings.GroupfightStrategy.Value), Headcount.Everyone);
             error = pick.Error;
             if (!pick.Succeeded) return false;
 
             run = new DrillRun(Name, _kit.ArenaFor(options));
-            _kit.PlaceLines(run, pick.Lineup, _kit.ShapeFor(options, _kit.Settings.GroupfightDistance, _kit.Settings.GroupfightSpacing));
+            _kit.PlaceLines(run, pick.Lineup, lines);
             return true;
+        }
+
+        // Everyone on the field is placed, so the longer team sets the line length.
+        private LineFit LinesFor(DrillOptions options)
+        {
+            LineShape asked = _kit.ShapeFor(options, _kit.Settings.GroupfightDistance, _kit.Settings.GroupfightSpacing);
+            int longest = Math.Max(_kit.Players.Attacking.Count, _kit.Players.Defending.Count);
+            return LineFit.Into(_kit.ArenaFor(options), asked, longest);
         }
     }
 }

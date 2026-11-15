@@ -68,7 +68,7 @@ When `rc xvx` places its players, anyone else still alive in the box around the 
 
 ## Drill Options
 
-Options can be given in order, by name, or both. A strategy or facing word can go anywhere.
+Options can be given in order, by name, or both. A strategy or facing word can go anywhere. A bare number fills the next option that takes a number, in the order below, facing included. So `rc openmelee teams 90` sets spacing to 90, and an angle goes by name: `rc openmelee teams facing=90`.
 
 ```
 rc xvx 3 3 next 4 1 northsouth
@@ -105,6 +105,8 @@ Every drill also takes `arena=<n>`. Without it the drill runs in arena 1. A whol
 
 Any option left out uses its setting.
 
+`xvx` and `groupfight` keep both lines inside the arena. If `distance` would put someone outside it, the lines move closer, down to 0.5 m. If the lines are still too long for the arena, `spacing` shrinks as well. The drill tells you what it changed, such as `Shrunk to fit arena 3: distance 6 instead of 10.`, and `rc preview` shows the same. An arena too small even at 0.5 m is refused.
+
 | Strategy | Drills | Picks |
 | --- | --- | --- |
 | `Random` | xvx, groupfight | Each side at random from its own team |
@@ -118,11 +120,15 @@ Any option left out uses its setting.
 | --- | --- |
 | `Scatter` | Everyone in uneven pockets grown from one random spot, so fights start at once. The default |
 | `Spread` | Everyone evenly over the whole arena, as far apart as the player count allows, for regroup practice. Spacing is only the least gap |
-| `Groups` | Both teams shuffled into groups of 2 to 4 that stand close together, with the groups spread over the arena |
+| `Groups` | Both teams shuffled into groups of 2 to 4 that stand close together, with the groups spread over the arena. Each group needs a 4 m box, so a narrow arena runs out of room for the boxes before the spacing matters |
 | `Teams` | Each team scattered over its own half, split across the facing, attackers on the half the facing points away from. Each half stays half the spacing back from the middle line |
 | `Random` | One of the four above, drawn again each run. The log and `rc preview` name the one drawn |
 
 A bare `random` after `rc openmelee` picks the Random strategy. For a random facing, write `facing=random`.
+
+`Scatter` and `Teams` refuse a spacing too fine for a big arena. `Spread` and `Groups` take any spacing of 0.5 m or more.
+
+Open melee and popcorn count down before anyone moves. If players join during the countdown and the arena has no room for all of them, the ones without room stay where they are and whoever ran the drill is told.
 
 ### Popcorn
 
@@ -131,7 +137,7 @@ A bare `random` after `rc openmelee` picks the Random strategy. For a random fac
 1. Each fight draws a size between `min` and `max` and splits it as evenly as it can: 2v1, 2v2, 3v2 and so on. Small fights are common and each player more makes a fight rarer, and about two fights in three are uneven. With 2v1 to 4v4 on a 10v10 field, about 43% are 2v1, 32% 2v2, 16% 3v2, 5% 3v3, 4% 4v3 and 1% 4v4. The odd player goes to the team with more players left.
 2. Fights are drawn until no fight fits the players left. They join an even fight or one where their side is behind, even past `max`, so everyone on the field fights.
 3. Set `max` to suit the server: 4v4 suits 10v10 and under, and a bigger field can take 5v5.
-4. Fights stand at least `distance` apart and wholly inside the arena. If the arena has no room for them all, the drill is refused and says so.
+4. Fights stand at least `distance` apart and wholly inside the arena. Each fight takes room for its own size, so one big fight doesn't spread the rest out. If the arena has no room for them all, popcorn uses the largest `distance` that fits and tells you. If they don't fit even at 0.5 m, the drill is refused and says so.
 
 | Strategy | Places the fights |
 | --- | --- |

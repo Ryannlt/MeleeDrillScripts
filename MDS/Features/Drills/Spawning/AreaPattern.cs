@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MDS.Features.Drills.Picking;
+using MDS.Shared;
 using MDS.Shared.Players;
 
 namespace MDS.Features.Drills.Spawning
@@ -15,6 +16,10 @@ namespace MDS.Features.Drills.Spawning
             _generator = generator;
             _random = random;
         }
+
+        public bool CanCover(SpawnRequest request) => _generator.CanCover(request.Area, request.Spacing);
+
+        public string DescribeSpacing(SpawnRequest request) => $"{Numbers.Format(request.Spacing)} m apart";
 
         public SpawnPlan Plan(Lineup field, SpawnRequest request)
         {

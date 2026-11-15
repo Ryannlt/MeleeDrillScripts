@@ -61,7 +61,8 @@ namespace MDS.Features.Drills.Preview
         {
             string sample = preview.IsSample ? " This is one random draw: the drill draws again when it runs." : string.Empty;
             string detail = preview.Detail.Length > 0 ? $" ({preview.Detail})" : string.Empty;
-            return $"Previewing {drill.Name}{detail} for you only: {preview.Attackers.Count} attacker spot(s) in yellow, {preview.Defenders.Count} defender spot(s) in cyan.{sample}";
+            string note = preview.Note.Length > 0 ? $" {preview.Note}" : string.Empty;
+            return $"Previewing {drill.Name}{detail} for you only: {preview.Attackers.Count} attacker spot(s) in yellow, {preview.Defenders.Count} defender spot(s) in cyan.{note}{sample}";
         }
 
         private void Clear(int playerId, string reply)

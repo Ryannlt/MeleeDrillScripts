@@ -27,7 +27,7 @@ namespace MDS.Features.Drills
         public string Name => "openmelee";
 
         public DrillSyntax Syntax { get; } = new DrillSyntax(
-            "Usage: rc openmelee [scatter|spread|groups|teams|random] [spacing] [offset] [facing] [arena=N], or by name: strategy=spread spacing=2 offset=3 facing=random",
+            "Usage: rc openmelee [scatter|spread|groups|teams|random] [spacing] [offset] [facing] [arena], numbers in that order, or by name: strategy=spread spacing=2 facing=90",
             0, DrillOption.Spawn, DrillOption.Spacing, DrillOption.Offset, DrillOption.Facing);
 
         // Everyone on the field is placed.
@@ -90,13 +90,13 @@ namespace MDS.Features.Drills
             int players = _kit.Players.Attacking.Count + _kit.Players.Defending.Count;
             if (players == 0) return "Nobody is on the field for an open melee.";
             if (request.Spacing < DrillKit.MinimumSpacing) return $"Spacing must be at least {Numbers.Format(DrillKit.MinimumSpacing)} m.";
-            // Qualified, since the offline checker would otherwise bind the stale MDS.Features.Drills.PoissonGrid in HBox's last editor build.
-            if (!Spawning.PoissonGrid.Fits(request.Area, request.Spacing)) return "The arena is too big for that spacing.";
+            ISpawnPattern pattern = _patterns.For(request.Strategy);
+            if (!pattern.CanCover(request)) return $"The arena is too big for {NameOf(request.Strategy)} at that spacing: raise spacing, or use spread or groups.";
 
             if (request.Area.width > 0f) plan = FullestPlan(_kit.Field(), request);
             if (plan.Spots.Count >= players) return string.Empty;
 
-            return $"The arena has room for {plan.Spots.Count} of {players} players {Numbers.Format(request.Spacing)} m apart and {Numbers.Format(request.Offset)} m in from the edges.";
+            return $"The arena has room for {plan.Spots.Count} of {players} players {pattern.DescribeSpacing(request)} and {Numbers.Format(request.Offset)} m in from the edges.";
         }
 
         private void Place(DrillRun run, SpawnRequest request)
@@ -106,7 +106,7 @@ namespace MDS.Features.Drills
             int moved = _kit.Teleporter.MoveAll(plan.Players, plan.Spots);
             run.Placed(field, plan.Spots);
             _kit.Log.Info($"openmelee ({NameOf(request.Strategy)}) in arena {run.Arena.Number}: {plan.Total} on the field, {plan.Spots.Count} spots, {moved} moved.");
-            if (!plan.PlacesEveryone) _kit.Log.Warning($"openmelee: no room for {plan.Unplaced} of {plan.Total} players, who stay where they are.");
+            if (!plan.PlacesEveryone) _kit.Warn(run, $"no room for {plan.Unplaced} of {plan.Total} players at the move, so they stay where they are.");
         }
 
         private SpawnPlan FullestPlan(Lineup field, SpawnRequest request)

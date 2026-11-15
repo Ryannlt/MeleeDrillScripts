@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using MDS.Features.Arenas;
 using MDS.Features.Drills.Picking;
@@ -24,6 +25,14 @@ namespace MDS.Features.Drills
         public Rect Footprint { get; private set; }
 
         public bool PlacedAnyone { get; private set; }
+
+        // What the drill changed to fit its arena, told to whoever started it.
+        public string Note { get; set; } = string.Empty;
+
+        // Raised for what goes wrong after the start, such as a move short of room once a countdown ends.
+        public event Action<string> Noticed;
+
+        public void Notice(string text) => Noticed?.Invoke(text);
 
         public void Placed(Lineup lineup, IReadOnlyList<Vector2> spots)
         {

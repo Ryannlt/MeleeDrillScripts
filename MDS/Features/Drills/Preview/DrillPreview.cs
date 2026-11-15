@@ -26,5 +26,8 @@ namespace MDS.Features.Drills.Preview
 
         // What the reply adds after the drill's name, such as the spawn strategy drawn.
         public string Detail { get; set; } = string.Empty;
+
+        // What the drill changed to fit its arena.
+        public string Note { get; set; } = string.Empty;
     }
 }
