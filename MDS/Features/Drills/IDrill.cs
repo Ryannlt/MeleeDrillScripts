@@ -1,3 +1,5 @@
+using MDS.Features.Drills.Preview;
+
 namespace MDS.Features.Drills
 {
     public interface IDrill
@@ -14,5 +16,8 @@ namespace MDS.Features.Drills
 
         // The pick happens here, so too few players still refuses after Validate passed.
         bool TryStart(DrillOptions options, out DrillRun run, out string error);
+
+        // Where the drill would put players now, without moving or picking anyone.
+        bool TryPreview(DrillOptions options, out DrillPreview preview, out string error);
     }
 }

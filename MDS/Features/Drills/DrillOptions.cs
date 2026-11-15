@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using MDS.Features.Arenas;
 using MDS.Features.Drills.Picking;
+using MDS.Features.Drills.Spawning;
 using MDS.Shared;
 
 namespace MDS.Features.Drills
@@ -26,6 +27,11 @@ namespace MDS.Features.Drills
         public PickStrategy GetStrategy(PickStrategy fallback)
         {
             return _values.TryGetValue(DrillOption.Strategy, out string text) && EnumParser.TryParseStrict(text, out PickStrategy value) ? value : fallback;
+        }
+
+        public SpawnStrategy GetSpawnStrategy(SpawnStrategy fallback)
+        {
+            return _values.TryGetValue(DrillOption.Spawn, out string text) && EnumParser.TryParseStrict(text, out SpawnStrategy value) ? value : fallback;
         }
 
         public Facing GetFacing(Facing fallback)

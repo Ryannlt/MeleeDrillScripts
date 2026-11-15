@@ -1,4 +1,5 @@
 using MDS.Features.Drills.Picking;
+using MDS.Features.Drills.Preview;
 
 namespace MDS.Features.Drills
 {
@@ -25,6 +26,14 @@ namespace MDS.Features.Drills
         public bool ClearsLeftovers => true;
 
         public bool Validate(DrillOptions options, out string error) => _kit.HasArena(options, out error);
+
+        public bool TryPreview(DrillOptions options, out DrillPreview preview, out string error)
+        {
+            error = string.Empty;
+            LineShape shape = _kit.ShapeFor(options, _kit.Settings.XvXDistance, _kit.Settings.XvXSpacing);
+            preview = _kit.PreviewLines(shape, options.GetCount(DrillOption.Attackers), options.GetCount(DrillOption.Defenders));
+            return true;
+        }
 
         public bool TryStart(DrillOptions options, out DrillRun run, out string error)
         {

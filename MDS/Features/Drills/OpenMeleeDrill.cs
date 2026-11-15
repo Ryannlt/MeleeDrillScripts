@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using MDS.Features.Arenas;
+using System.Linq;
 using MDS.Features.Drills.Picking;
+using MDS.Features.Drills.Preview;
+using MDS.Features.Drills.Spawning;
 using MDS.Shared;
 using MDS.Shared.Game;
 using MDS.Shared.Players;
@@ -19,22 +22,26 @@ namespace MDS.Features.Drills
         // Below it players would stand inside each other.
         private const float MinimumSpacing = 0.5f;
 
+        // A random layout near the arena's capacity can come up short, so a few are drawn and the fullest kept.
+        private const int PlanAttempts = 5;
+
         private readonly DrillKit _kit;
         private readonly Routines _routines;
-        private readonly PoissonSampler _sampler;
+        private readonly SpawnPatterns _patterns;
         private Routine _running;
 
         public OpenMeleeDrill(DrillKit kit, Routines routines)
         {
             _kit = kit;
             _routines = routines;
-            _sampler = new PoissonSampler(kit.Random);
+            _patterns = new SpawnPatterns(kit.Random);
         }
 
         public string Name => "openmelee";
 
         public DrillSyntax Syntax { get; } = new DrillSyntax(
-            "Usage: rc openmelee [spacing] [offset] [arena=N], or by name: spacing=2 offset=3", 0, DrillOption.Spacing, DrillOption.Offset);
+            "Usage: rc openmelee [scatter|spread|groups|teams|random] [spacing] [offset] [facing] [arena=N], or by name: strategy=spread spacing=2 offset=3 facing=random",
+            0, DrillOption.Spawn, DrillOption.Spacing, DrillOption.Offset, DrillOption.Facing);
 
         // Everyone on the field is placed.
         public bool ClearsLeftovers => false;
@@ -52,34 +59,67 @@ namespace MDS.Features.Drills
         public bool TryStart(DrillOptions options, out DrillRun run, out string error)
         {
             run = null;
-            float spacing = options.GetNumber(DrillOption.Spacing, _kit.Settings.OpenMeleeSpacing.Value);
-            float offset = options.GetNumber(DrillOption.Offset, _kit.Settings.OpenMeleeOffset.Value);
-            Arena arena = _kit.ArenaFor(options);
-            Rect area = Area(arena, offset);
-            error = Refusal(area, spacing, offset);
+            SpawnRequest request = RequestFor(options);
+            error = _running != null && !_running.IsFinished ? "An open melee is already counting down." : Refusal(request, out _);
             if (error.Length > 0) return false;
 
-            run = new DrillRun(Name, arena);
-            _running = _routines.Start(Run(run, area, spacing), "open melee");
+            run = new DrillRun(Name, _kit.ArenaFor(options));
+            _running = _routines.Start(Run(run, request), "open melee");
             return true;
         }
 
-        // The size checks come before any spot is drawn: a tiny spacing over a big arena needs a grid too large to build.
-        private string Refusal(Rect area, float spacing, float offset)
+        public bool TryPreview(DrillOptions options, out DrillPreview preview, out string error)
         {
-            int players = _kit.Players.Attacking.Count + _kit.Players.Defending.Count;
-            if (_running != null && !_running.IsFinished) return "An open melee is already counting down.";
-            if (players == 0) return "Nobody is on the field for an open melee.";
-            if (spacing < MinimumSpacing) return $"Spacing must be at least {Numbers.Format(MinimumSpacing)} m.";
-            if (!PoissonGrid.Fits(area, spacing)) return "The arena is too big for that spacing.";
+            preview = null;
+            SpawnRequest request = RequestFor(options);
+            error = Refusal(request, out SpawnPlan plan);
+            if (error.Length > 0) return false;
 
-            int spots = area.width > 0f ? _sampler.Generate(area, spacing, players).Count : 0;
-            if (spots >= players) return string.Empty;
-
-            return $"The arena has room for {spots} of {players} players {Numbers.Format(spacing)} m apart and {Numbers.Format(offset)} m in from the edges.";
+            preview = PreviewOf(Field(_kit.Players), plan, request);
+            return true;
         }
 
-        private IEnumerator Run(DrillRun run, Rect area, float spacing)
+        private static Lineup Field(PlayerRegistry players) => new Lineup(new List<IPlayer>(players.Attacking), new List<IPlayer>(players.Defending));
+
+        private static string NameOf(SpawnStrategy strategy) => strategy.ToString().ToLowerInvariant();
+
+        private static DrillPreview PreviewOf(Lineup field, SpawnPlan plan, SpawnRequest request)
+        {
+            var preview = new DrillPreview { Area = request.Area, IsSample = true, Detail = NameOf(request.Strategy) };
+            for (int i = 0; i < plan.Players.Count; i++) (field.Attackers.Contains(plan.Players[i]) ? preview.Attackers : preview.Defenders).Add(plan.Spots[i]);
+            return preview;
+        }
+
+        private SpawnRequest RequestFor(DrillOptions options)
+        {
+            float offset = options.GetNumber(DrillOption.Offset, _kit.Settings.OpenMeleeOffset.Value);
+            return new SpawnRequest
+            {
+                Strategy = _patterns.Resolve(options.GetSpawnStrategy(_kit.Settings.OpenMeleeStrategy.Value)),
+                Area = Area(_kit.ArenaFor(options), offset),
+                Offset = offset,
+                Spacing = options.GetNumber(DrillOption.Spacing, _kit.Settings.OpenMeleeSpacing.Value),
+                Degrees = options.GetFacing(_kit.Settings.Orientation.Value).Resolve(_kit.Random),
+            };
+        }
+
+        // The size checks come before any spot is drawn: a tiny spacing over a big arena needs a grid too large to build.
+        private string Refusal(SpawnRequest request, out SpawnPlan plan)
+        {
+            plan = new SpawnPlan();
+            int players = _kit.Players.Attacking.Count + _kit.Players.Defending.Count;
+            if (players == 0) return "Nobody is on the field for an open melee.";
+            if (request.Spacing < MinimumSpacing) return $"Spacing must be at least {Numbers.Format(MinimumSpacing)} m.";
+            // Qualified, since the offline checker would otherwise bind the stale MDS.Features.Drills.PoissonGrid in HBox's last editor build.
+            if (!Spawning.PoissonGrid.Fits(request.Area, request.Spacing)) return "The arena is too big for that spacing.";
+
+            if (request.Area.width > 0f) plan = FullestPlan(Field(_kit.Players), request);
+            if (plan.Spots.Count >= players) return string.Empty;
+
+            return $"The arena has room for {plan.Spots.Count} of {players} players {Numbers.Format(request.Spacing)} m apart and {Numbers.Format(request.Offset)} m in from the edges.";
+        }
+
+        private IEnumerator Run(DrillRun run, SpawnRequest request)
         {
             for (int left = CountdownSeconds; left > 0; left--)
             {
@@ -88,20 +128,31 @@ namespace MDS.Features.Drills
             }
 
             _kit.Console.ExecuteForCurrentRound("set characterGodMode true");
-            Scatter(run, area, spacing);
+            Place(run, request);
             yield return Routines.Wait(GodModeAfterMoveSeconds);
             _kit.Console.ExecuteForCurrentRound("set characterGodMode false");
         }
 
-        private void Scatter(DrillRun run, Rect area, float spacing)
+        private void Place(DrillRun run, SpawnRequest request)
         {
-            var lineup = new Lineup(new List<IPlayer>(_kit.Players.Attacking), new List<IPlayer>(_kit.Players.Defending));
-            var field = new List<IPlayer>(lineup.Attackers);
-            field.AddRange(lineup.Defenders);
-            List<Vector2> spots = _sampler.Generate(area, spacing, field.Count);
-            int moved = _kit.Teleporter.MoveAll(field, spots);
-            run.Placed(lineup, spots);
-            _kit.Log.Info($"openmelee in arena {run.Arena.Number}: {field.Count} on the field, {spots.Count} spots, {moved} moved.");
+            Lineup field = Field(_kit.Players);
+            SpawnPlan plan = FullestPlan(field, request);
+            int moved = _kit.Teleporter.MoveAll(plan.Players, plan.Spots);
+            run.Placed(field, plan.Spots);
+            _kit.Log.Info($"openmelee ({NameOf(request.Strategy)}) in arena {run.Arena.Number}: {plan.Total} on the field, {plan.Spots.Count} spots, {moved} moved.");
+            if (!plan.PlacesEveryone) _kit.Log.Warning($"openmelee: no room for {plan.Unplaced} of {plan.Total} players, who stay where they are.");
+        }
+
+        private SpawnPlan FullestPlan(Lineup field, SpawnRequest request)
+        {
+            ISpawnPattern pattern = _patterns.For(request.Strategy);
+            SpawnPlan fullest = pattern.Plan(field, request);
+            for (int attempt = 1; attempt < PlanAttempts && !fullest.PlacesEveryone; attempt++)
+            {
+                SpawnPlan next = pattern.Plan(field, request);
+                if (next.Spots.Count > fullest.Spots.Count) fullest = next;
+            }
+            return fullest;
         }
     }
 }

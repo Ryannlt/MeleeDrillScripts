@@ -25,6 +25,7 @@ namespace MDS.Features.Drills.Settings
             GroupfightStrategy = new StrategySetting("groupfightStrategy", groupfight.Allowed, replies);
             OpenMeleeSpacing = new NumberSetting("openMeleeSpacing", OpenMeleeSpacingDefault, replies);
             OpenMeleeOffset = new OffsetSetting("openMeleeOffset", OpenMeleeOffsetDefault, replies);
+            OpenMeleeStrategy = new SpawnStrategySetting("openMeleeStrategy", replies);
             Orientation = new FacingSetting(replies);
         }
 
@@ -44,6 +45,8 @@ namespace MDS.Features.Drills.Settings
 
         public OffsetSetting OpenMeleeOffset { get; }
 
+        public SpawnStrategySetting OpenMeleeStrategy { get; }
+
         public FacingSetting Orientation { get; }
 
         public void RegisterWith(SettingsRegistry settings, ConfigRouter config)
@@ -60,7 +63,7 @@ namespace MDS.Features.Drills.Settings
             return new ISetting[]
             {
                 XvXDistance, XvXSpacing, XvXStrategy, GroupfightDistance, GroupfightSpacing, GroupfightStrategy,
-                OpenMeleeSpacing, OpenMeleeOffset, Orientation,
+                OpenMeleeSpacing, OpenMeleeOffset, OpenMeleeStrategy, Orientation,
             };
         }
     }

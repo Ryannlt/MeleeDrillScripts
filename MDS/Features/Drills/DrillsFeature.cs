@@ -1,6 +1,7 @@
 using System;
 using MDS.Features.Arenas;
 using MDS.Features.Drills.Picking;
+using MDS.Features.Drills.Preview;
 using MDS.Features.Drills.Settings;
 using MDS.Shared.Rounds;
 
@@ -11,6 +12,7 @@ namespace MDS.Features.Drills
         private readonly RoundTracker _round;
         private readonly Selection _xvx;
         private readonly Selection _groupfight;
+        private readonly SpotPreviewOverlay _preview;
 
         public DrillsFeature(ModContext context, ArenaStore arenas)
         {
@@ -25,10 +27,19 @@ namespace MDS.Features.Drills
             var runner = new DrillRunner(new LeftoverClearing(kit));
             var drills = new IDrill[] { new XvXDrill(kit, _xvx), new GroupfightDrill(kit, _groupfight), new OpenMeleeDrill(kit, context.Routines) };
             foreach (IDrill drill in drills) context.Commands.Register(new DrillCommand(drill, runner, context.Replies));
+            context.Commands.Register(new PreviewCommand(drills, context.Replies));
             _round.RoundStarted += OnRoundStarted;
+            if (context.IsServer) return;
+
+            _preview = new SpotPreviewOverlay(context.Runtime.CreateOverlayDrawer(kit.Log), context.Runtime.CreateGround(kit.Log));
+            context.ClientMessages.Register(SpotViewMessage.Name, _preview.OnMessage);
         }
 
-        public void Dispose() => _round.RoundStarted -= OnRoundStarted;
+        public void Dispose()
+        {
+            _round.RoundStarted -= OnRoundStarted;
+            _preview?.Dispose();
+        }
 
         private void OnRoundStarted(RoundInfo round)
         {

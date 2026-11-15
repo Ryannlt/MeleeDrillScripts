@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using MDS.Features.Arenas;
 using MDS.Features.Drills.Picking;
+using MDS.Features.Drills.Preview;
 using MDS.Features.Drills.Settings;
 using MDS.Shared;
 using MDS.Shared.Game;
@@ -51,13 +52,23 @@ namespace MDS.Features.Drills
 
         public LineShape ShapeFor(DrillOptions options, NumberSetting distance, NumberSetting spacing)
         {
+            Facing facing = options.GetFacing(Settings.Orientation.Value);
             return new LineShape
             {
                 Center = ArenaFor(options).Center,
                 Distance = options.GetNumber(DrillOption.Distance, distance.Value),
                 Spacing = options.GetNumber(DrillOption.Spacing, spacing.Value),
-                Degrees = options.GetFacing(Settings.Orientation.Value).Resolve(Random),
+                Degrees = facing.Resolve(Random),
+                FacingIsRandom = facing.IsRandom,
             };
+        }
+
+        public DrillPreview PreviewLines(LineShape shape, int attackers, int defenders)
+        {
+            var preview = new DrillPreview { IsSample = shape.FacingIsRandom };
+            preview.Attackers.AddRange(LinePlacement.AttackerSpots(shape, attackers));
+            preview.Defenders.AddRange(LinePlacement.DefenderSpots(shape, defenders));
+            return preview;
         }
 
         public void PlaceLines(DrillRun run, Lineup lineup, LineShape shape)

@@ -13,6 +13,9 @@ namespace MDS.Features.Drills
 
         // The compass direction from the attackers' line toward the defenders'.
         public float Degrees { get; set; }
+
+        // Degrees was drawn at random, so the next run faces another way.
+        public bool FacingIsRandom { get; set; }
     }
 
     public static class LinePlacement

@@ -1,4 +1,5 @@
 using MDS.Features.Drills.Picking;
+using MDS.Features.Drills.Preview;
 
 namespace MDS.Features.Drills
 {
@@ -30,6 +31,14 @@ namespace MDS.Features.Drills
             if (!_selection.Allows(strategy)) error = $"A groupfight picks by random or repeat, not {strategy}.";
             else if (_kit.Players.Attacking.Count == 0 || _kit.Players.Defending.Count == 0) error = "Both teams need players for a groupfight.";
             return error.Length == 0;
+        }
+
+        public bool TryPreview(DrillOptions options, out DrillPreview preview, out string error)
+        {
+            error = string.Empty;
+            LineShape shape = _kit.ShapeFor(options, _kit.Settings.GroupfightDistance, _kit.Settings.GroupfightSpacing);
+            preview = _kit.PreviewLines(shape, _kit.Players.Attacking.Count, _kit.Players.Defending.Count);
+            return true;
         }
 
         public bool TryStart(DrillOptions options, out DrillRun run, out string error)

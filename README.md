@@ -18,6 +18,8 @@ rc xvx 3 3 arena=2
 rc xvx 3 3 eastwest spacing=1
 rc groupfight
 rc openmelee
+rc openmelee spread
+rc preview openmelee groups
 rc shootingTraining
 rc mds
 ```
@@ -50,7 +52,9 @@ Commands and keys are not case sensitive.
 | `rc arena show [on\|off]` | Paints every arena on the ground: a thin border that fades inward and the arena number in the middle, one color per arena. Only you see it. With no argument it switches to the other state |
 | `rc xvx <attackers> <defenders> [options]` | Places two lines of picked players facing each other across the arena center. Anyone else standing where the lines go is sent back to their spawn |
 | `rc groupfight [options]` | Places each whole team in a line, facing the other |
-| `rc openmelee [options]` | Counts down 3, 2, 1, then scatters everyone on the field across the arena |
+| `rc openmelee [options]` | Counts down 3, 2, 1, then places everyone on the field across the arena with a [spawn strategy](#open-melee-strategies) |
+| `rc preview <drill> [options]` | Shows where a drill would put players, without moving anyone: yellow rings for attackers, cyan for defenders, and a white border round the area `openmelee` draws from. Only you see it. Open melee and a random facing draw again when the drill runs, so this is one sample. It stays until the next preview |
+| `rc preview off` | Clears the preview |
 | `rc shootingTraining [on\|off]` | Turns infinite firearm ammo and drawn bullet paths on or off for the current map. With no argument it switches to the other state |
 | `rc get <key>` / `rc set <key> <value>` | Reads or changes a [setting](#settings) |
 
@@ -69,6 +73,8 @@ rc xvx 5 2 any distance=12
 rc groupfight repeat spacing=1.5
 rc groupfight 25
 rc openmelee spacing=2 offset=3
+rc openmelee groups 4
+rc openmelee teams eastwest
 rc xvx 2 2 arena=3
 ```
 
@@ -76,17 +82,17 @@ rc xvx 2 2 arena=3
 | --- | --- |
 | `xvx` | attackers, defenders, strategy, distance, spacing, facing |
 | `groupfight` | strategy, distance, spacing, facing |
-| `openmelee` | spacing, offset |
+| `openmelee` | strategy, spacing, offset, facing |
 
 Every drill also takes `arena=<n>`, by name only. Without it the drill runs in arena 1.
 
 | Option | Value | Meaning |
 | --- | --- | --- |
 | `attackers`, `defenders` | whole number | Players on each line |
-| `strategy` | see below | How players are picked |
+| `strategy` | see below | How players are picked. For `openmelee`, how they are spread over the arena |
 | `distance` | meters | Distance between the two lines |
-| `spacing` | meters | Distance between neighbors on a line. For `openmelee`, the least distance between any two players, at least 0.5 |
-| `facing` | `NorthSouth`, `EastWest`, `SouthNorth`, `WestEast`, `Random` (or `-1`) or 0 to 359 | Compass direction from the attackers' line to the defenders' |
+| `spacing` | meters | Distance between neighbors on a line. For `openmelee`, the least distance between any two players, at least 0.5. With `groups`, the least distance between players of different groups |
+| `facing` | `NorthSouth`, `EastWest`, `SouthNorth`, `WestEast`, `Random` (or `-1`) or 0 to 359 | Compass direction from the attackers' line to the defenders'. For `openmelee teams`, from the attackers' half to the defenders' |
 | `offset` | meters, 0 or more | How far in from the arena edges `openmelee` keeps everyone. 0 uses the arena edge to edge |
 | `arena` | an arena number | The arena the drill runs in |
 
@@ -98,6 +104,18 @@ Any option left out uses its setting.
 | `Any` | xvx | At random from everyone on the field, whatever their team |
 | `Next` | xvx | The next players in each team's order, carrying on from the last drill |
 | `Repeat` | xvx, groupfight | The same players as that drill's last run this round |
+
+### Open Melee Strategies
+
+| Strategy | Places |
+| --- | --- |
+| `Scatter` | Everyone in uneven pockets grown from one random spot, so fights start at once. The default |
+| `Spread` | Everyone evenly over the whole arena, as far apart as the player count allows, for regroup practice. Spacing is only the least gap |
+| `Groups` | Both teams shuffled into groups of 2 to 4 that stand close together, with the groups spread over the arena |
+| `Teams` | Each team scattered over its own half, split across the facing, attackers on the half the facing points away from. Each half stays half the spacing back from the middle line |
+| `Random` | One of the four above, drawn again each run. The log and `rc preview` name the one drawn |
+
+A bare `random` after `rc openmelee` picks the Random strategy. For a random facing, write `facing=random`.
 
 ## Settings
 
@@ -113,6 +131,7 @@ Each setting is changed with `rc set`, read with `rc get`, and can be set from t
 | `groupfightStrategy` | Random | Random, Repeat |
 | `openMeleeSpacing` | 1.5 | meters |
 | `openMeleeOffset` | 2 | meters, 0 or more |
+| `openMeleeStrategy` | Scatter | Scatter, Spread, Groups, Teams, Random |
 | `DrillOrientation` | NorthSouth | a facing |
 | `MDSDebugLogging` | false | true, false |
 
@@ -143,6 +162,7 @@ mod_variable_local MDS:GroupfightSpacing:2
 mod_variable_local MDS:GroupfightStrategy:Random
 mod_variable_local MDS:OpenMeleeSpacing:1.5
 mod_variable_local MDS:OpenMeleeOffset:2
+mod_variable_local MDS:OpenMeleeStrategy:Scatter
 mod_variable_local MDS:DrillOrientation:NorthSouth
 ```
 
