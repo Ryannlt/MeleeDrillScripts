@@ -1,3 +1,4 @@
+using MDS.Features.Arenas;
 using MDS.Features.Drills.Picking;
 using MDS.Shared;
 
@@ -11,7 +12,8 @@ namespace MDS.Features.Drills
         Distance,
         Spacing,
         Facing,
-        Offset
+        Offset,
+        Arena
     }
 
     public static class DrillOptionValues
@@ -23,6 +25,8 @@ namespace MDS.Features.Drills
                 case DrillOption.Attackers:
                 case DrillOption.Defenders:
                     return int.TryParse(text, out int count) && count > 0;
+                case DrillOption.Arena:
+                    return ArenaParser.TryParseNumber(text, out _);
                 case DrillOption.Strategy:
                     return EnumParser.TryParseStrict(text, out PickStrategy _);
                 case DrillOption.Facing:
@@ -34,6 +38,9 @@ namespace MDS.Features.Drills
                     return Numbers.TryParsePositive(text, out _);
             }
         }
+
+        // A bare number already means a count, a distance or a spacing, so the arena is only ever given by name.
+        public static bool IsNamedOnly(DrillOption option) => option == DrillOption.Arena;
 
         public static string KeyOf(DrillOption option) => option.ToString().ToLowerInvariant();
     }

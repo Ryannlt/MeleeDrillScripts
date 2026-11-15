@@ -57,6 +57,8 @@ namespace MDS
 
         public Replies Replies { get; }
 
+        public ClientMessageRouter ClientMessages { get; } = new();
+
         public Routines Routines { get; }
 
         public PlayerQueries Queries { get; }

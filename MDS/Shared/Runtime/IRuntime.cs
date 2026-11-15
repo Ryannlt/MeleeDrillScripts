@@ -13,6 +13,8 @@ namespace MDS.Shared.Runtime
 
         IGround CreateGround(ModLog log);
 
+        IOverlayDrawer CreateOverlayDrawer(ModLog log);
+
         Random CreateRandom();
     }
 }

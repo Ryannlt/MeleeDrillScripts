@@ -10,6 +10,9 @@ namespace MDS.Shared.Game
         private const float RayHeightAboveTerrain = 20f;
         private const float RayLength = 40f;
 
+        // A ray that starts under the terrain passes through it, since terrain colliders are one-sided.
+        private const float RayStartAboveTerrain = 0.5f;
+
         // Players and props are left out on purpose.
         private static readonly string[] GroundLayerNames = { "Terrain", "Static Environment", "WalkablePlatform" };
 
@@ -21,13 +24,26 @@ namespace MDS.Shared.Game
             _log = log;
         }
 
+        public float TerrainHeightAt(Vector2 position) => HighestTerrainAt(position);
+
         public float HeightAt(Vector2 position)
         {
             float terrainY = HighestTerrainAt(position);
-            Vector3 origin = new Vector3(position.x, terrainY + RayHeightAboveTerrain, position.y);
+            return SurfaceBelow(position, terrainY + RayHeightAboveTerrain, terrainY);
+        }
+
+        public float HeightBelow(Vector2 position, float fromY)
+        {
+            float terrainY = HighestTerrainAt(position);
+            return SurfaceBelow(position, Mathf.Max(fromY, terrainY + RayStartAboveTerrain), terrainY);
+        }
+
+        private float SurfaceBelow(Vector2 position, float fromY, float terrainY)
+        {
+            Vector3 origin = new Vector3(position.x, fromY, position.y);
             if (Physics.Raycast(origin, Vector3.down, out RaycastHit hit, RayLength, _groundMask)) return hit.point.y;
 
-            _log.Warning($"No surface at ({position.x:F2}, {position.y:F2}); using the terrain height {terrainY:F2}.");
+            _log.Warning($"No surface below ({position.x:F2}, {fromY:F2}, {position.y:F2}); using the terrain height {terrainY:F2}.");
             return terrainY;
         }
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MDS.Features.Arenas;
 using MDS.Features.Drills.Picking;
 using MDS.Shared;
 
@@ -14,6 +15,8 @@ namespace MDS.Features.Drills
         public void Set(DrillOption option, string text) => _values[option] = text;
 
         public int GetCount(DrillOption option) => _values.TryGetValue(option, out string text) ? int.Parse(text) : 0;
+
+        public int GetArena() => _values.TryGetValue(DrillOption.Arena, out string text) ? int.Parse(text) : ArenaStore.First;
 
         public float GetNumber(DrillOption option, float fallback)
         {

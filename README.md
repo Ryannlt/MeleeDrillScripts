@@ -11,7 +11,10 @@ Run every command as a logged-in server admin, prefixed with `rc`.
 ```
 rc arena corner1
 rc arena corner2
+rc arena 2 corner1
+rc arena show
 rc xvx 3 3
+rc xvx 3 3 arena=2
 rc xvx 3 3 eastwest spacing=1
 rc groupfight
 rc openmelee
@@ -24,8 +27,9 @@ rc mds
 ## Quick Start
 
 1. Set the arena. Stand in one corner and run `rc arena corner1`, then stand in the opposite corner and run `rc arena corner2`. Or put `mod_variable_local MDS:Arena:(x,z),(x,z)` in the map's rotation.
-2. Run a drill: `rc xvx 3 3`, `rc groupfight` or `rc openmelee`.
-3. For bots, load CarbonPlayer AI next to MDS. See [Bots](#bots).
+2. For more arenas, put the arena number first: `rc arena 2 corner1` and `rc arena 2 corner2`, or `MDS:Arena:2:(x,z),(x,z)`.
+3. Run a drill: `rc xvx 3 3`, `rc groupfight` or `rc openmelee`. Add `arena=2` to run it in arena 2.
+4. For bots, load CarbonPlayer AI next to MDS. See [Bots](#bots).
 
 Commands and keys are not case sensitive.
 
@@ -35,18 +39,24 @@ Commands and keys are not case sensitive.
 
 | Command | What it does |
 | --- | --- |
-| `rc mds` | Shows the round, the arena and how many players are on each side |
+| `rc mds` | Shows the round, the arenas and how many players are on each side |
 | `rc mds round` | Shows the round, the map, the mode and both factions |
 | `rc mds players [all\|attacking\|defending\|spectator] [count]` | Lists the players in a group in your F2 log. With `count`, replies with the number only |
 | `rc mds player <id>` | Shows one player: name, admin, faction, alive, position |
-| `rc arena` | Shows the arena |
-| `rc arena corner1 [x z]` | Sets the first corner. Without coordinates it uses where you stand |
-| `rc arena corner2 [x z]` | Sets the opposite corner |
-| `rc xvx <attackers> <defenders> [options]` | Places two lines of picked players facing each other across the arena center |
+| `rc arena` | Lists every arena that is set |
+| `rc arena <n>` | Shows arena n |
+| `rc arena [n] corner1 [x z]` | Sets the first corner of arena n, or arena 1 without a number. Without coordinates it uses where you stand |
+| `rc arena [n] corner2 [x z]` | Sets the opposite corner |
+| `rc arena show [on\|off]` | Paints every arena on the ground: a thin border that fades inward and the arena number in the middle, one color per arena. Only you see it. With no argument it switches to the other state |
+| `rc xvx <attackers> <defenders> [options]` | Places two lines of picked players facing each other across the arena center. Anyone else standing where the lines go is sent back to their spawn |
 | `rc groupfight [options]` | Places each whole team in a line, facing the other |
 | `rc openmelee [options]` | Counts down 3, 2, 1, then scatters everyone on the field across the arena |
 | `rc shootingTraining [on\|off]` | Turns infinite firearm ammo and drawn bullet paths on or off for the current map. With no argument it switches to the other state |
 | `rc get <key>` / `rc set <key> <value>` | Reads or changes a [setting](#settings) |
+
+### Leftover Players
+
+When `rc xvx` places its players, anyone else still alive in the box around the new lines, 3 m past the outermost players, goes back to the spawn they came from, if their side may still use it. Players elsewhere in the arena are left alone, so a spawn inside a big arena keeps working. If a spawn is inside that box, they go to the nearest spawn of their side outside it. Players sent to the same spawn stand in a small ring around it. `groupfight` and `openmelee` place everyone, so they skip this.
 
 ## Drill Options
 
@@ -59,6 +69,7 @@ rc xvx 5 2 any distance=12
 rc groupfight repeat spacing=1.5
 rc groupfight 25
 rc openmelee spacing=2 offset=3
+rc xvx 2 2 arena=3
 ```
 
 | Drill | Options in order |
@@ -66,6 +77,8 @@ rc openmelee spacing=2 offset=3
 | `xvx` | attackers, defenders, strategy, distance, spacing, facing |
 | `groupfight` | strategy, distance, spacing, facing |
 | `openmelee` | spacing, offset |
+
+Every drill also takes `arena=<n>`, by name only. Without it the drill runs in arena 1.
 
 | Option | Value | Meaning |
 | --- | --- | --- |
@@ -75,6 +88,7 @@ rc openmelee spacing=2 offset=3
 | `spacing` | meters | Distance between neighbors on a line. For `openmelee`, the least distance between any two players, at least 0.5 |
 | `facing` | `NorthSouth`, `EastWest`, `SouthNorth`, `WestEast`, `Random` (or `-1`) or 0 to 359 | Compass direction from the attackers' line to the defenders' |
 | `offset` | meters, 0 or more | How far in from the arena edges `openmelee` keeps everyone. 0 uses the arena edge to edge |
+| `arena` | an arena number | The arena the drill runs in |
 
 Any option left out uses its setting.
 
@@ -111,9 +125,8 @@ Use `mod_variable` for every map or `mod_variable_local` inside a map rotation. 
 | Key | Value |
 | --- | --- |
 | `EnableDebugLogging` | `true` or `false` |
-| `Arena` | `(x,z),(x,z)` |
-| `AddArena` | `(x,z),(x,z)`, an extra arena after the first |
-| `ArenaCorner1`, `ArenaCorner2` | `x,z` |
+| `Arena` | `(x,z),(x,z)` for arena 1, or `<n>:(x,z),(x,z)` for arena n |
+| `ArenaCorner1`, `ArenaCorner2` | `x,z` for arena 1, or `<n>:x,z` for arena n |
 | any key from [Settings](#settings) except `MDSDebugLogging` | as in the table |
 
 ```text
@@ -121,6 +134,7 @@ mod_variable MDS:EnableDebugLogging:true
 
 # Map rotation
 mod_variable_local MDS:Arena:(-40.99,42.69),(-3.35,5.38)
+mod_variable_local MDS:Arena:2:(-3.35,42.69),(33.80,5.38)
 mod_variable_local MDS:XvXDistance:20
 mod_variable_local MDS:XvXSpacing:2
 mod_variable_local MDS:XvXStrategy:Random
@@ -155,6 +169,7 @@ CarbonPlayer AI owns `bot`, `summonLine`, `summonLineAt`, `spawnLine` and `melee
 | `rc set AdminOnly`, `MDS:EnableAdminOnly` | removed. Every command is for admins |
 | `MDS:SetArena`, `MDS:SetXvXDistance` and the other `MDS:Set...` keys | `MDS:Arena`, `MDS:XvXDistance` and the rest without `Set` |
 | `openMeleeOffset` counted twice | counted once. Set it to 4 to keep the old spread |
+| `MDS:AddArena` | `MDS:Arena:2:(x,z),(x,z)` |
 
 MDS logs `Unknown config variable` for any old key it still gets.
 

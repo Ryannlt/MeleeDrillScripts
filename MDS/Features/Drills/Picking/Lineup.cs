@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using MDS.Shared.Players;
 
 namespace MDS.Features.Drills.Picking
@@ -14,5 +15,8 @@ namespace MDS.Features.Drills.Picking
         public IReadOnlyList<IPlayer> Attackers { get; }
 
         public IReadOnlyList<IPlayer> Defenders { get; }
+
+        // Players compare by object, so a newcomer on a reused id isn't taken for the player who left.
+        public bool Includes(IPlayer player) => Attackers.Contains(player) || Defenders.Contains(player);
     }
 }

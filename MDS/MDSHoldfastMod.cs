@@ -32,7 +32,10 @@ namespace MDS
 
         public void OnClientModMessage(uint modId, string messageName, byte[] data)
         {
-            if (_context != null && !_context.IsServer) _context.Replies.OnClientMessage(messageName, data);
+            if (_context == null || _context.IsServer) return;
+
+            _context.Replies.OnClientMessage(messageName, data);
+            _context.ClientMessages.Handle(messageName, data);
         }
 
         public void OnRCCommand(int playerId, string input, string output, bool success)

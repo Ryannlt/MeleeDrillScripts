@@ -7,11 +7,14 @@ namespace MDS.Features.Arenas
     {
         private const float Midway = 0.5f;
 
-        public Arena(Vector2 corner1, Vector2 corner2)
+        public Arena(int number, Vector2 corner1, Vector2 corner2)
         {
+            Number = number;
             Corner1 = corner1;
             Corner2 = corner2;
         }
+
+        public int Number { get; }
 
         public Vector2 Corner1 { get; }
 
@@ -25,7 +28,7 @@ namespace MDS.Features.Arenas
 
         public bool IsUsable => Min.x < Max.x && Min.y < Max.y;
 
-        public override string ToString() => $"{Format(Corner1)} to {Format(Corner2)}";
+        public override string ToString() => $"Arena {Number} is {Format(Corner1)} to {Format(Corner2)}";
 
         public static string Format(Vector2 corner) => $"({Numbers.Coordinate(corner.x)}, {Numbers.Coordinate(corner.y)})";
     }

@@ -88,6 +88,7 @@ namespace MDS.Shared.Players
 
             RemoveFromTeams(player);
             _all.Remove(player);
+            player.MarkDead();
             _log.Debug($"Left: {player}");
             PlayerLeft?.Invoke(player);
         }

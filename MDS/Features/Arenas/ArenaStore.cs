@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using MDS.Shared.Logging;
 using UnityEngine;
@@ -10,14 +11,12 @@ namespace MDS.Features.Arenas
         Corner2
     }
 
-    // Drills use only the first arena.
-    // The rest are for later multi-arena drills.
     // The mod reloads with every map, so nothing here resets per round.
     public sealed class ArenaStore
     {
-        public const string NotSet = "No arena is set: use rc arena corner1 and corner2, or MDS:Arena in the config.";
+        public const int First = 1;
 
-        private readonly List<Arena> _arenas = new();
+        private readonly SortedDictionary<int, Arena> _arenas = new();
         private readonly ModLog _log;
 
         public ArenaStore(ModLog log)
@@ -25,27 +24,47 @@ namespace MDS.Features.Arenas
             _log = log;
         }
 
-        public Arena Current => _arenas.Count > 0 ? _arenas[0] : null;
+        public event Action<Arena> ArenaChanged;
 
-        public IReadOnlyList<Arena> All => _arenas;
+        public IEnumerable<Arena> All => _arenas.Values;
+
+        public static string NotSet(int number)
+        {
+            return number == First
+                ? "No arena is set: use rc arena corner1 and corner2, or MDS:Arena in the config."
+                : $"Arena {number} isn't set: use rc arena {number} corner1 and corner2, or MDS:Arena:{number}: in the config.";
+        }
+
+        public Arena Find(int number) => _arenas.TryGetValue(number, out Arena arena) ? arena : null;
+
+        public bool TryGetUsable(int number, out Arena arena, out string error)
+        {
+            arena = Find(number);
+            bool usable = arena != null && arena.IsUsable;
+            error = usable ? string.Empty : NotSet(number);
+            return usable;
+        }
 
         public void Set(Arena arena)
         {
-            if (_arenas.Count == 0) _arenas.Add(arena);
-            else _arenas[0] = arena;
-            _log.Info($"Arena set: {arena}.");
+            _arenas[arena.Number] = arena;
+            _log.Info($"{arena}.");
+            ArenaChanged?.Invoke(arena);
         }
 
-        public void Add(Arena arena)
+        public void SetCorner(int number, ArenaCorner corner, Vector2 position)
         {
-            _arenas.Add(arena);
-            _log.Info($"Arena {_arenas.Count} added: {arena}.");
+            Arena current = Find(number) ?? new Arena(number, position, position);
+            Set(corner == ArenaCorner.Corner1 ? new Arena(number, position, current.Corner2) : new Arena(number, current.Corner1, position));
         }
 
-        public void SetCorner(ArenaCorner corner, Vector2 position)
+        public string Describe()
         {
-            Arena current = Current ?? new Arena(position, position);
-            Set(corner == ArenaCorner.Corner1 ? new Arena(position, current.Corner2) : new Arena(current.Corner1, position));
+            if (_arenas.Count == 0) return NotSet(First);
+
+            var lines = new List<string>();
+            foreach (Arena arena in _arenas.Values) lines.Add($"{arena}.");
+            return string.Join(" ", lines);
         }
     }
 }

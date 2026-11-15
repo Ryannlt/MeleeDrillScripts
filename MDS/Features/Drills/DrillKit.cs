@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MDS.Features.Arenas;
 using MDS.Features.Drills.Picking;
 using MDS.Features.Drills.Settings;
@@ -6,6 +7,7 @@ using MDS.Shared;
 using MDS.Shared.Game;
 using MDS.Shared.Logging;
 using MDS.Shared.Players;
+using UnityEngine;
 
 namespace MDS.Features.Drills
 {
@@ -16,6 +18,7 @@ namespace MDS.Features.Drills
             Arenas = arenas;
             Settings = settings;
             Players = context.Players;
+            Queries = context.Queries;
             Console = context.Console;
             Replies = context.Replies;
             Log = context.Log.For("Drills");
@@ -29,39 +32,42 @@ namespace MDS.Features.Drills
 
         public PlayerRegistry Players { get; }
 
+        public PlayerQueries Queries { get; }
+
         public GameConsole Console { get; }
 
         public Replies Replies { get; }
 
         public ModLog Log { get; }
 
-        public Random Random { get; }
+        public System.Random Random { get; }
 
         public Teleporter Teleporter { get; }
 
-        public bool HasArena(out string error)
-        {
-            bool usable = Arenas.Current != null && Arenas.Current.IsUsable;
-            error = usable ? string.Empty : ArenaStore.NotSet;
-            return usable;
-        }
+        public bool HasArena(DrillOptions options, out string error) => Arenas.TryGetUsable(options.GetArena(), out _, out error);
+
+        // Validate has checked it is set.
+        public Arena ArenaFor(DrillOptions options) => Arenas.Find(options.GetArena());
 
         public LineShape ShapeFor(DrillOptions options, NumberSetting distance, NumberSetting spacing)
         {
             return new LineShape
             {
-                Center = Arenas.Current.Center,
+                Center = ArenaFor(options).Center,
                 Distance = options.GetNumber(DrillOption.Distance, distance.Value),
                 Spacing = options.GetNumber(DrillOption.Spacing, spacing.Value),
                 Degrees = options.GetFacing(Settings.Orientation.Value).Resolve(Random),
             };
         }
 
-        public void PlaceLines(string drill, Lineup lineup, LineShape shape)
+        public void PlaceLines(DrillRun run, Lineup lineup, LineShape shape)
         {
-            int moved = Teleporter.MoveAll(lineup.Attackers, LinePlacement.AttackerSpots(shape, lineup.Attackers.Count))
-                + Teleporter.MoveAll(lineup.Defenders, LinePlacement.DefenderSpots(shape, lineup.Defenders.Count));
-            Log.Info($"{drill}: {lineup.Attackers.Count} attackers vs {lineup.Defenders.Count} defenders, facing {Numbers.Format(shape.Degrees)} degrees; {moved} moved.");
+            List<Vector2> attackerSpots = LinePlacement.AttackerSpots(shape, lineup.Attackers.Count);
+            List<Vector2> defenderSpots = LinePlacement.DefenderSpots(shape, lineup.Defenders.Count);
+            int moved = Teleporter.MoveAll(lineup.Attackers, attackerSpots) + Teleporter.MoveAll(lineup.Defenders, defenderSpots);
+            attackerSpots.AddRange(defenderSpots);
+            run.Placed(lineup, attackerSpots);
+            Log.Info($"{run.Drill} in arena {run.Arena.Number}: {lineup.Attackers.Count} attackers vs {lineup.Defenders.Count} defenders, facing {Numbers.Format(shape.Degrees)} degrees; {moved} moved.");
         }
     }
 }

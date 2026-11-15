@@ -22,9 +22,9 @@ namespace MDS.Features.Drills
             settings.RegisterWith(context.Settings, context.Config);
 
             var kit = new DrillKit(context, arenas, settings);
-            context.Commands.Register(new XvXCommand(kit, _xvx));
-            context.Commands.Register(new GroupfightCommand(kit, _groupfight));
-            context.Commands.Register(new OpenMeleeCommand(kit, new OpenMeleeDrill(kit, context.Routines)));
+            var runner = new DrillRunner(new LeftoverClearing(kit));
+            var drills = new IDrill[] { new XvXDrill(kit, _xvx), new GroupfightDrill(kit, _groupfight), new OpenMeleeDrill(kit, context.Routines) };
+            foreach (IDrill drill in drills) context.Commands.Register(new DrillCommand(drill, runner, context.Replies));
             _round.RoundStarted += OnRoundStarted;
         }
 

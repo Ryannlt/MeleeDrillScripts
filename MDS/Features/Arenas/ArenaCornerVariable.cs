@@ -16,12 +16,12 @@ namespace MDS.Features.Arenas
 
         public string Key => $"Arena{_corner}";
 
-        public bool Validate(string value) => ArenaParser.TryParseCorner(value, out _);
+        public bool Validate(string value) => ArenaParser.TryParseNumberedCorner(value, out _, out _);
 
         public void Apply(string value)
         {
-            ArenaParser.TryParseCorner(value, out Vector2 position);
-            _store.SetCorner(_corner, position);
+            ArenaParser.TryParseNumberedCorner(value, out int number, out Vector2 position);
+            _store.SetCorner(number, _corner, position);
         }
     }
 }

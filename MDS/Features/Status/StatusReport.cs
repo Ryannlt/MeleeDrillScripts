@@ -35,8 +35,7 @@ namespace MDS.Features.Status
 
         public string Summary()
         {
-            string arena = _arenas.Current == null ? "not set" : _arenas.Current.ToString();
-            return $"MDS: round {_round.Current.RoundId} on {_round.Current.MapName}. Arena {arena}. "
+            return $"MDS: round {_round.Current.RoundId} on {_round.Current.MapName}. {_arenas.Describe()} "
                 + $"{_players.Attacking.Count} attacking, {_players.Defending.Count} defending, {_players.Spectating.Count} spectating.";
         }
 

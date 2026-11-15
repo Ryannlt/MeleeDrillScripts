@@ -9,6 +9,9 @@ namespace MDS.Features.Drills
 {
     public sealed class Teleporter
     {
+        // Under a ceiling over the spawn, above the spawn's own floor.
+        private const float Headroom = 2f;
+
         private readonly GameConsole _console;
         private readonly IGround _ground;
 
@@ -29,9 +32,13 @@ namespace MDS.Features.Drills
             return moved;
         }
 
-        public bool Move(int playerId, Vector2 spot)
+        public bool Move(int playerId, Vector2 spot) => MoveTo(playerId, spot, _ground.HeightAt(spot));
+
+        // Looking down from just above the spawn's floor finds that floor beside it, or the ground past the edge of a raised spawn.
+        public bool MoveNear(int playerId, Vector2 spot, float spawnY) => MoveTo(playerId, spot, _ground.HeightBelow(spot, spawnY + Headroom));
+
+        private bool MoveTo(int playerId, Vector2 spot, float y)
         {
-            float y = _ground.HeightAt(spot);
             return _console.Execute($"teleport {playerId} {Numbers.Coordinate(spot.x)},{Numbers.Coordinate(y)},{Numbers.Coordinate(spot.y)}");
         }
     }

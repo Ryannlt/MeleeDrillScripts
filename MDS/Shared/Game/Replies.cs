@@ -32,6 +32,9 @@ namespace MDS.Shared.Game
             _networking?.SendModMessageToPlayer(playerId, ReplyMessage, Encoding.UTF8.GetBytes(text));
         }
 
+        // Data for this mod's client half, which takes it by name through the ClientMessageRouter.
+        public void SendToClient(int playerId, string messageName, byte[] data) => _networking?.SendModMessageToPlayer(playerId, messageName, data);
+
         public void OnClientMessage(string messageName, byte[] data)
         {
             if (messageName == ReplyMessage && data != null) _log.Info(Encoding.UTF8.GetString(data));

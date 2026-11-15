@@ -3,6 +3,7 @@ using System;
 namespace MDS.Features.Drills
 {
     // A bare token fills the first empty slot that accepts it, so the old positional form and words in any order both work.
+    // Every drill also takes arena=N.
     public sealed class DrillSyntax
     {
         private const char NameSeparator = '=';
@@ -14,7 +15,9 @@ namespace MDS.Features.Drills
         {
             Usage = usage;
             _required = required;
-            _slots = slots;
+            _slots = new DrillOption[slots.Length + 1];
+            slots.CopyTo(_slots, 0);
+            _slots[slots.Length] = DrillOption.Arena;
         }
 
         public string Usage { get; }
@@ -51,7 +54,7 @@ namespace MDS.Features.Drills
             error = string.Empty;
             foreach (DrillOption slot in _slots)
             {
-                if (options.Has(slot) || !DrillOptionValues.Accepts(slot, token)) continue;
+                if (options.Has(slot) || DrillOptionValues.IsNamedOnly(slot) || !DrillOptionValues.Accepts(slot, token)) continue;
 
                 options.Set(slot, token);
                 return true;

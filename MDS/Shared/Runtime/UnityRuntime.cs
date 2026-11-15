@@ -12,6 +12,8 @@ namespace MDS.Shared.Runtime
 
         public IGround CreateGround(ModLog log) => new TerrainGround(log);
 
+        public IOverlayDrawer CreateOverlayDrawer(ModLog log) => new UnityOverlayDrawer(log);
+
         public Random CreateRandom() => new Random();
     }
 }
