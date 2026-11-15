@@ -1,287 +1,165 @@
 # MDS (Melee Drill Scripts)
 
-*A utility mod with commands and scripts to assist, enhance, and automate melee drills in **Holdfast: Nations At War***
+*Commands and scripts to run and automate melee drills in **Holdfast: Nations At War***
 
 ---
 
 ## Command Quick Reference
 
-Prefix all commands with `rc` and run as a logged-in server admin.
-
-**Arena**
+Run every command as a logged-in server admin, prefixed with `rc`.
 
 ```
-rc set ArenaCorner1
-rc set ArenaCorner2
-```
-
-With coordinates: `rc set ArenaCorner1 [x,z]`, `rc set ArenaCorner2 [x,z]`
-
-**Drills**
-
-```
-rc 3v3
+rc arena corner1
+rc arena corner2
+rc xvx 3 3
+rc xvx 3 3 eastwest spacing=1
 rc groupfight
-rc openmelee 2 7
-```
-
-**Runtime Config**
-
-```
-rc get xvxDistance
-rc get Players all
-rc set xvxDistance 5
+rc openmelee
+rc shootingTraining
+rc mds
 ```
 
 ---
 
-## Overview
+## Quick Start
 
-MDS tracks round and player state to run custom drills and utility commands. Use standard `rc` commands and **modded config variables** to tailor drills to your server's needs.
+1. Set the arena. Stand in one corner and run `rc arena corner1`, then stand in the opposite corner and run `rc arena corner2`. Or put `mod_variable_local MDS:Arena:(x,z),(x,z)` in the map's rotation.
+2. Run a drill: `rc xvx 3 3`, `rc groupfight` or `rc openmelee`.
+3. For bots, load CarbonPlayer AI next to MDS. See [Bots](#bots).
 
----
-
-## Quick Start (In‑Game)
-
-1. **Set the arena corners** (use your current position if no coords given):
-
-   ```
-   rc set ArenaCorner1
-   rc set ArenaCorner2
-   ```
-2. **Run a drill** (examples):
-
-   ```
-   rc 3v3
-   rc groupfight
-   rc openmelee 2 7
-   ```
-3. **Add bots** by loading CarbonPlayer AI next to MDS. See **[Bots](#bots)**.
-
-> Commands are **case‑insensitive**. Arguments in `<>` are required; `[ ]` are optional.
+Commands and keys are not case sensitive.
 
 ---
 
-## Arena
+## Commands
 
-All drills require a rectangular **arena** defined by two corner points *(x,z)*.
+| Command | What it does |
+| --- | --- |
+| `rc mds` | Shows the round, the arena and how many players are on each side |
+| `rc mds round` | Shows the round, the map, the mode and both factions |
+| `rc mds players [all\|attacking\|defending\|spectator] [count]` | Lists the players in a group in your F2 log. With `count`, replies with the number only |
+| `rc mds player <id>` | Shows one player: name, admin, faction, alive, position |
+| `rc arena` | Shows the arena |
+| `rc arena corner1 [x z]` | Sets the first corner. Without coordinates it uses where you stand |
+| `rc arena corner2 [x z]` | Sets the opposite corner |
+| `rc xvx <attackers> <defenders> [options]` | Places two lines of picked players facing each other across the arena center |
+| `rc groupfight [options]` | Places each whole team in a line, facing the other |
+| `rc openmelee [options]` | Counts down 3, 2, 1, then scatters everyone on the field across the arena |
+| `rc shootingTraining [on\|off]` | Turns infinite firearm ammo and drawn bullet paths on or off for the current map. With no argument it switches to the other state |
+| `rc get <key>` / `rc set <key> <value>` | Reads or changes a [setting](#settings) |
 
-* **Config variable:**
+## Drill Options
 
-  * `mod_variable MDS:SetArena:(x,z),(x,z)`
-* **Runtime via `rc`:**
+Options can be given in order, by name, or both. A strategy or facing word can go anywhere.
 
-  * `rc set ArenaCorner1 [x,z]` *(uses player pos if none given)*
-  * `rc set ArenaCorner2 [x,z]` *(uses player pos if none given)*
+```
+rc xvx 3 3 next 4 1 northsouth
+rc xvx 3 3 eastwest spacing=1
+rc xvx 5 2 any distance=12
+rc groupfight repeat spacing=1.5
+rc groupfight 25
+rc openmelee spacing=2 offset=3
+```
 
----
+| Drill | Options in order |
+| --- | --- |
+| `xvx` | attackers, defenders, strategy, distance, spacing, facing |
+| `groupfight` | strategy, distance, spacing, facing |
+| `openmelee` | spacing, offset |
 
-## Available Commands
+| Option | Value | Meaning |
+| --- | --- | --- |
+| `attackers`, `defenders` | whole number | Players on each line |
+| `strategy` | see below | How players are picked |
+| `distance` | meters | Distance between the two lines |
+| `spacing` | meters | Distance between neighbors on a line. For `openmelee`, the least distance between any two players |
+| `facing` | `NorthSouth`, `EastWest`, `SouthNorth`, `WestEast`, `Random` or 0 to 359 | Compass direction from the attackers' line to the defenders' |
+| `offset` | meters | How far in from the arena edges `openmelee` keeps everyone |
 
-All commands must be prefixed with `rc` and require admin.
+Any option left out uses its setting.
 
-### `xvx`
+| Strategy | Drills | Picks |
+| --- | --- | --- |
+| `Random` | xvx, groupfight | Each side at random from its own team |
+| `Any` | xvx | At random from everyone on the field, whatever their team |
+| `Next` | xvx | The next players in each team's order, carrying on from the last drill |
+| `Repeat` | xvx, groupfight | The same players as that drill's last run this round |
 
-**Usage:** `rc xvx <attacking:int> <defending:int> [strategy] [distance:float] [spacing:float] [orientation]`
+## Settings
 
-* Spawns an X‑v‑X match inside the arena using the selected strategy and parameters.
-* Shorthand calls are supported using defaults. e.g. `rc 3v2`, `rc 20v1`.
-* **Defaults (configurable):** `xvxStrategy`, `xvxDistance`, `xvxSpacing`
-* **Examples:**
+Each setting is changed with `rc set`, read with `rc get`, and can be set from the server config under the same name with the `MDS:` prefix.
 
-  ```
-  rc xvx 3 3 next 4 1 northsouth
-  rc 3v3
-  ```
+| Key | Default | Value |
+| --- | --- | --- |
+| `xvxDistance` | 20 | meters |
+| `xvxSpacing` | 2 | meters |
+| `xvxStrategy` | Random | Random, Any, Next, Repeat |
+| `groupfightDistance` | 25 | meters |
+| `groupfightSpacing` | 2 | meters |
+| `groupfightStrategy` | Random | Random, Repeat |
+| `openMeleeSpacing` | 1.5 | meters |
+| `openMeleeOffset` | 2 | meters |
+| `DrillOrientation` | NorthSouth | a facing |
+| `MDSDebugLogging` | false | true, false |
 
-### `groupfight`
+The defaults are tuned for Palisade Arena A1.
 
-**Usage:** `rc groupfight [strategy] [distance:float] [spacing:float] [orientation]`
+## Config Variables
 
-* Spawns both teams in lines for a groupfight inside the arena.
-* **Defaults (configurable):** `groupfightStrategy`, `groupfightDistance`, `groupfightSpacing`
-* **Examples:**
+Use `mod_variable` for every map or `mod_variable_local` inside a map rotation. Format: `MDS:<Key>:<Value>`.
 
-  ```
-  rc groupfight random 25 2 180
-  rc groupfight
-  ```
+| Key | Value |
+| --- | --- |
+| `EnableDebugLogging` | `true` or `false` |
+| `Arena` | `(x,z),(x,z)` |
+| `AddArena` | `(x,z),(x,z)`, an extra arena after the first |
+| `ArenaCorner1`, `ArenaCorner2` | `x,z` |
+| any key from [Settings](#settings) except `MDSDebugLogging` | as in the table |
 
-### `openmelee`
+```text
+mod_variable MDS:EnableDebugLogging:true
 
-**Usage:** `rc openmelee [spacing:float] [offset:float]`
-
-* Spawns players randomly around the arena to simulate an open melee.
-* **Defaults (configurable):** `openMeleeSpacing`, `openMeleeOffset`
-* **Examples:**
-
-  ```
-  rc openmelee 2 7
-  rc openmelee
-  ```
-
-### `shootingTraining`
-
-**Usage:** `rc shootingTraining`
-
-* Toggle. Turns infinite firearm ammo and firearm trajectory lines on, and off again on the next call.
-* Takes no arguments. Replies with the new state.
-
-### `get`
-
-**Usage:** `rc get <Configurable> [additional arguments]`
-
-* Mirrors Holdfast's `rc get` to read **mod configurables** and **mod data** at runtime.
-* Additional mod data shortcuts:
-
-  ```
-  Player <playerId>
-  Players <faction> (Attacking|Defending|Spectator|All) [count]
-  Round
-  ```
-* **Examples:**
-
-  ```
-  rc get xvxDistance
-  rc get Players all
-  ```
-
-### `set`
-
-**Usage:** `rc set <Configurable> <Value> [additional arguments]`
-
-* Mirrors Holdfast's `rc set` to set **mod configurables** at runtime.
-* **Example:**
-
-  ```
-  rc set xvxDistance 5
-  ```
+# Map rotation
+mod_variable_local MDS:Arena:(-40.99,42.69),(-3.35,5.38)
+mod_variable_local MDS:XvXDistance:20
+mod_variable_local MDS:XvXSpacing:2
+mod_variable_local MDS:XvXStrategy:Random
+mod_variable_local MDS:GroupfightDistance:25
+mod_variable_local MDS:GroupfightSpacing:2
+mod_variable_local MDS:GroupfightStrategy:Random
+mod_variable_local MDS:OpenMeleeSpacing:1.5
+mod_variable_local MDS:OpenMeleeOffset:2
+mod_variable_local MDS:DrillOrientation:NorthSouth
+```
 
 ---
 
 ## Bots
 
-Bots live in their own mod, CarbonPlayer AI. Load it next to MDS to spawn and train against them. MDS sees its bots as ordinary players, so `xvx`, `groupfight` and `openmelee` move them like anyone else.
+Bots live in their own mod, CarbonPlayer AI. Load it next to MDS to train against them. MDS moves its bots like any other player.
 
-The `rc` commands kept their names and moved with the bots: `bot`, `summonLine`, `summonLineAt`, `spawnLine` and `meleelog`, plus the `rc set` and `rc get` keys `botDefaultAi`, `botDefaultDeathPolicy`, `botKickDelay`, `botReplaceDelay`, `globalAI`, `lineBotCount` and `lineSpacing`.
-
-Their config variables moved to the `CarbonPlayerAI:` prefix. For each of these, swap `MDS:` for `CarbonPlayerAI:` and keep the rest of the line: `EnableMeleeLog`, `SetBotDefaultAi`, `SetBotDefaultDeathPolicy`, `SetBotKickDelay`, `SetBotReplaceDelay`, `SetGlobalAi`, `SpawnBot`, `SetLineBotCount`, `SetLineSpacing` and `SpawnLine`. MDS logs `Unknown config command key` for any old line it still gets.
+CarbonPlayer AI owns `bot`, `summonLine`, `summonLineAt`, `spawnLine` and `meleelog`, the keys `botDefaultAi`, `botDefaultDeathPolicy`, `botKickDelay`, `botReplaceDelay`, `globalAI`, `lineBotCount` and `lineSpacing`, and every config variable with the `CarbonPlayerAI:` prefix.
 
 ---
 
-## Configurables
+## Changes From Earlier Versions
 
-*(Defaults shown are tuned for Palisade Arena A1.)*
+| Before | Now |
+| --- | --- |
+| `rc 3v3` | `rc xvx 3 3` |
+| `rc set ArenaCorner1 [x z]`, `rc set ArenaCorner2 [x z]` | `rc arena corner1 [x z]`, `rc arena corner2 [x z]` |
+| `rc get Round`, `rc get Player <id>`, `rc get Players ...` | `rc mds round`, `rc mds player <id>`, `rc mds players ...` |
+| `rc set Orientation` | `rc set DrillOrientation` |
+| `rc set DebugLogging` | `rc set MDSDebugLogging` |
+| `rc test` | removed |
+| `rc set AdminOnly`, `MDS:EnableAdminOnly` | removed. Every command is for admins |
+| `MDS:SetArena`, `MDS:SetXvXDistance` and the other `MDS:Set...` keys | `MDS:Arena`, `MDS:XvXDistance` and the rest without `Set` |
+| `openMeleeOffset` counted twice | counted once. Set it to 4 to keep the old spread |
 
-* **ArenaCorner1**: x,z coordinate of the 1st corner of the arena play area.
-
-  * **args:** `x z` (floats) or none (uses player position)
-  * **default:** Not set
-* **ArenaCorner2**: x,z coordinate of the 2nd corner of the arena play area.
-
-  * **args:** `x z` (floats) or none (uses player position)
-  * **default:** Not set
-* **xvxDistance**: Distance between attacking and defending faction lines for `xvx`.
-
-  * **args:** `distance (float)`
-  * **default:** `20`
-* **xvxSpacing**: Space between each player on a line for `xvx`.
-
-  * **args:** `distance (float)`
-  * **default:** `2`
-* **xvxStrategy**: Player selection strategy for `xvx`.
-
-  * **args:** `Random | Next | Any | Repeat`
-  * **default:** `Random`
-* **groupfightDistance**: Distance between attacking and defending faction lines for `groupfight`.
-
-  * **args:** `distance (float)`
-  * **default:** `25`
-* **groupfightSpacing**: Space between each player on a line for `groupfight`.
-
-  * **args:** `distance (float)`
-  * **default:** `2`
-* **groupfightStrategy**: Player selection strategy for `groupfight`.
-
-  * **args:** `Random | Repeat`
-  * **default:** `Random`
-* **openMeleeSpacing**: Minimum distance players can spawn from each other for `openmelee`.
-
-  * **args:** `distance (float)`
-  * **default:** `1.5`
-* **openMeleeOffset**: Minimum spawn distance from the arena edges in `openmelee`.
-
-  * **args:** `distance (float)`
-  * **default:** `7`
-* **Orientation**: Direction two lines spawn facing each other.
-
-  * **args:** `degree (int)` or `NorthSouth | EastWest | SouthNorth | WestEast | Random`
-  * **default:** `90` (NorthSouth)
-
----
-
-## Mod Config Variables
-
-Use **global** `mod_variable` or **per‑map** `mod_variable_local` to set MDS options in rotation configs.
-
-**Format:** `MDS:<ConfigVariable>:<Argument(s)>`
-
-### General
-
-* **EnableDebugLogging**: `true | false`
-* **EnableAdminOnly**: `true | false`
-
-### Arena
-
-* **SetArena**: `(x,z),(x,z)`
-* **AddArena**: `(x,z),(x,z)`
-* **SetArenaCorner1**: `x,z`
-* **SetArenaCorner2**: `x,z`
-
-### Drill
-
-* **SetXvXDistance**: `distance(float)`
-* **SetXvXSpacing**: `distance(float)`
-* **SetXvXStrategy**: `Random | Next | Any | Repeat`
-* **SetGroupfightDistance**: `distance(float)`
-* **SetGroupfightSpacing**: `distance(float)`
-* **SetGroupfightStrategy**: `Random | Repeat`
-* **SetOpenMeleeSpacing**: `distance(float)`
-* **SetOpenMeleeOffset**: `distance(float)`
-* **SetOrientation**: `degree(int)` **or** `NorthSouth | EastWest | SouthNorth | WestEast | Random`
-
----
-
-## Example Config
-
-```text
-# Global
-mod_variable MDS:EnableDebugLogging:true
-mod_variable MDS:EnableAdminOnly:true
-
-# Map Rotation (per‑map overrides)
-mod_variable_local MDS:SetArena:(-40.99,42.69),(-3.35,5.38)
-mod_variable_local MDS:SetXvXDistance:20
-mod_variable_local MDS:SetXvXSpacing:2
-mod_variable_local MDS:SetXvXStrategy:Random
-mod_variable_local MDS:SetGroupfightDistance:25
-mod_variable_local MDS:SetGroupfightSpacing:2
-mod_variable_local MDS:SetGroupfightStrategy:Random
-mod_variable_local MDS:SetOpenMeleeSpacing:1.5
-mod_variable_local MDS:SetOpenMeleeOffset:7
-mod_variable_local MDS:SetOrientation:NorthSouth
-```
-
----
-
-## Future Features
-
-* Automatic repeating drills with user customization
-* Modded UI
-* Multi-arena support
+MDS logs `Unknown config variable` for any old key it still gets.
 
 ---
 
 ## Support
 
-Feedback & bugs: open a GitHub issue or DM **@ryanlt** on Discord.
+Feedback and bugs: open a GitHub issue or DM **@ryanlt** on Discord.
