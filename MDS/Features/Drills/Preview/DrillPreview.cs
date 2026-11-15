@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
+using MDS.Features.Drills.Picking;
+using MDS.Features.Drills.Spawning;
 using UnityEngine;
 
 namespace MDS.Features.Drills.Preview
@@ -14,6 +17,12 @@ namespace MDS.Features.Drills.Preview
 
         // A random draw, which the drill makes again when it runs.
         public bool IsSample { get; set; }
+
+        // Each placed player's spot goes on their team's side.
+        public void AddSpots(Lineup field, SpawnPlan plan)
+        {
+            for (int i = 0; i < plan.Players.Count; i++) (field.Attackers.Contains(plan.Players[i]) ? Attackers : Defenders).Add(plan.Spots[i]);
+        }
 
         // What the reply adds after the drill's name, such as the spawn strategy drawn.
         public string Detail { get; set; } = string.Empty;

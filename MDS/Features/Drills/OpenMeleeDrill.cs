@@ -1,39 +1,26 @@
-using System.Collections;
-using System.Collections.Generic;
 using MDS.Features.Arenas;
-using System.Linq;
 using MDS.Features.Drills.Picking;
 using MDS.Features.Drills.Preview;
 using MDS.Features.Drills.Spawning;
 using MDS.Shared;
 using MDS.Shared.Game;
-using MDS.Shared.Players;
 using UnityEngine;
 
 namespace MDS.Features.Drills
 {
     public sealed class OpenMeleeDrill : IDrill
     {
-        private const int CountdownSeconds = 3;
-        private const float CountdownStepSeconds = 1f;
+        private const string Title = "Open Melee";
         private const float GodModeAfterMoveSeconds = 2f;
 
-        // About a player's width.
-        // Below it players would stand inside each other.
-        private const float MinimumSpacing = 0.5f;
-
-        // A random layout near the arena's capacity can come up short, so a few are drawn and the fullest kept.
-        private const int PlanAttempts = 5;
-
         private readonly DrillKit _kit;
-        private readonly Routines _routines;
+        private readonly DrillCountdown _countdown;
         private readonly SpawnPatterns _patterns;
-        private Routine _running;
 
-        public OpenMeleeDrill(DrillKit kit, Routines routines)
+        public OpenMeleeDrill(DrillKit kit, DrillCountdown countdown)
         {
             _kit = kit;
-            _routines = routines;
+            _countdown = countdown;
             _patterns = new SpawnPatterns(kit.Random);
         }
 
@@ -60,11 +47,12 @@ namespace MDS.Features.Drills
         {
             run = null;
             SpawnRequest request = RequestFor(options);
-            error = _running != null && !_running.IsFinished ? "An open melee is already counting down." : Refusal(request, out _);
+            error = _countdown.IsRunning ? _countdown.Busy : Refusal(request, out _);
             if (error.Length > 0) return false;
 
-            run = new DrillRun(Name, _kit.ArenaFor(options));
-            _running = _routines.Start(Run(run, request), "open melee");
+            DrillRun started = new DrillRun(Name, _kit.ArenaFor(options));
+            _countdown.Start(Title, () => Place(started, request), GodModeAfterMoveSeconds);
+            run = started;
             return true;
         }
 
@@ -75,20 +63,12 @@ namespace MDS.Features.Drills
             error = Refusal(request, out SpawnPlan plan);
             if (error.Length > 0) return false;
 
-            preview = PreviewOf(Field(_kit.Players), plan, request);
+            preview = new DrillPreview { Area = request.Area, IsSample = true, Detail = NameOf(request.Strategy) };
+            preview.AddSpots(_kit.Field(), plan);
             return true;
         }
 
-        private static Lineup Field(PlayerRegistry players) => new Lineup(new List<IPlayer>(players.Attacking), new List<IPlayer>(players.Defending));
-
         private static string NameOf(SpawnStrategy strategy) => strategy.ToString().ToLowerInvariant();
-
-        private static DrillPreview PreviewOf(Lineup field, SpawnPlan plan, SpawnRequest request)
-        {
-            var preview = new DrillPreview { Area = request.Area, IsSample = true, Detail = NameOf(request.Strategy) };
-            for (int i = 0; i < plan.Players.Count; i++) (field.Attackers.Contains(plan.Players[i]) ? preview.Attackers : preview.Defenders).Add(plan.Spots[i]);
-            return preview;
-        }
 
         private SpawnRequest RequestFor(DrillOptions options)
         {
@@ -109,33 +89,19 @@ namespace MDS.Features.Drills
             plan = new SpawnPlan();
             int players = _kit.Players.Attacking.Count + _kit.Players.Defending.Count;
             if (players == 0) return "Nobody is on the field for an open melee.";
-            if (request.Spacing < MinimumSpacing) return $"Spacing must be at least {Numbers.Format(MinimumSpacing)} m.";
+            if (request.Spacing < DrillKit.MinimumSpacing) return $"Spacing must be at least {Numbers.Format(DrillKit.MinimumSpacing)} m.";
             // Qualified, since the offline checker would otherwise bind the stale MDS.Features.Drills.PoissonGrid in HBox's last editor build.
             if (!Spawning.PoissonGrid.Fits(request.Area, request.Spacing)) return "The arena is too big for that spacing.";
 
-            if (request.Area.width > 0f) plan = FullestPlan(Field(_kit.Players), request);
+            if (request.Area.width > 0f) plan = FullestPlan(_kit.Field(), request);
             if (plan.Spots.Count >= players) return string.Empty;
 
             return $"The arena has room for {plan.Spots.Count} of {players} players {Numbers.Format(request.Spacing)} m apart and {Numbers.Format(request.Offset)} m in from the edges.";
         }
 
-        private IEnumerator Run(DrillRun run, SpawnRequest request)
-        {
-            for (int left = CountdownSeconds; left > 0; left--)
-            {
-                _kit.Console.Execute(left == CountdownSeconds ? $"broadcast Open Melee starting in {left}..." : $"broadcast {left}...");
-                yield return Routines.Wait(CountdownStepSeconds);
-            }
-
-            _kit.Console.ExecuteForCurrentRound("set characterGodMode true");
-            Place(run, request);
-            yield return Routines.Wait(GodModeAfterMoveSeconds);
-            _kit.Console.ExecuteForCurrentRound("set characterGodMode false");
-        }
-
         private void Place(DrillRun run, SpawnRequest request)
         {
-            Lineup field = Field(_kit.Players);
+            Lineup field = _kit.Field();
             SpawnPlan plan = FullestPlan(field, request);
             int moved = _kit.Teleporter.MoveAll(plan.Players, plan.Spots);
             run.Placed(field, plan.Spots);
@@ -146,13 +112,7 @@ namespace MDS.Features.Drills
         private SpawnPlan FullestPlan(Lineup field, SpawnRequest request)
         {
             ISpawnPattern pattern = _patterns.For(request.Strategy);
-            SpawnPlan fullest = pattern.Plan(field, request);
-            for (int attempt = 1; attempt < PlanAttempts && !fullest.PlacesEveryone; attempt++)
-            {
-                SpawnPlan next = pattern.Plan(field, request);
-                if (next.Spots.Count > fullest.Spots.Count) fullest = next;
-            }
-            return fullest;
+            return SpawnPlan.Fullest(() => pattern.Plan(field, request));
         }
     }
 }

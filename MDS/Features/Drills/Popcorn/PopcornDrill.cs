@@ -1,0 +1,131 @@
+using System.Collections.Generic;
+using System.Linq;
+using MDS.Features.Drills.Picking;
+using MDS.Features.Drills.Preview;
+using MDS.Features.Drills.Spawning;
+using MDS.Shared;
+
+namespace MDS.Features.Drills.Popcorn
+{
+    public sealed class PopcornDrill : IDrill
+    {
+        private const string Title = "Popcorn";
+
+        // Just long enough that nobody is hit as the fights land.
+        private const float GodModeAfterMoveSeconds = 1f;
+
+        private readonly DrillKit _kit;
+        private readonly DrillCountdown _countdown;
+        private readonly PopcornFights _fights;
+        private readonly PopcornLayout _layout;
+
+        public PopcornDrill(DrillKit kit, DrillCountdown countdown)
+        {
+            _kit = kit;
+            _countdown = countdown;
+            _fights = new PopcornFights(kit.Random);
+            _layout = new PopcornLayout(kit.Random);
+        }
+
+        public string Name => "popcorn";
+
+        public DrillSyntax Syntax { get; } = new DrillSyntax(
+            "Usage: rc popcorn [scatter|spread|tight|random] [min] [max] [distance] [lineDistance] [spacing] [arena=N], or by name: strategy=tight min=2v1 max=5v5 distance=10",
+            0, DrillOption.Layout, DrillOption.Min, DrillOption.Max, DrillOption.Distance, DrillOption.LineDistance, DrillOption.Spacing);
+
+        // Everyone on the field fights.
+        public bool ClearsLeftovers => false;
+
+        public bool Validate(DrillOptions options, out string error)
+        {
+            if (!_kit.HasArena(options, out error)) return false;
+
+            PopcornRequest request = RequestFor(options);
+            if (request.Smallest.Total > request.Largest.Total) error = $"The smallest fight ({request.Smallest}) is bigger than the largest ({request.Largest}).";
+            else if (IsTooTight(request)) error = $"distance, lineDistance and spacing must each be at least {Numbers.Format(DrillKit.MinimumSpacing)} m.";
+            else if (_kit.Players.Attacking.Count == 0 || _kit.Players.Defending.Count == 0) error = "Both teams need players for popcorn.";
+            return error.Length == 0;
+        }
+
+        // The fights are dealt again at the move, for whoever is on the field by then.
+        public bool TryStart(DrillOptions options, out DrillRun run, out string error)
+        {
+            run = null;
+            PopcornRequest request = RequestFor(options);
+            if (_countdown.IsRunning) error = _countdown.Busy;
+            else TryDraw(request, out _, out error);
+            if (error.Length > 0) return false;
+
+            DrillRun started = new DrillRun(Name, _kit.ArenaFor(options));
+            _countdown.Start(Title, () => Place(started, request), GodModeAfterMoveSeconds);
+            run = started;
+            return true;
+        }
+
+        public bool TryPreview(DrillOptions options, out DrillPreview preview, out string error)
+        {
+            preview = null;
+            if (!TryDraw(RequestFor(options), out Draw draw, out error)) return false;
+
+            preview = new DrillPreview { IsSample = true, Detail = $"{draw.LayoutName}, {draw.Fights.Count} fights: {draw.Sizes}" };
+            preview.AddSpots(_kit.Field(), draw.Plan);
+            return true;
+        }
+
+        private static bool IsTooTight(PopcornRequest request)
+        {
+            return request.Distance < DrillKit.MinimumSpacing || request.LineDistance < DrillKit.MinimumSpacing || request.Spacing < DrillKit.MinimumSpacing;
+        }
+
+        private void Place(DrillRun run, PopcornRequest request)
+        {
+            TryDraw(request, out Draw draw, out string error);
+            int moved = _kit.Teleporter.MoveAll(draw.Plan.Players, draw.Plan.Spots);
+            run.Placed(_kit.Field(), draw.Plan.Spots);
+            _kit.Log.Info($"popcorn ({draw.LayoutName}) in arena {run.Arena.Number}: {draw.Fights.Count} fights ({draw.Sizes}); {moved} of {draw.Plan.Total} moved.");
+            if (error.Length > 0) _kit.Log.Warning($"popcorn: {error} The rest stay where they are.");
+        }
+
+        private bool TryDraw(PopcornRequest request, out Draw draw, out string error)
+        {
+            List<Lineup> fights = _fights.Deal(_kit.Field(), request.Smallest, request.Largest);
+            SpawnPlan plan = SpawnPlan.Fullest(() => _layout.Place(fights, request));
+
+            draw = new Draw(fights, plan, request.Layout);
+            error = plan.PlacesEveryone ? string.Empty : $"The arena has room for {plan.Spots.Count} of {plan.Total} players in {fights.Count} fights: lower distance, lineDistance or spacing, or use a bigger arena.";
+            return error.Length == 0;
+        }
+
+        private PopcornRequest RequestFor(DrillOptions options)
+        {
+            return new PopcornRequest
+            {
+                Layout = _layout.Resolve(options.GetFightLayout(_kit.Settings.PopcornStrategy.Value)),
+                Smallest = options.GetFightSize(DrillOption.Min, _kit.Settings.PopcornMin.Value),
+                Largest = options.GetFightSize(DrillOption.Max, _kit.Settings.PopcornMax.Value),
+                Area = _kit.ArenaFor(options).Bounds,
+                Distance = options.GetNumber(DrillOption.Distance, _kit.Settings.PopcornDistance.Value),
+                LineDistance = options.GetNumber(DrillOption.LineDistance, _kit.Settings.PopcornLineDistance.Value),
+                Spacing = options.GetNumber(DrillOption.Spacing, _kit.Settings.PopcornSpacing.Value),
+            };
+        }
+
+        private sealed class Draw
+        {
+            public Draw(List<Lineup> fights, SpawnPlan plan, FightLayout layout)
+            {
+                Fights = fights;
+                Plan = plan;
+                LayoutName = layout.ToString().ToLowerInvariant();
+            }
+
+            public string LayoutName { get; }
+
+            public List<Lineup> Fights { get; }
+
+            public SpawnPlan Plan { get; }
+
+            public string Sizes => string.Join(", ", Fights.Select(fight => $"{fight.Attackers.Count}v{fight.Defenders.Count}"));
+        }
+    }
+}

@@ -7,7 +7,7 @@ namespace MDS.Features.Drills.Preview
 {
     public sealed class PreviewCommand : IConsoleCommand
     {
-        public const string Usage = "Usage: rc preview <xvx|groupfight|openmelee> [its options], or rc preview off";
+        public const string Usage = "Usage: rc preview <xvx|groupfight|openmelee|popcorn> [its options], or rc preview off";
 
         private const string Off = "off";
 

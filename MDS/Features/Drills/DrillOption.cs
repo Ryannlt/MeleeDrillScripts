@@ -1,5 +1,6 @@
 using MDS.Features.Arenas;
 using MDS.Features.Drills.Picking;
+using MDS.Features.Drills.Popcorn;
 using MDS.Features.Drills.Spawning;
 using MDS.Shared;
 
@@ -15,7 +16,11 @@ namespace MDS.Features.Drills
         Facing,
         Offset,
         Arena,
-        Spawn
+        Spawn,
+        Min,
+        Max,
+        LineDistance,
+        Layout
     }
 
     public static class DrillOptionValues
@@ -33,6 +38,11 @@ namespace MDS.Features.Drills
                     return EnumParser.TryParseStrict(text, out PickStrategy _);
                 case DrillOption.Spawn:
                     return EnumParser.TryParseStrict(text, out SpawnStrategy _);
+                case DrillOption.Layout:
+                    return EnumParser.TryParseStrict(text, out FightLayout _);
+                case DrillOption.Min:
+                case DrillOption.Max:
+                    return FightSize.TryParse(text, out _);
                 case DrillOption.Facing:
                     return Facing.TryParse(text, out _);
                 case DrillOption.Offset:
@@ -43,10 +53,7 @@ namespace MDS.Features.Drills
             }
         }
 
-        // A bare number already means a count, a distance or a spacing, so the arena is only ever given by name.
-        public static bool IsNamedOnly(DrillOption option) => option == DrillOption.Arena;
-
-        // A drill takes either a pick or a spawn strategy, never both, so they share the name.
-        public static string KeyOf(DrillOption option) => option == DrillOption.Spawn ? KeyOf(DrillOption.Strategy) : option.ToString().ToLowerInvariant();
+        // A drill takes one kind of strategy (picks, spawns or fight layout), never two, so they share the name.
+        public static string KeyOf(DrillOption option) => option == DrillOption.Spawn || option == DrillOption.Layout ? KeyOf(DrillOption.Strategy) : option.ToString().ToLowerInvariant();
     }
 }

@@ -14,6 +14,10 @@ namespace MDS.Features.Drills
 {
     public sealed class DrillKit
     {
+        // About a player's width.
+        // Below it players would stand inside each other.
+        public const float MinimumSpacing = 0.5f;
+
         public DrillKit(ModContext context, ArenaStore arenas, DrillSettings settings)
         {
             Arenas = arenas;
@@ -44,6 +48,8 @@ namespace MDS.Features.Drills
         public System.Random Random { get; }
 
         public Teleporter Teleporter { get; }
+
+        public Lineup Field() => new Lineup(new List<IPlayer>(Players.Attacking), new List<IPlayer>(Players.Defending));
 
         public bool HasArena(DrillOptions options, out string error) => Arenas.TryGetUsable(options.GetArena(), out _, out error);
 

@@ -19,9 +19,10 @@ namespace MDS.Features.Drills.Spawning
             _random = random;
         }
 
+        // No spots when the grid for that spacing over the area would be too large to build.
         public List<Vector2> Generate(SpotArea area, float spacing, int count)
         {
-            if (count <= 0 || !area.TryDraw(_random, out Vector2 first)) return new List<Vector2>();
+            if (count <= 0 || !PoissonGrid.Fits(area.Bounds, spacing) || !area.TryDraw(_random, out Vector2 first)) return new List<Vector2>();
 
             float reach = Mathf.Max(spacing, (area.Bounds.width + area.Bounds.height) * ReachPerAreaSize);
             var grid = new PoissonGrid(area, spacing, reach);

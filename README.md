@@ -19,6 +19,9 @@ rc xvx 3 3 eastwest spacing=1
 rc groupfight
 rc openmelee
 rc openmelee spread
+rc popcorn
+rc popcorn 2v2 4v4 distance=12
+rc popcorn tight
 rc preview openmelee groups
 rc shootingTraining
 rc mds
@@ -53,6 +56,7 @@ Commands and keys are not case sensitive.
 | `rc xvx <attackers> <defenders> [options]` | Places two lines of picked players facing each other across the arena center. Anyone else standing where the lines go is sent back to their spawn |
 | `rc groupfight [options]` | Places each whole team in a line, facing the other |
 | `rc openmelee [options]` | Counts down 3, 2, 1, then places everyone on the field across the arena with a [spawn strategy](#open-melee-strategies) |
+| `rc popcorn [options]` | Counts down 3, 2, 1, then splits both teams into small fights of mixed sizes across the arena. See [Popcorn](#popcorn) |
 | `rc preview <drill> [options]` | Shows where a drill would put players, without moving anyone: yellow rings for attackers, cyan for defenders, and a white border round the area `openmelee` draws from. Only you see it. Open melee and a random facing draw again when the drill runs, so this is one sample. It stays until the next preview |
 | `rc preview off` | Clears the preview |
 | `rc shootingTraining [on\|off]` | Turns infinite firearm ammo and drawn bullet paths on or off for the current map. With no argument it switches to the other state |
@@ -83,18 +87,21 @@ rc xvx 2 2 arena=3
 | `xvx` | attackers, defenders, strategy, distance, spacing, facing |
 | `groupfight` | strategy, distance, spacing, facing |
 | `openmelee` | strategy, spacing, offset, facing |
+| `popcorn` | strategy, min, max, distance, lineDistance, spacing |
 
-Every drill also takes `arena=<n>`, by name only. Without it the drill runs in arena 1.
+Every drill also takes `arena=<n>`. Without it the drill runs in arena 1. A whole number after every other option also sets the arena, so `rc xvx 3 3 random 20 2 northsouth 2` runs in arena 2, but `rc xvx 3 3 2` sets the distance.
 
 | Option | Value | Meaning |
 | --- | --- | --- |
 | `attackers`, `defenders` | whole number | Players on each line |
-| `strategy` | see below | How players are picked. For `openmelee`, how they are spread over the arena |
-| `distance` | meters | Distance between the two lines |
+| `strategy` | see below | How players are picked. For `openmelee`, how they are spread over the arena. For `popcorn`, how the fights are |
+| `distance` | meters | Distance between the two lines. For `popcorn`, the least distance between players of different fights |
 | `spacing` | meters | Distance between neighbors on a line. For `openmelee`, the least distance between any two players, at least 0.5. With `groups`, the least distance between players of different groups |
 | `facing` | `NorthSouth`, `EastWest`, `SouthNorth`, `WestEast`, `Random` (or `-1`) or 0 to 359 | Compass direction from the attackers' line to the defenders'. For `openmelee teams`, from the attackers' half to the defenders' |
 | `offset` | meters, 0 or more | How far in from the arena edges `openmelee` keeps everyone. 0 uses the arena edge to edge |
 | `arena` | an arena number | The arena the drill runs in |
+| `min`, `max` | attackers v defenders, such as `2v1` | The smallest and largest `popcorn` fight. Only the total counts |
+| `lineDistance` | meters | Distance between a `popcorn` fight's two lines |
 
 Any option left out uses its setting.
 
@@ -117,6 +124,24 @@ Any option left out uses its setting.
 
 A bare `random` after `rc openmelee` picks the Random strategy. For a random facing, write `facing=random`.
 
+### Popcorn
+
+`rc popcorn` counts down 3, 2, 1, then deals both teams into fights and places every fight as two short lines facing each other, each turned a random way. God mode is on for a second as the fights land. Only one countdown drill runs at a time, so `rc openmelee` and `rc popcorn` wait for each other.
+
+1. Each fight draws a size between `min` and `max` and splits it as evenly as it can: 2v1, 2v2, 3v2 and so on. Small fights are common and each player more makes a fight rarer, and about two fights in three are uneven. With 2v1 to 4v4 on a 10v10 field, about 43% are 2v1, 32% 2v2, 16% 3v2, 5% 3v3, 4% 4v3 and 1% 4v4. The odd player goes to the team with more players left.
+2. Fights are drawn until no fight fits the players left. They join an even fight or one where their side is behind, even past `max`, so everyone on the field fights.
+3. Set `max` to suit the server: 4v4 suits 10v10 and under, and a bigger field can take 5v5.
+4. Fights stand at least `distance` apart and wholly inside the arena. If the arena has no room for them all, the drill is refused and says so.
+
+| Strategy | Places the fights |
+| --- | --- |
+| `Scatter` | In uneven clumps grown from one random spot |
+| `Spread` | Evenly over the whole arena, as far apart as the count allows. The default |
+| `Tight` | Packed together around a random spot, as close as `distance` allows |
+| `Random` | One of the three above, drawn again each run |
+
+`rc preview popcorn` shows one draw and names the strategy and the fight sizes.
+
 ## Settings
 
 Each setting is changed with `rc set`, read with `rc get`, and can be set from the server config under the same name with the `MDS:` prefix.
@@ -132,6 +157,12 @@ Each setting is changed with `rc set`, read with `rc get`, and can be set from t
 | `openMeleeSpacing` | 1.5 | meters |
 | `openMeleeOffset` | 2 | meters, 0 or more |
 | `openMeleeStrategy` | Scatter | Scatter, Spread, Groups, Teams, Random |
+| `popcornMin` | 2v1 | attackers v defenders |
+| `popcornMax` | 4v4 | attackers v defenders |
+| `popcornDistance` | 6 | meters |
+| `popcornLineDistance` | 6 | meters |
+| `popcornSpacing` | 2 | meters |
+| `popcornStrategy` | Spread | Scatter, Spread, Tight, Random |
 | `DrillOrientation` | NorthSouth | a facing |
 | `MDSDebugLogging` | false | true, false |
 
@@ -163,6 +194,12 @@ mod_variable_local MDS:GroupfightStrategy:Random
 mod_variable_local MDS:OpenMeleeSpacing:1.5
 mod_variable_local MDS:OpenMeleeOffset:2
 mod_variable_local MDS:OpenMeleeStrategy:Scatter
+mod_variable_local MDS:PopcornMin:2v1
+mod_variable_local MDS:PopcornMax:4v4
+mod_variable_local MDS:PopcornDistance:6
+mod_variable_local MDS:PopcornLineDistance:6
+mod_variable_local MDS:PopcornSpacing:2
+mod_variable_local MDS:PopcornStrategy:Spread
 mod_variable_local MDS:DrillOrientation:NorthSouth
 ```
 

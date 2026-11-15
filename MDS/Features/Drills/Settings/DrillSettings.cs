@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MDS.Features.Drills.Picking;
+using MDS.Features.Drills.Popcorn;
 using MDS.Shared.Config;
 using MDS.Shared.Game;
 using MDS.Shared.Settings;
@@ -14,6 +15,10 @@ namespace MDS.Features.Drills.Settings
         private const float LineSpacingDefault = 2f;
         private const float OpenMeleeSpacingDefault = 1.5f;
         private const float OpenMeleeOffsetDefault = 2f;
+        private const float PopcornDistanceDefault = 6f;
+        private const float PopcornLineDistanceDefault = 6f;
+        private static readonly FightSize PopcornMinDefault = new FightSize(2, 1);
+        private static readonly FightSize PopcornMaxDefault = new FightSize(4, 4);
 
         public DrillSettings(Replies replies, Selection xvx, Selection groupfight)
         {
@@ -26,6 +31,12 @@ namespace MDS.Features.Drills.Settings
             OpenMeleeSpacing = new NumberSetting("openMeleeSpacing", OpenMeleeSpacingDefault, replies);
             OpenMeleeOffset = new OffsetSetting("openMeleeOffset", OpenMeleeOffsetDefault, replies);
             OpenMeleeStrategy = new SpawnStrategySetting("openMeleeStrategy", replies);
+            PopcornMin = new FightSizeSetting("popcornMin", PopcornMinDefault, replies);
+            PopcornMax = new FightSizeSetting("popcornMax", PopcornMaxDefault, replies);
+            PopcornDistance = new NumberSetting("popcornDistance", PopcornDistanceDefault, replies);
+            PopcornLineDistance = new NumberSetting("popcornLineDistance", PopcornLineDistanceDefault, replies);
+            PopcornSpacing = new NumberSetting("popcornSpacing", LineSpacingDefault, replies);
+            PopcornStrategy = new FightLayoutSetting("popcornStrategy", replies);
             Orientation = new FacingSetting(replies);
         }
 
@@ -47,6 +58,18 @@ namespace MDS.Features.Drills.Settings
 
         public SpawnStrategySetting OpenMeleeStrategy { get; }
 
+        public FightSizeSetting PopcornMin { get; }
+
+        public FightSizeSetting PopcornMax { get; }
+
+        public NumberSetting PopcornDistance { get; }
+
+        public NumberSetting PopcornLineDistance { get; }
+
+        public NumberSetting PopcornSpacing { get; }
+
+        public FightLayoutSetting PopcornStrategy { get; }
+
         public FacingSetting Orientation { get; }
 
         public void RegisterWith(SettingsRegistry settings, ConfigRouter config)
@@ -63,7 +86,8 @@ namespace MDS.Features.Drills.Settings
             return new ISetting[]
             {
                 XvXDistance, XvXSpacing, XvXStrategy, GroupfightDistance, GroupfightSpacing, GroupfightStrategy,
-                OpenMeleeSpacing, OpenMeleeOffset, OpenMeleeStrategy, Orientation,
+                OpenMeleeSpacing, OpenMeleeOffset, OpenMeleeStrategy, PopcornMin, PopcornMax, PopcornDistance, PopcornLineDistance, PopcornSpacing,
+                PopcornStrategy, Orientation,
             };
         }
     }

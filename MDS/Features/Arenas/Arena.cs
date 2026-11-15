@@ -26,6 +26,8 @@ namespace MDS.Features.Arenas
 
         public Vector2 Center => Vector2.Lerp(Corner1, Corner2, Midway);
 
+        public Rect Bounds => Rect.MinMaxRect(Min.x, Min.y, Max.x, Max.y);
+
         public bool IsUsable => Min.x < Max.x && Min.y < Max.y;
 
         public override string ToString() => $"Arena {Number} is {Format(Corner1)} to {Format(Corner2)}";

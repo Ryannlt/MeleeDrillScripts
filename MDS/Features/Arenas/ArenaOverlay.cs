@@ -42,8 +42,6 @@ namespace MDS.Features.Arenas
 
         private static Color Faded(Color color, float alpha) => new Color(color.r, color.g, color.b, alpha);
 
-        private static Rect RectOf(Arena arena) => Rect.MinMaxRect(arena.Min.x, arena.Min.y, arena.Max.x, arena.Max.y);
-
         private static float NumberHeight(Arena arena)
         {
             Vector2 size = arena.Max - arena.Min;
@@ -54,7 +52,7 @@ namespace MDS.Features.Arenas
         {
             var mesh = new OverlayMesh();
             Color color = ArenaColors.ColorOf(arena.Number);
-            AddFrame(mesh, RectOf(arena), color);
+            AddFrame(mesh, arena.Bounds, color);
             AddNumber(new Pen(mesh, Faded(color, NumberAlpha), NumberHeight(arena) * StrokeShare), arena);
             return mesh;
         }

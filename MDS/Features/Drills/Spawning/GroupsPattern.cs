@@ -15,7 +15,6 @@ namespace MDS.Features.Drills.Spawning
         // A group stands in a box 4 m across, room for four players 1.5 m apart.
         private const float GroupReach = 2f;
         private const float MemberSpacing = 1.5f;
-        private const float Half = 0.5f;
 
         // A member can stand in a corner of the group's box, this far from its center.
         // Two centers that far from the corners plus the spacing apart keep any two groups the spacing apart.
@@ -37,7 +36,7 @@ namespace MDS.Features.Drills.Spawning
         {
             List<IPlayer> players = Interleaved(field);
             List<int> sizes = GroupSizes(players.Count);
-            List<Vector2> centers = _even.Generate(SpotArea.Whole(Shrunk(request.Area, GroupReach)), request.Spacing + CenterClearance, sizes.Count);
+            List<Vector2> centers = _even.Generate(SpotArea.Whole(SpotArea.Shrunk(request.Area, GroupReach)), request.Spacing + CenterClearance, sizes.Count);
 
             var plan = new SpawnPlan();
             int next = 0;
@@ -48,14 +47,6 @@ namespace MDS.Features.Drills.Spawning
                 plan.Add(members, group < centers.Count ? MemberSpots(centers[group], members.Count, request.Area) : new List<Vector2>());
             }
             return plan;
-        }
-
-        // An area too small to shrink becomes its middle point, so it still holds one group.
-        private static Rect Shrunk(Rect area, float by)
-        {
-            float x = area.width > by + by ? by : area.width * Half;
-            float y = area.height > by + by ? by : area.height * Half;
-            return Rect.MinMaxRect(area.xMin + x, area.yMin + y, area.xMax - x, area.yMax - y);
         }
 
         // Organic growth keeps a group in one tight pocket, inside its box cut to the area.

@@ -6,6 +6,7 @@ namespace MDS.Features.Drills.Spawning
     public sealed class SpotArea
     {
         private const int MaxDraws = 100;
+        private const float HalfOfSide = 0.5f;
 
         private readonly Vector2 _toward;
         private readonly float _gap;
@@ -23,6 +24,14 @@ namespace MDS.Features.Drills.Spawning
 
         // The side the direction points to, starting the gap's distance past the middle line.
         public static SpotArea Half(Rect bounds, Vector2 toward, float gap) => new SpotArea(bounds, toward.normalized, gap);
+
+        // Moved in by the margin on every side; a box too small for that becomes its middle line or point.
+        public static Rect Shrunk(Rect area, float margin)
+        {
+            float x = area.width > margin + margin ? margin : area.width * HalfOfSide;
+            float y = area.height > margin + margin ? margin : area.height * HalfOfSide;
+            return Rect.MinMaxRect(area.xMin + x, area.yMin + y, area.xMax - x, area.yMax - y);
+        }
 
         public bool Contains(Vector2 spot)
         {
