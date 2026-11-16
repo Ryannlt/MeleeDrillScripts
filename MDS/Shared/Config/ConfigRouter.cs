@@ -54,8 +54,8 @@ namespace MDS.Shared.Config
 
         private void ApplyOne(IConfigVariable variable, string value)
         {
-            if (variable.Validate(value)) variable.Apply(value);
-            else _log.Warning($"Invalid value '{value}' for {_prefix}:{variable.Key}");
+            if (variable.Validate(value, out string reason)) variable.Apply(value);
+            else _log.Warning($"Invalid value '{value}' for {_prefix}:{variable.Key}{(reason.Length > 0 ? $": {reason}" : string.Empty)}");
         }
     }
 }

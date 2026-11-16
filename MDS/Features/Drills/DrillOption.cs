@@ -22,7 +22,9 @@ namespace MDS.Features.Drills
         Min,
         Max,
         LineDistance,
-        Layout
+        Layout,
+        Name,
+        Turn
     }
 
     public static class DrillOptionValues
@@ -44,9 +46,16 @@ namespace MDS.Features.Drills
             [DrillOption.Arena] = text => ArenaParser.TryParseNumber(text, out _),
             [DrillOption.Min] = IsFightSize,
             [DrillOption.Max] = IsFightSize,
+
+            // Any word but a pick word, which fills the strategy, so the name and the strategy can come in either order.
+            [DrillOption.Name] = text => !EnumParser.TryParseStrict(text, out PickStrategy _),
+            [DrillOption.Turn] = text => Facing.TryParse(text, out _),
         };
 
         public static bool Accepts(DrillOption option, string text) => Rules[option](text);
+
+        // A bare number after a custom drill's name would otherwise turn the drill instead of picking the arena.
+        public static bool TakesBare(DrillOption option) => option != DrillOption.Turn;
 
         private static bool IsCount(string text) => int.TryParse(text, out int count) && count > 0;
 

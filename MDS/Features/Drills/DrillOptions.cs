@@ -45,9 +45,15 @@ namespace MDS.Features.Drills
             return _values.TryGetValue(option, out string text) && FightSize.TryParse(text, out FightSize value) ? value : fallback;
         }
 
-        public Facing GetFacing(Facing fallback)
+        public string GetName() => _values.TryGetValue(DrillOption.Name, out string text) ? text : string.Empty;
+
+        public Facing GetFacing(Facing fallback) => GetAngle(DrillOption.Facing, fallback);
+
+        public Facing GetTurn(Facing fallback) => GetAngle(DrillOption.Turn, fallback);
+
+        private Facing GetAngle(DrillOption option, Facing fallback)
         {
-            return _values.TryGetValue(DrillOption.Facing, out string text) && Facing.TryParse(text, out Facing value) ? value : fallback;
+            return _values.TryGetValue(option, out string text) && Facing.TryParse(text, out Facing value) ? value : fallback;
         }
     }
 }

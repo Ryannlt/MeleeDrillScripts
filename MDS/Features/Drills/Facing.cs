@@ -32,6 +32,8 @@ namespace MDS.Features.Drills
 
         public static Facing NorthSouth => new Facing(NorthSouthDegrees, false);
 
+        public static Facing WestEast => new Facing(WestEastDegrees, false);
+
         public static Facing Random => new Facing(0f, true);
 
         public float Degrees { get; }

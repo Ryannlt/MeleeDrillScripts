@@ -4,6 +4,7 @@ namespace MDS.Features.Drills
 {
     // A bare token fills the first empty slot that accepts it, so the old positional form and words in any order both work.
     // Every drill also takes an arena, in the last slot: a bare number only reaches it once every option before it is taken.
+    // A slot that goes by name only, such as turn, never takes a bare token.
     public sealed class DrillSyntax
     {
         private const char NameSeparator = '=';
@@ -54,7 +55,7 @@ namespace MDS.Features.Drills
             error = string.Empty;
             foreach (DrillOption slot in _slots)
             {
-                if (options.Has(slot) || !DrillOptionValues.Accepts(slot, token)) continue;
+                if (options.Has(slot) || !DrillOptionValues.TakesBare(slot) || !DrillOptionValues.Accepts(slot, token)) continue;
 
                 options.Set(slot, token);
                 return true;

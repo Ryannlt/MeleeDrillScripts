@@ -13,7 +13,11 @@ namespace MDS.Features.Arenas
 
         public string Key => "Arena";
 
-        public bool Validate(string value) => ArenaParser.TryParseArena(value, out _);
+        public bool Validate(string value, out string reason)
+        {
+            reason = string.Empty;
+            return ArenaParser.TryParseArena(value, out _);
+        }
 
         public void Apply(string value)
         {

@@ -20,7 +20,11 @@ namespace MDS.Features.Drills.Settings
 
         public T Value { get; private set; }
 
-        public bool Validate(string value) => TryRead(value, out _);
+        public bool Validate(string value, out string reason)
+        {
+            reason = string.Empty;
+            return TryRead(value, out _);
+        }
 
         public void Apply(string value)
         {

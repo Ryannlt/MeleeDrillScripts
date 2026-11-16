@@ -13,7 +13,11 @@ namespace MDS.Shared.Logging
 
         public string Key => "EnableDebugLogging";
 
-        public bool Validate(string value) => bool.TryParse(value, out _);
+        public bool Validate(string value, out string reason)
+        {
+            reason = string.Empty;
+            return bool.TryParse(value, out _);
+        }
 
         public void Apply(string value)
         {

@@ -16,7 +16,11 @@ namespace MDS.Features.Arenas
 
         public string Key => $"Arena{_corner}";
 
-        public bool Validate(string value) => ArenaParser.TryParseNumberedCorner(value, out _, out _);
+        public bool Validate(string value, out string reason)
+        {
+            reason = string.Empty;
+            return ArenaParser.TryParseNumberedCorner(value, out _, out _);
+        }
 
         public void Apply(string value)
         {
