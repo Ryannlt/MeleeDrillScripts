@@ -22,10 +22,17 @@ namespace MDS.Features.Drills
                 return false;
             }
 
-            if (drill.ClearsLeftovers) _clearing.Clear(run);
+            if (drill.ClearsLeftovers) ClearWhenPlaced(run);
             run.Noticed += tell;
             if (run.Note.Length > 0) tell(run.Note);
             return true;
+        }
+
+        // A drill that counts down places its players later, and the clearing waits for them.
+        private void ClearWhenPlaced(DrillRun run)
+        {
+            if (run.PlacedAnyone) _clearing.Clear(run);
+            else run.PlayersPlaced += _clearing.Clear;
         }
     }
 }

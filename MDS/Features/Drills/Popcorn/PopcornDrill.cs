@@ -61,7 +61,7 @@ namespace MDS.Features.Drills.Popcorn
 
             var started = new DrillRun(Name, _kit.ArenaFor(options));
             started.Note = NoteFor(started.Arena.Number, request, draw);
-            _countdown.Start(Title, () => Place(started, request), GodModeAfterMoveSeconds);
+            _countdown.Start(new DrillTiming(Title, true, GodModeAfterMoveSeconds), () => Place(started, request));
             run = started;
             return true;
         }

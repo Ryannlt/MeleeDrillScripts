@@ -24,7 +24,9 @@ namespace MDS.Features.Drills
         LineDistance,
         Layout,
         Name,
-        Turn
+        Turn,
+        Side,
+        Position
     }
 
     public static class DrillOptionValues
@@ -50,6 +52,10 @@ namespace MDS.Features.Drills
             // Any word but a pick word, which fills the strategy, so the name and the strategy can come in either order.
             [DrillOption.Name] = text => !EnumParser.TryParseStrict(text, out PickStrategy _),
             [DrillOption.Turn] = text => Facing.TryParse(text, out _),
+            [DrillOption.Side] = text => EnumParser.TryParseStrict(text, out TeamSide _),
+
+            // Brackets are required, since the lines that hold a position are split on commas.
+            [DrillOption.Position] = text => text.StartsWith("(") && text.EndsWith(")") && ArenaParser.TryParseCorner(text, out _),
         };
 
         public static bool Accepts(DrillOption option, string text) => Rules[option](text);

@@ -34,11 +34,15 @@ namespace MDS.Features.Drills
 
         public void Notice(string text) => Noticed?.Invoke(text);
 
+        // Raised when the players are placed, which a countdown puts off.
+        public event Action<DrillRun> PlayersPlaced;
+
         public void Placed(Lineup lineup, IReadOnlyList<Vector2> spots)
         {
             Lineup = lineup;
             PlacedAnyone = spots.Count > 0;
             Footprint = PlacedAnyone ? BoundsOf(spots) : Rect.zero;
+            PlayersPlaced?.Invoke(this);
         }
 
         private static Rect BoundsOf(IReadOnlyList<Vector2> spots)

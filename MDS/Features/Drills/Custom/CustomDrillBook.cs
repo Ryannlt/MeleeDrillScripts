@@ -26,28 +26,28 @@ namespace MDS.Features.Drills.Custom
         public IReadOnlyList<CustomDrill> All => _drills;
 
         // Letters, digits, - and _.
-        // Not a bare number, which picks a drill by its place in the list, nor a pick word, which fills the strategy, nor a word rc drill already uses.
+        // Not a bare number, which picks a drill by its place in the list, nor a pick word, which fills the strategy, nor a word rc customdrill already uses.
         public static bool IsName(string name, out string error)
         {
             bool shaped = !string.IsNullOrEmpty(name) && name.Length <= LongestName && Array.TrueForAll(name.ToCharArray(), c => char.IsLetterOrDigit(c) || c == '-' || c == '_');
             if (!shaped) error = $"'{name}' isn't a drill name: use up to {LongestName} letters, digits, - and _.";
             else if (int.TryParse(name, out _)) error = $"'{name}' would read as a drill number: give it a name with a letter in it.";
             else if (EnumParser.TryParseStrict(name, out PickStrategy _)) error = $"'{name}' is a strategy word: pick another name.";
-            else if (Array.Exists(Reserved, word => word.Equals(name, StringComparison.OrdinalIgnoreCase))) error = $"'{name}' is a word rc drill uses: pick another name.";
+            else if (Array.Exists(Reserved, word => word.Equals(name, StringComparison.OrdinalIgnoreCase))) error = $"'{name}' is a word rc customdrill uses: pick another name.";
             else error = string.Empty;
             return error.Length == 0;
         }
 
-        public bool CanAdd(string name, string text, out string error) => Checked(name, text, out error) != null;
+        public bool CanAdd(string name, string text, out string error) => Parsed(name, text, out error) != null;
 
         // Makes the drill when the name is new.
         public bool TryAdd(string name, string text, out string error)
         {
-            DrillLine line = Checked(name, text, out error);
-            if (line == null) return false;
+            Action<CustomDrill> apply = Parsed(name, text, out error);
+            if (apply == null) return false;
             if (!TryFind(name, out CustomDrill drill)) _drills.Add(drill = new CustomDrill(name, Selection.ForXvX(_players, _random)));
 
-            drill.Apply(line);
+            apply(drill);
             return true;
         }
 
@@ -67,17 +67,9 @@ namespace MDS.Features.Drills.Custom
             foreach (CustomDrill drill in _drills) drill.Selection.Reset();
         }
 
-        // Null with the reason when the name or the line won't do, or when a group would take one side of its drill past the most players.
-        private DrillLine Checked(string name, string text, out string error)
+        private static Action<CustomDrill> Parsed(string name, string text, out string error)
         {
-            if (!IsName(name, out error) || !DrillLineParser.TryParse(text, out DrillLine line, out error)) return null;
-            if (line.Group == null || !TryFind(name, out CustomDrill drill)) return line;
-
-            int side = drill.CountOf(line.Group.Side) + line.Group.Count;
-            if (side <= DrillLineParser.MostPlayers) return line;
-
-            error = $"{drill.Name} would need {side} {line.Group.Side.ToString().ToLowerInvariant()} players, more than {DrillLineParser.MostPlayers}.";
-            return null;
+            return IsName(name, out error) && CustomLineParser.TryParse(text, out Action<CustomDrill> apply, out error) ? apply : null;
         }
     }
 }

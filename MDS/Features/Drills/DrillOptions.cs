@@ -4,6 +4,7 @@ using MDS.Features.Drills.Picking;
 using MDS.Features.Drills.Popcorn;
 using MDS.Features.Drills.Spawning;
 using MDS.Shared;
+using UnityEngine;
 
 namespace MDS.Features.Drills
 {
@@ -46,6 +47,10 @@ namespace MDS.Features.Drills
         }
 
         public string GetName() => _values.TryGetValue(DrillOption.Name, out string text) ? text : string.Empty;
+
+        public TeamSide GetSide() => _values.TryGetValue(DrillOption.Side, out string text) && EnumParser.TryParseStrict(text, out TeamSide side) ? side : TeamSide.Attacker;
+
+        public Vector2 GetPosition() => _values.TryGetValue(DrillOption.Position, out string text) && ArenaParser.TryParseCorner(text, out Vector2 position) ? position : Vector2.zero;
 
         public Facing GetFacing(Facing fallback) => GetAngle(DrillOption.Facing, fallback);
 

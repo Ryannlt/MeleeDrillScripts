@@ -4,10 +4,10 @@ using MDS.Shared.Game;
 
 namespace MDS.Features.Drills.Custom
 {
-    // rc drill alone lists the custom drills, add, remove and show change or read one, and anything else runs one.
+    // rc customdrill alone lists the custom drills, add, remove and show change or read one, and anything else runs one.
     public sealed class CustomDrillCommand : IConsoleCommand
     {
-        public const string AddUsage = "Usage: rc drill add <name> " + DrillLineParser.GroupFormat + ", or rc drill add <name> strategy <random|any|next|repeat>, or rc drill add <name> turn <degrees|random>";
+        public const string AddUsage = "Usage: rc customdrill add <name> <line>, where a line is one of: " + CustomLineParser.Format;
 
         private const string AddWord = "add";
         private const string RemoveWord = "remove";
@@ -66,18 +66,18 @@ namespace MDS.Features.Drills.Custom
         private bool CanFind(string[] parameters, out string error)
         {
             error = string.Empty;
-            if (parameters.Length != NameParts) error = $"Usage: rc drill {VerbOf(parameters)} <name|number>";
-            else if (!_book.TryFind(parameters[1], out _)) error = $"No custom drill '{parameters[1]}'. rc drill lists them.";
+            if (parameters.Length != NameParts) error = $"Usage: rc customdrill {VerbOf(parameters)} <name|number>";
+            else if (!_book.TryFind(parameters[1], out _)) error = $"No custom drill '{parameters[1]}'. rc customdrill lists them.";
             return error.Length == 0;
         }
 
         private string List()
         {
-            if (_book.All.Count == 0) return "No custom drills yet. Add one with rc drill add <name> <group>, or an MDS:Drill config line.";
+            if (_book.All.Count == 0) return "No custom drills yet. Add one with rc customdrill add <name> <line>, or an MDS:CustomDrill config line.";
 
             var entries = new List<string>();
             for (int i = 0; i < _book.All.Count; i++) entries.Add($"{i + 1} {_book.All[i].Summary}");
-            return $"Custom drills: {string.Join(", ", entries)}. Run one with rc drill <name|number>.";
+            return $"Custom drills: {string.Join(", ", entries)}. Run one with rc customdrill <name|number>.";
         }
 
         private string Add(string[] parameters)

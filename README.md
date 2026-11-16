@@ -22,12 +22,12 @@ rc openmelee spread
 rc popcorn
 rc popcorn 2v2 4v4 distance=12
 rc popcorn tight
-rc drill
-rc drill flank
-rc drill flank turn=random
-rc drill add flank attacking 2 at -5,0
+rc customdrill
+rc customdrill flank
+rc customdrill flank turn=random
+rc customdrill add flank attacker,(-5,0)
 rc preview openmelee groups
-rc preview drill flank
+rc preview customdrill flank
 rc shootingTraining
 rc mds
 ```
@@ -62,11 +62,11 @@ Commands and keys are not case sensitive.
 | `rc groupfight [options]` | Places each whole team in a line, facing the other |
 | `rc openmelee [options]` | Counts down 3, 2, 1, then places everyone on the field across the arena with a [spawn strategy](#open-melee-strategies) |
 | `rc popcorn [options]` | Counts down 3, 2, 1, then splits both teams into small fights of mixed sizes across the arena. See [Popcorn](#popcorn) |
-| `rc drill` | Lists the custom drills by number. See [Custom Drills](#custom-drills) |
-| `rc drill <name\|number> [options]` | Runs a custom drill: its groups stand where the drill says, around the arena center. Anyone else standing there is sent back to their spawn |
-| `rc drill add <name> <line>` | Adds a group, a strategy or a turn to a custom drill, and makes the drill if the name is new. It lasts until the next map |
-| `rc drill show <name\|number>` | Shows a custom drill as the lines that make it |
-| `rc drill remove <name\|number>` | Removes a custom drill until the next map |
+| `rc customdrill` | Lists the custom drills by number. See [Custom Drills](#custom-drills) |
+| `rc customdrill <name\|number> [options]` | Runs a custom drill: picked players on its static spots, then everyone else in its formation. Anyone else standing there is sent back to their spawn |
+| `rc customdrill add <name> <line>` | Adds a spot, a formation or a setting to a custom drill, and makes the drill if the name is new. It lasts until the next map |
+| `rc customdrill show <name\|number>` | Shows a custom drill as the lines that make it |
+| `rc customdrill remove <name\|number>` | Removes a custom drill until the next map |
 | `rc preview <drill> [options]` | Shows where a drill would put players, without moving anyone: yellow rings for attackers, cyan for defenders, and a white border round the area `openmelee` draws from. Only you see it. Open melee and a random facing draw again when the drill runs, so this is one sample. It stays until the next preview |
 | `rc preview off` | Clears the preview |
 | `rc shootingTraining [on\|off]` | Turns infinite firearm ammo and drawn bullet paths on or off for the current map. With no argument it switches to the other state |
@@ -98,7 +98,7 @@ rc xvx 2 2 arena=3
 | `groupfight` | strategy, distance, spacing, facing |
 | `openmelee` | strategy, spacing, offset, facing |
 | `popcorn` | strategy, min, max, distance, lineDistance, spacing |
-| `drill` | name, strategy. `turn` goes by name only |
+| `customdrill` | name, strategy. `turn` goes by name only |
 
 Every drill also takes `arena=<n>`. Without it the drill runs in arena 1. A whole number after every other option also sets the arena, so `rc xvx 3 3 random 20 2 northsouth 2` runs in arena 2, but `rc xvx 3 3 2` sets the distance.
 
@@ -122,10 +122,10 @@ Any option left out uses its setting.
 
 | Strategy | Drills | Picks |
 | --- | --- | --- |
-| `Random` | xvx, groupfight, drill | Each side at random from its own team |
-| `Any` | xvx, drill | At random from everyone on the field, whatever their team |
-| `Next` | xvx, drill | The next players in each team's order, carrying on from the last drill |
-| `Repeat` | xvx, groupfight, drill | The same players as that drill's last run this round |
+| `Random` | xvx, groupfight, customdrill | Each side at random from its own team |
+| `Any` | xvx, customdrill | At random from everyone on the field, whatever their team |
+| `Next` | xvx, customdrill | The next players in each team's order, carrying on from the last drill |
+| `Repeat` | xvx, groupfight, customdrill | The same players as that drill's last run this round |
 
 ### Open Melee Strategies
 
@@ -145,35 +145,40 @@ Open melee and popcorn count down before anyone moves. If players join during th
 
 ### Custom Drills
 
-A custom drill is a set of groups, each standing at its own spot around the arena center. Make one with config lines or with `rc drill add`, then run it with `rc drill <name>` or its number from `rc drill`.
+A custom drill has static spots and one formation. Each static spot holds one picked player. The formation takes everyone else on the field. Make a drill with config lines or with `rc customdrill add`, then run it with `rc customdrill <name>` or its number from `rc customdrill`.
 
 ```text
-mod_variable_local MDS:Drill:flank:attacking 2 at -5,0
-mod_variable_local MDS:Drill:flank:defending 1 at 5,0 facing eastwest
-mod_variable_local MDS:Drill:flank:strategy next
-mod_variable_local MDS:Drill:wedge:attacking 3 at 0,-6 spacing 1.5
-mod_variable_local MDS:Drill:wedge:defending 4 at 0,6 scatter
-mod_variable_local MDS:Drill:wedge:turn random
+mod_variable_local MDS:CustomDrill:flank:attacker,(-5,-1),(-5,1)
+mod_variable_local MDS:CustomDrill:flank:defender,(5,0)
+mod_variable_local MDS:CustomDrill:flank:spread,spacing=2
+mod_variable_local MDS:CustomDrill:flank:strategy,next
+mod_variable_local MDS:CustomDrill:wall:line,attacker,(0,-8)
+mod_variable_local MDS:CustomDrill:wall:line,defender,(0,8),spacing=1.5
+mod_variable_local MDS:CustomDrill:wall:countdown,on
+mod_variable_local MDS:CustomDrill:wall:godmode,on
 ```
 
-Each line is one of these. Lines with the same name build one drill, numbered in the order the names first appear.
+Each line is one of these, its parts separated by commas. Positions are `(x,z)`, meters from the arena center on the same axes as the arena corners. Lines with the same name build one drill, numbered in the order the names first appear.
 
 | Line | What it does |
 | --- | --- |
-| `<attacking\|defending> <count> at <x>,<z>` | A group of that side, `x` and `z` meters from the arena center on the same axes as the arena corners |
-| `... facing <direction>` | The way the group's line faces: `NorthSouth`, `EastWest`, `SouthNorth`, `WestEast`, 0 to 359 or `Random`. Without it the line faces the middle of the other side's groups, or the arena center when the drill has one side only |
-| `... spacing <m>` | Distance between neighbors in the group, 2 m without it, at least 0.5 |
-| `... line` or `... scatter` | A line across the facing, the default, or a loose pocket around the spot |
-| `strategy <random\|any\|next\|repeat>` | How the drill picks its players when `rc drill` gives no strategy. Random without it |
-| `turn <degrees\|random>` | How far the drill turns when `rc drill` gives no turn. 0 without it |
+| `attacker,(x,z)` or `defender,(x,z)` | Static spots for that side, one player each. More positions can follow: `attacker,(-5,-1),(-5,1)` |
+| `scatter`, `spread`, `groups`, `teams` or `random` | An open melee formation: everyone not on a static spot, spread over the arena. It takes the same options as `rc openmelee`, in order or by name: `spread,2,3` or `spread,spacing=2,offset=3` |
+| `line,<attacker\|defender>,(x,z)` | A line formation for one team: every player of that team not on a static spot, in a line centered on the position. Spacing and facing follow, in order or by name: `line,defender,(0,8),1.5,eastwest`. Without spacing it uses `groupfightSpacing`. Without a facing the line faces the middle of the other team's spots and line |
+| `strategy,<random\|any\|next\|repeat>` | How the static spots are picked when `rc customdrill` gives no strategy. Random without it |
+| `turn,<degrees\|random>` | How far the drill turns when `rc customdrill` gives no turn. 0 without it |
+| `countdown,<on\|off>` | Counts down 3, 2, 1 before anyone moves. Off without it |
+| `godmode,<on\|off>` | God mode while the players land. Off without it |
+| `godModeSeconds,<seconds>` | How long god mode lasts. 2 without it |
 
-- Attackers fill the attacking groups in the order they were written, and defenders the defending ones. Each drill remembers its own picks, so `next` and `repeat` carry on from that drill's last run.
-- `turn=90` turns the whole drill a quarter turn around the arena center, the same way facing goes from 0 to 90. `turn=random` draws a new turn every run. A turn goes by name only, so a bare number after the name picks the arena: `rc drill flank 2` runs in arena 2.
-- A name can't be a number or a pick word (`random`, `any`, `next`, `repeat`), so `rc drill next flank` and `rc drill flank next` both work. Each side of a drill holds at most 100 players.
-- A drill whose groups stand two players under 0.5 m apart is refused, whatever the arena.
-- A drill wider than its arena shrinks toward the arena center until everyone fits, and says so: `Shrunk to fit arena 2: 64% of its size.` An arena too small even at 0.5 m spacing refuses the drill.
-- `rc drill add flank attacking 2 at -5,0` takes the same lines as the config, so a drill can be built and tried with `rc preview drill flank` before it goes in the config. Drills added this way last until the next map.
-- A bad config line is skipped, and the server log says why: `Invalid value 'flank:attacking two at 0,0' for MDS:Drill: 'two' isn't a count from 1 to 100.`
+- The static spots fill first, attackers in the order they were written and defenders likewise. Each drill remembers its own picks, so `next` and `repeat` carry on from that drill's last run.
+- A drill has one formation. A later formation line replaces the earlier one, except that a line for the other team joins a line. Without a formation, only the static spots are filled.
+- `turn=90` turns the whole drill a quarter turn around the arena center, the same way facing goes from 0 to 90. `turn=random` draws a new turn every run. A turn goes by name only, so a bare number after the name picks the arena: `rc customdrill flank 2` runs in arena 2.
+- A drill whose static spots or lines would leave the arena shrinks toward the arena center until everyone fits, and says so: `Shrunk to fit arena 2: 64% of its size.` An arena too small for its lines even at 0.5 m spacing refuses the drill. An open melee formation stays inside the arena on its own.
+- How close the drill puts its players is up to the drill. Spots and lines can share ground.
+- A name can't be a number or a pick word (`random`, `any`, `next`, `repeat`), so `rc customdrill next flank` and `rc customdrill flank next` both work.
+- `rc customdrill add flank attacker,(-5,0)` takes the same lines as the config, so a drill can be built and tried with `rc preview customdrill flank` before it goes in the config. Drills added this way last until the next map.
+- A bad config line is skipped, and the server log says why: `Invalid value 'flank:attacker' for MDS:CustomDrill: attacker needs a position, like attacker,(-5,0).`
 
 ### Popcorn
 
@@ -228,7 +233,7 @@ Use `mod_variable` for every map or `mod_variable_local` inside a map rotation. 
 | `EnableDebugLogging` | `true` or `false` |
 | `Arena` | `(x,z),(x,z)` for arena 1, or `<n>:(x,z),(x,z)` for arena n |
 | `ArenaCorner1`, `ArenaCorner2` | `x,z` for arena 1, or `<n>:x,z` for arena n |
-| `Drill` | `<name>:<line>`, one line per group. See [Custom Drills](#custom-drills) |
+| `CustomDrill` | `<name>:<line>`, one line per spot, formation or setting. See [Custom Drills](#custom-drills) |
 | any key from [Settings](#settings) except `MDSDebugLogging` | as in the table |
 
 ```text
@@ -253,8 +258,9 @@ mod_variable_local MDS:PopcornLineDistance:6
 mod_variable_local MDS:PopcornSpacing:2
 mod_variable_local MDS:PopcornStrategy:Spread
 mod_variable_local MDS:DrillOrientation:NorthSouth
-mod_variable_local MDS:Drill:flank:attacking 2 at -5,0
-mod_variable_local MDS:Drill:flank:defending 1 at 5,0
+mod_variable_local MDS:CustomDrill:flank:attacker,(-5,-1),(-5,1)
+mod_variable_local MDS:CustomDrill:flank:defender,(5,0)
+mod_variable_local MDS:CustomDrill:flank:spread
 ```
 
 ---

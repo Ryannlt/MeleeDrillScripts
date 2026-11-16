@@ -15,13 +15,13 @@ namespace MDS.Features.Drills
 
         private readonly DrillKit _kit;
         private readonly DrillCountdown _countdown;
-        private readonly SpawnPatterns _patterns;
+        private readonly OpenMeleePlanner _planner;
 
         public OpenMeleeDrill(DrillKit kit, DrillCountdown countdown)
         {
             _kit = kit;
             _countdown = countdown;
-            _patterns = new SpawnPatterns(kit.Random);
+            _planner = new OpenMeleePlanner(kit);
         }
 
         public string Name => "openmelee";
@@ -46,12 +46,12 @@ namespace MDS.Features.Drills
         public bool TryStart(DrillOptions options, out DrillRun run, out string error)
         {
             run = null;
-            SpawnRequest request = RequestFor(options);
-            error = _countdown.IsRunning ? _countdown.Busy : Refusal(request, out _);
+            SpawnRequest request = _planner.RequestFor(options, _kit.ArenaFor(options));
+            error = _countdown.IsRunning ? _countdown.Busy : _planner.Refusal(request, _kit.Field(), out _);
             if (error.Length > 0) return false;
 
             DrillRun started = new DrillRun(Name, _kit.ArenaFor(options));
-            _countdown.Start(Title, () => Place(started, request), GodModeAfterMoveSeconds);
+            _countdown.Start(new DrillTiming(Title, true, GodModeAfterMoveSeconds), () => Place(started, request));
             run = started;
             return true;
         }
@@ -59,60 +59,23 @@ namespace MDS.Features.Drills
         public bool TryPreview(DrillOptions options, out DrillPreview preview, out string error)
         {
             preview = null;
-            SpawnRequest request = RequestFor(options);
-            error = Refusal(request, out SpawnPlan plan);
+            SpawnRequest request = _planner.RequestFor(options, _kit.ArenaFor(options));
+            error = _planner.Refusal(request, _kit.Field(), out SpawnPlan plan);
             if (error.Length > 0) return false;
 
-            preview = new DrillPreview { Area = request.Area, IsSample = true, Detail = NameOf(request.Strategy) };
+            preview = new DrillPreview { Area = request.Area, IsSample = true, Detail = OpenMeleePlanner.NameOf(request.Strategy) };
             preview.AddSpots(_kit.Field(), plan);
             return true;
-        }
-
-        private static string NameOf(SpawnStrategy strategy) => strategy.ToString().ToLowerInvariant();
-
-        private SpawnRequest RequestFor(DrillOptions options)
-        {
-            float offset = options.GetNumber(DrillOption.Offset, _kit.Settings.OpenMeleeOffset.Value);
-            return new SpawnRequest
-            {
-                Strategy = _patterns.Resolve(options.GetSpawnStrategy(_kit.Settings.OpenMeleeStrategy.Value)),
-                Area = Area(_kit.ArenaFor(options), offset),
-                Offset = offset,
-                Spacing = options.GetNumber(DrillOption.Spacing, _kit.Settings.OpenMeleeSpacing.Value),
-                Degrees = options.GetFacing(_kit.Settings.Orientation.Value).Resolve(_kit.Random),
-            };
-        }
-
-        // The size checks come before any spot is drawn: a tiny spacing over a big arena needs a grid too large to build.
-        private string Refusal(SpawnRequest request, out SpawnPlan plan)
-        {
-            plan = new SpawnPlan();
-            int players = _kit.Players.Attacking.Count + _kit.Players.Defending.Count;
-            if (players == 0) return "Nobody is on the field for an open melee.";
-            if (request.Spacing < DrillKit.MinimumSpacing) return $"Spacing must be at least {Numbers.Format(DrillKit.MinimumSpacing)} m.";
-            ISpawnPattern pattern = _patterns.For(request.Strategy);
-            if (!pattern.CanCover(request)) return $"The arena is too big for {NameOf(request.Strategy)} at that spacing: raise spacing, or use spread or groups.";
-
-            if (request.Area.width > 0f) plan = FullestPlan(_kit.Field(), request);
-            if (plan.Spots.Count >= players) return string.Empty;
-
-            return $"The arena has room for {plan.Spots.Count} of {players} players {pattern.DescribeSpacing(request)} and {Numbers.Format(request.Offset)} m in from the edges.";
         }
 
         private void Place(DrillRun run, SpawnRequest request)
         {
             Lineup field = _kit.Field();
-            SpawnPlan plan = FullestPlan(field, request);
+            SpawnPlan plan = _planner.FullestPlan(field, request);
             int moved = _kit.Teleporter.MoveAll(plan.Players, plan.Spots);
             run.Placed(field, plan.Spots);
-            _kit.Log.Info($"openmelee ({NameOf(request.Strategy)}) in arena {run.Arena.Number}: {plan.Total} on the field, {plan.Spots.Count} spots, {moved} moved.");
+            _kit.Log.Info($"openmelee ({OpenMeleePlanner.NameOf(request.Strategy)}) in arena {run.Arena.Number}: {plan.Total} on the field, {plan.Spots.Count} spots, {moved} moved.");
             if (!plan.PlacesEveryone) _kit.Warn(run, $"no room for {plan.Unplaced} of {plan.Total} players at the move, so they stay where they are.");
-        }
-
-        private SpawnPlan FullestPlan(Lineup field, SpawnRequest request)
-        {
-            ISpawnPattern pattern = _patterns.For(request.Strategy);
-            return SpawnPlan.Fullest(() => pattern.Plan(field, request));
         }
     }
 }

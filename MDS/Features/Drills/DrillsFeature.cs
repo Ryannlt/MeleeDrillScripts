@@ -29,7 +29,7 @@ namespace MDS.Features.Drills
             settings.RegisterWith(context.Settings, context.Config);
 
             var kit = new DrillKit(context, arenas, settings);
-            context.Config.Register(new DrillVariable(_book));
+            context.Config.Register(new CustomDrillVariable(_book));
             RegisterCommands(context, kit);
             _round.RoundStarted += OnRoundStarted;
             if (context.IsServer) return;
@@ -38,20 +38,21 @@ namespace MDS.Features.Drills
             context.ClientMessages.Register(SpotViewMessage.Name, _preview.OnMessage);
         }
 
-        // Open melee and popcorn share one countdown, so they never run at once.
         private IDrill[] DrillsOf(DrillKit kit, DrillCountdown countdown)
         {
             return new IDrill[] { new XvXDrill(kit, _xvx), new GroupfightDrill(kit, _groupfight), new OpenMeleeDrill(kit, countdown), new PopcornDrill(kit, countdown) };
         }
 
-        // rc drill also lists and edits the custom drills, so its command wraps the plain drill command.
+        // Open melee, popcorn and custom drills share one countdown, so they never run at once.
+        // rc customdrill also lists and edits the custom drills, so its command wraps the plain drill command.
         private void RegisterCommands(ModContext context, DrillKit kit)
         {
             var runner = new DrillRunner(new LeftoverClearing(kit));
-            var drills = new List<IDrill>(DrillsOf(kit, new DrillCountdown(context.Console, context.Routines)));
+            var countdown = new DrillCountdown(context.Console, context.Routines);
+            var drills = new List<IDrill>(DrillsOf(kit, countdown));
             foreach (IDrill drill in drills) context.Commands.Register(new DrillCommand(drill, runner, context.Replies));
 
-            var custom = new CustomDrills(kit, _book);
+            var custom = new CustomDrills(kit, _book, countdown);
             context.Commands.Register(new CustomDrillCommand(_book, new DrillCommand(custom, runner, context.Replies), context.Replies));
             drills.Add(custom);
             context.Commands.Register(new PreviewCommand(drills, context.Replies));

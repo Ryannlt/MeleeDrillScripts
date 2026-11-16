@@ -2,23 +2,23 @@ using MDS.Shared.Config;
 
 namespace MDS.Features.Drills.Custom
 {
-    // MDS:Drill:<name>:<line>, one line per group, so lines with the same name build one drill.
-    public sealed class DrillVariable : IConfigVariable
+    // MDS:CustomDrill:<name>:<line>, one line per spot, formation or setting, so lines with the same name build one drill.
+    public sealed class CustomDrillVariable : IConfigVariable
     {
         private readonly CustomDrillBook _book;
 
-        public DrillVariable(CustomDrillBook book)
+        public CustomDrillVariable(CustomDrillBook book)
         {
             _book = book;
         }
 
-        public string Key => "Drill";
+        public string Key => "CustomDrill";
 
         public bool Validate(string value, out string reason)
         {
             if (TrySplit(value, out string name, out string line)) return _book.CanAdd(name, line, out reason);
 
-            reason = "expected MDS:Drill:<name>:<line>.";
+            reason = "expected MDS:CustomDrill:<name>:<line>.";
             return false;
         }
 
