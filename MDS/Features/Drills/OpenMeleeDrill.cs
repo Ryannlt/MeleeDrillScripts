@@ -33,6 +33,10 @@ namespace MDS.Features.Drills
         // Everyone on the field is placed.
         public bool ClearsLeftovers => false;
 
+        public bool RunsInParallel(DrillOptions options) => false;
+
+        public Headcount Needs(DrillOptions options) => Headcount.Everyone;
+
         public static Rect Area(Arena arena, float offset)
         {
             Vector2 min = arena.Min + Vector2.one * offset;
@@ -47,11 +51,12 @@ namespace MDS.Features.Drills
         {
             run = null;
             SpawnRequest request = _planner.RequestFor(options, _kit.ArenaFor(options));
-            error = _countdown.IsRunning ? _countdown.Busy : _planner.Refusal(request, _kit.Field(), out _);
+            PickScope scope = options.Scope;
+            error = _countdown.IsRunning ? _countdown.Busy : _planner.Refusal(request, _kit.Field(scope), out _);
             if (error.Length > 0) return false;
 
             DrillRun started = new DrillRun(Name, _kit.ArenaFor(options));
-            _countdown.Start(new DrillTiming(Title, true, GodModeAfterMoveSeconds), () => Place(started, request));
+            _countdown.Start(new DrillTiming(Title, true, GodModeAfterMoveSeconds), () => Place(started, request, scope));
             run = started;
             return true;
         }
@@ -60,17 +65,18 @@ namespace MDS.Features.Drills
         {
             preview = null;
             SpawnRequest request = _planner.RequestFor(options, _kit.ArenaFor(options));
-            error = _planner.Refusal(request, _kit.Field(), out SpawnPlan plan);
+            error = _planner.Refusal(request, _kit.Field(options.Scope), out SpawnPlan plan);
             if (error.Length > 0) return false;
 
             preview = new DrillPreview { Area = request.Area, IsSample = true, Detail = OpenMeleePlanner.NameOf(request.Strategy) };
-            preview.AddSpots(_kit.Field(), plan);
+            preview.AddSpots(_kit.Field(options.Scope), plan);
             return true;
         }
 
-        private void Place(DrillRun run, SpawnRequest request)
+        // Whoever is free at the move, after the countdown.
+        private void Place(DrillRun run, SpawnRequest request, PickScope scope)
         {
-            Lineup field = _kit.Field();
+            Lineup field = _kit.Field(scope);
             SpawnPlan plan = _planner.FullestPlan(field, request);
             int moved = _kit.Teleporter.MoveAll(plan.Players, plan.Spots);
             run.Placed(field, plan.Spots);

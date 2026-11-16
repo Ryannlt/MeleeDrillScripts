@@ -28,6 +28,9 @@ rc customdrill flank turn=random
 rc customdrill add flank attacker,(-5,0)
 rc preview openmelee groups
 rc preview customdrill flank
+rc program
+rc program run pits
+rc program stop
 rc shootingTraining
 rc mds
 ```
@@ -70,6 +73,12 @@ Commands and keys are not case sensitive.
 | `rc preview <drill> [options]` | Shows where a drill would put players, without moving anyone: yellow rings for attackers, cyan for defenders, and a white border round the area `openmelee` draws from. Only you see it. Open melee and a random facing draw again when the drill runs, so this is one sample. It stays until the next preview |
 | `rc preview off` | Clears the preview |
 | `rc shootingTraining [on\|off]` | Turns infinite firearm ammo and drawn bullet paths on or off for the current map. With no argument it switches to the other state |
+| `rc program` | Lists the programs, or says how the running one is doing. See [Programs](#programs) |
+| `rc program run <name\|number> [loop]` | Runs a program step by step, and with `loop` starts it over after the last step |
+| `rc program stop` | Stops the running program. Fights already running carry on |
+| `rc program add <name> <line>` | Adds a step or a drill line to a program, and makes the program if the name is new. It lasts until the next map |
+| `rc program show <name\|number>` | Shows a program as the lines that make it |
+| `rc program remove <name\|number>` | Removes a program until the next map |
 | `rc get <key>` / `rc set <key> <value>` | Reads or changes a [setting](#settings) |
 
 ### Leftover Players
@@ -94,11 +103,11 @@ rc xvx 2 2 arena=3
 
 | Drill | Options in order |
 | --- | --- |
-| `xvx` | attackers, defenders, strategy, distance, spacing, facing |
+| `xvx` | attackers, defenders, strategy, distance, spacing, facing, mirror |
 | `groupfight` | strategy, distance, spacing, facing |
 | `openmelee` | strategy, spacing, offset, facing |
 | `popcorn` | strategy, min, max, distance, lineDistance, spacing |
-| `customdrill` | name, strategy. `turn` goes by name only |
+| `customdrill` | name, strategy, mirror. `turn` goes by name only |
 
 Every drill also takes `arena=<n>`. Without it the drill runs in arena 1. A whole number after every other option also sets the arena, so `rc xvx 3 3 random 20 2 northsouth 2` runs in arena 2, but `rc xvx 3 3 2` sets the distance.
 
@@ -115,6 +124,7 @@ Every drill also takes `arena=<n>`. Without it the drill runs in arena 1. A whol
 | `lineDistance` | meters | Distance between a `popcorn` fight's two lines |
 | `name` | a custom drill's name or number | The custom drill to run |
 | `turn` | 0 to 359, or `Random`, by name only: `turn=90` | Turns a whole custom drill around the arena center for this run |
+| `mirror` | the word `mirror` | Swaps which team takes which side: `rc xvx 2 1 mirror` puts 1 attacker against 2 defenders, and a custom drill gives its attacker spots and line to the defenders and the other way round |
 
 Any option left out uses its setting.
 
@@ -180,6 +190,46 @@ Each line is one of these, its parts separated by commas. Positions are `(x,z)`,
 - `rc customdrill add flank attacker,(-5,0)` takes the same lines as the config, so a drill can be built and tried with `rc preview customdrill flank` before it goes in the config. Drills added this way last until the next map.
 - A bad config line is skipped, and the server log says why: `Invalid value 'flank:attacker' for MDS:CustomDrill: attacker needs a position, like attacker,(-5,0).`
 
+### Programs
+
+A program runs drills on its own, step by step. It is also the way to run a drill in several arenas at once, such as as many 2v1s as the players allow in small arenas drawn inside a big one.
+
+```text
+mod_variable_local MDS:Arena:4:(-40.99,5.38),(-22.17,24.04)
+mod_variable_local MDS:Arena:5:(-22.17,5.38),(-3.35,24.04)
+mod_variable_local MDS:Arena:6:(-40.99,24.04),(-22.17,42.69)
+mod_variable_local MDS:Arena:7:(-22.17,24.04),(-3.35,42.69)
+mod_variable_local MDS:Program:pits:step,next,balance,rolling,minutes=5
+mod_variable_local MDS:Program:pits:xvx,2,1,arenas=(4,5,6,7)
+mod_variable_local MDS:Program:pits:step,together,fights=1
+mod_variable_local MDS:Program:pits:groupfight,arena=1
+```
+
+A step line starts a step. The drill lines under it run at the same time, each in its own arenas. Lines with the same name build one program, in the order they are written.
+
+| Step part | What it does |
+| --- | --- |
+| `random`, `any`, `next` or `repeat` | How the step picks players for every drill line in it. Random without it. A drill line takes no pick word of its own |
+| `fill` | Every fight as written: in a 2v1 the attackers are always the 2. The default |
+| `balance` | Each fight's sides are chosen to play the most people, so a 2v1 can run as a 1v2 |
+| `together` | A new round of fights starts once every fight of the last round is over. The default |
+| `rolling` | An arena starts its next fight as soon as its last one is over |
+| `minutes=<n>` | No new fight starts after this many minutes |
+| `fights=<n>` | No new fight starts after this many fights |
+| `fightSeconds=<n>` | How long a fight can last. `programFightSeconds` without it |
+| `pause=<n>` | Seconds before the step starts. `programPause` without it |
+
+A drill line is a drill and its options as `rc` takes them, with commas: `xvx,2,1,distance=10,arenas=(4,5,6,7)`. `arenas=(4,5,6,7)` runs it in each of those arenas, and `arena=4` or no arena runs it in one.
+
+- Each step uses as many of its arenas as the free players allow, so the same program works with 3 players a side or 20. With 3 attackers and 5 defenders, 2v1s in 4 arenas are 1 fight with `fill` and 2 fights with `balance`. The rest wait their turn, and `next` brings whoever has waited longest in first.
+- Nobody is in two fights at once. A drill that takes everyone, such as `groupfight`, takes everyone not already in another fight of the step, and runs in one arena.
+- A fight is over when one side has all died since it started, or when its time is up.
+- A step without `minutes` or `fights` is one round. A step ends when its last fight is over, and the next step is announced on screen.
+- Only one program runs at a time. A new round stops it.
+- `rc program run` checks every drill line in every arena first, and says which line would fail before anything starts.
+- `rc program add pits xvx,2,1,arenas=(4,5)` takes the same lines as the config. Programs added this way last until the next map.
+- A bad config line is skipped, and the server log says why.
+
 ### Popcorn
 
 `rc popcorn` counts down 3, 2, 1, then deals both teams into fights and places every fight as two short lines facing each other, each turned a random way. God mode is on for a second as the fights land. Only one countdown drill runs at a time, so `rc openmelee` and `rc popcorn` wait for each other.
@@ -220,6 +270,8 @@ Each setting is changed with `rc set`, read with `rc get`, and can be set from t
 | `popcornSpacing` | 2 | meters |
 | `popcornStrategy` | Spread | Scatter, Spread, Tight, Random |
 | `DrillOrientation` | NorthSouth | a facing |
+| `programPause` | 5 | seconds before each program step |
+| `programFightSeconds` | 90 | seconds before a program calls a fight over |
 | `MDSDebugLogging` | false | true, false |
 
 The defaults are tuned for Palisade Arena A1.
@@ -234,6 +286,7 @@ Use `mod_variable` for every map or `mod_variable_local` inside a map rotation. 
 | `Arena` | `(x,z),(x,z)` for arena 1, or `<n>:(x,z),(x,z)` for arena n |
 | `ArenaCorner1`, `ArenaCorner2` | `x,z` for arena 1, or `<n>:x,z` for arena n |
 | `CustomDrill` | `<name>:<line>`, one line per spot, formation or setting. See [Custom Drills](#custom-drills) |
+| `Program` | `<name>:<line>`, one line per step or drill line. See [Programs](#programs) |
 | any key from [Settings](#settings) except `MDSDebugLogging` | as in the table |
 
 ```text

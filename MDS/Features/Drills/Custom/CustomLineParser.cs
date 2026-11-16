@@ -9,7 +9,6 @@ using UnityEngine;
 namespace MDS.Features.Drills.Custom
 {
     // Reads one comma separated line of a custom drill: static spots, a formation written as its rc options, or one of the drill's settings.
-    // Commas inside brackets belong to a position, so (x,z) stays one part.
     // A parsed line comes back as what it does to a drill, so the config and rc customdrill add apply it the same way.
     public static class CustomLineParser
     {
@@ -42,7 +41,7 @@ namespace MDS.Features.Drills.Custom
 
         public static bool TryParse(string text, out Action<CustomDrill> apply, out string error)
         {
-            string[] parts = Split(text);
+            string[] parts = CommaParts.Split(text);
             string head = parts.Length > 0 ? parts[0] : string.Empty;
             apply = null;
             if (EnumParser.TryParseStrict(head, out TeamSide _)) error = ReadSpots(parts, out apply);
@@ -51,29 +50,6 @@ namespace MDS.Features.Drills.Custom
             else if (Settings.TryGetValue(head, out SettingReader read)) error = parts.Length == SettingParts ? read(parts[1], out apply) : $"{head} takes one value, like {head},<value>.";
             else error = $"'{text}' isn't a custom drill line. A line is one of: {Format}";
             return error.Length == 0;
-        }
-
-        private static string[] Split(string text)
-        {
-            string line = text ?? string.Empty;
-            var parts = new List<string>();
-            int depth = 0;
-            int start = 0;
-            for (int i = 0; i < line.Length; i++)
-            {
-                depth += line[i] == '(' ? 1 : line[i] == ')' ? -1 : 0;
-                if (line[i] != ',' || depth != 0) continue;
-
-                AddPart(parts, line.Substring(start, i - start));
-                start = i + 1;
-            }
-            AddPart(parts, line.Substring(start));
-            return parts.ToArray();
-        }
-
-        private static void AddPart(List<string> parts, string part)
-        {
-            if (part.Trim().Length > 0) parts.Add(part.Trim());
         }
 
         private static string ReadSpots(string[] parts, out Action<CustomDrill> apply)

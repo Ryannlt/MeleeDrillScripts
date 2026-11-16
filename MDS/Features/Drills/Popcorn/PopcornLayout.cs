@@ -25,9 +25,12 @@ namespace MDS.Features.Drills.Popcorn
         // Between neighbors on a line.
         public float Spacing { get; set; }
 
+        // Who is free to be dealt into a fight.
+        public PickScope Scope { get; set; }
+
         public PopcornRequest WithDistance(float distance)
         {
-            return new PopcornRequest { Layout = Layout, Smallest = Smallest, Largest = Largest, Area = Area, Distance = distance, LineDistance = LineDistance, Spacing = Spacing };
+            return new PopcornRequest { Layout = Layout, Smallest = Smallest, Largest = Largest, Area = Area, Distance = distance, LineDistance = LineDistance, Spacing = Spacing, Scope = Scope };
         }
     }
 

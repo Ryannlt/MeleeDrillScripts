@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Holdfast.Modding;
 using MDS.Features.Arenas;
 using MDS.Features.Drills;
+using MDS.Features.Programs;
 using MDS.Features.ShootingTraining;
 using MDS.Features.Status;
 using MDS.Shared.Commands;
@@ -94,7 +95,9 @@ namespace MDS
 
             var arena = new ArenaFeature(this);
             _features.Add(arena);
-            _features.Add(new DrillsFeature(this, arena.Store));
+            var drills = new DrillsFeature(this, arena.Store);
+            _features.Add(drills);
+            _features.Add(new ProgramsFeature(this, drills.Catalog));
             _features.Add(new ShootingTrainingFeature(this));
             _features.Add(new StatusFeature(this, arena.Store));
         }

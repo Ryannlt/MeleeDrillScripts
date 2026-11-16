@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using MDS.Shared.Players;
 
 namespace MDS.Features.Drills.Picking
@@ -14,16 +15,18 @@ namespace MDS.Features.Drills.Picking
             _random = random;
         }
 
-        public PickResult Pick(Headcount count)
+        public PickResult Pick(Headcount count, PickScope scope)
         {
-            int attackers = count.IsEveryone ? _players.Attacking.Count : count.Attackers;
-            int defenders = count.IsEveryone ? _players.Defending.Count : count.Defenders;
-            if (attackers > _players.Attacking.Count) return PickRules.Shortfall("attackers", attackers, _players.Attacking.Count);
-            if (defenders > _players.Defending.Count) return PickRules.Shortfall("defenders", defenders, _players.Defending.Count);
+            List<IPlayer> attacking = scope.Free(_players.Attacking);
+            List<IPlayer> defending = scope.Free(_players.Defending);
+            int attackers = count.IsEveryone ? attacking.Count : count.Attackers;
+            int defenders = count.IsEveryone ? defending.Count : count.Defenders;
+            if (attackers > attacking.Count) return PickRules.Shortfall("attackers", attackers, attacking.Count);
+            if (defenders > defending.Count) return PickRules.Shortfall("defenders", defenders, defending.Count);
 
             var lineup = new Lineup(
-                PickRules.Shuffled(_players.Attacking, _random).GetRange(0, attackers),
-                PickRules.Shuffled(_players.Defending, _random).GetRange(0, defenders));
+                PickRules.Shuffled(attacking, _random).GetRange(0, attackers),
+                PickRules.Shuffled(defending, _random).GetRange(0, defenders));
             return PickResult.Ok(lineup);
         }
     }

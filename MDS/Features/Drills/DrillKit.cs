@@ -49,7 +49,11 @@ namespace MDS.Features.Drills
 
         public Teleporter Teleporter { get; }
 
-        public Lineup Field() => new Lineup(new List<IPlayer>(Players.Attacking), new List<IPlayer>(Players.Defending));
+        // Without a scope, everyone on the field; with one, only the players free for this fight.
+        public Lineup Field(PickScope scope = null)
+        {
+            return scope == null ? new Lineup(new List<IPlayer>(Players.Attacking), new List<IPlayer>(Players.Defending)) : new Lineup(scope.Free(Players.Attacking), scope.Free(Players.Defending));
+        }
 
         public bool HasArena(DrillOptions options, out string error) => Arenas.TryGetUsable(options.GetArena(), out _, out error);
 

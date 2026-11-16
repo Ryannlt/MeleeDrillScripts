@@ -40,6 +40,10 @@ namespace MDS.Features.Drills.Popcorn
         // Everyone on the field fights.
         public bool ClearsLeftovers => false;
 
+        public bool RunsInParallel(DrillOptions options) => false;
+
+        public Headcount Needs(DrillOptions options) => Headcount.Everyone;
+
         public bool Validate(DrillOptions options, out string error)
         {
             if (!_kit.HasArena(options, out error)) return false;
@@ -74,7 +78,7 @@ namespace MDS.Features.Drills.Popcorn
 
             preview = new DrillPreview { IsSample = true, Detail = $"{draw.LayoutName}, {draw.Fights.Count} fights: {draw.Sizes}" };
             preview.Note = NoteFor(_kit.ArenaFor(options).Number, request, draw);
-            preview.AddSpots(_kit.Field(), draw.Plan);
+            preview.AddSpots(_kit.Field(request.Scope), draw.Plan);
             return true;
         }
 
@@ -93,7 +97,7 @@ namespace MDS.Features.Drills.Popcorn
         {
             TryDraw(request, out Draw draw, out string error);
             int moved = _kit.Teleporter.MoveAll(draw.Plan.Players, draw.Plan.Spots);
-            run.Placed(_kit.Field(), draw.Plan.Spots);
+            run.Placed(_kit.Field(request.Scope), draw.Plan.Spots);
             _kit.Log.Info($"popcorn ({draw.LayoutName}) in arena {run.Arena.Number}: {draw.Fights.Count} fights ({draw.Sizes}); {moved} of {draw.Plan.Total} moved. {NoteFor(run.Arena.Number, request, draw)}".TrimEnd());
             if (error.Length > 0) _kit.Warn(run, $"{error} The rest stay where they are.");
         }
@@ -101,7 +105,7 @@ namespace MDS.Features.Drills.Popcorn
         // A deal that doesn't fit at the asked distance takes the largest distance that does.
         private bool TryDraw(PopcornRequest request, out Draw draw, out string error)
         {
-            List<Lineup> fights = _fights.Deal(_kit.Field(), request.Smallest, request.Largest);
+            List<Lineup> fights = _fights.Deal(_kit.Field(request.Scope), request.Smallest, request.Largest);
             draw = DrawAt(fights, request);
             if (!draw.Plan.PlacesEveryone) draw = Closest(fights, request);
 
@@ -142,6 +146,7 @@ namespace MDS.Features.Drills.Popcorn
                 Distance = options.GetNumber(DrillOption.Distance, _kit.Settings.PopcornDistance.Value),
                 LineDistance = options.GetNumber(DrillOption.LineDistance, _kit.Settings.PopcornLineDistance.Value),
                 Spacing = options.GetNumber(DrillOption.Spacing, _kit.Settings.PopcornSpacing.Value),
+                Scope = options.Scope,
             };
         }
 

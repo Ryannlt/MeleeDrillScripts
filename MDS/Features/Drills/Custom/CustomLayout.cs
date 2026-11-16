@@ -41,7 +41,7 @@ namespace MDS.Features.Drills.Custom
         public CustomPlacement Place(CustomRun run, Lineup rest)
         {
             var placement = new CustomPlacement();
-            foreach (StaticSpot spot in run.Drill.Spots) placement.SpotsOf(spot.Side).Add(run.Arena.Center + Turned(spot.Offset, run.Degrees));
+            foreach (StaticSpot spot in run.Drill.Spots) placement.SpotsOf(run.SideOf(spot.Side)).Add(run.Arena.Center + Turned(spot.Offset, run.Degrees));
             if (run.Drill.Formation != null) placement.Formation = run.Drill.Formation.Plan(FormationRequestFor(run, rest, placement));
 
             placement.Error = placement.Formation.Error;
@@ -88,6 +88,7 @@ namespace MDS.Features.Drills.Custom
                 Settings = _settings,
                 Random = _random,
                 OpenMelee = _openMelee,
+                Mirrored = run.Mirrored,
             };
         }
     }

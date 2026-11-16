@@ -18,6 +18,9 @@ namespace MDS.Features.Drills.Picking
 
         public bool IsEveryone => Attackers == WholeTeam;
 
+        // The other team takes each side.
+        public Headcount Mirrored => IsEveryone ? this : new Headcount(Defenders, Attackers);
+
         public override string ToString() => IsEveryone ? "everyone" : $"{Attackers}v{Defenders}";
     }
 }

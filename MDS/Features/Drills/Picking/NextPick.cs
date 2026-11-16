@@ -5,13 +5,14 @@ using MDS.Shared.Players;
 namespace MDS.Features.Drills.Picking
 {
     // Carrying on from the last pick makes repeated drills rotate through everyone.
+    // Busy players are passed over and come up again on the next turn round, so whoever waited longest goes first.
     // The picks are shuffled so nobody keeps the same spot on the line.
     public sealed class NextPick : ISelectionStrategy
     {
         private readonly PlayerRegistry _players;
         private readonly Random _random;
-        private int _attackerIndex;
-        private int _defenderIndex;
+        private readonly Rotation _attackers = new();
+        private readonly Rotation _defenders = new();
 
         public NextPick(PlayerRegistry players, Random random)
         {
@@ -19,32 +20,42 @@ namespace MDS.Features.Drills.Picking
             _random = random;
         }
 
-        public PickResult Pick(Headcount count)
+        public PickResult Pick(Headcount count, PickScope scope)
         {
-            if (count.Attackers > _players.Attacking.Count) return PickRules.Shortfall("attackers", count.Attackers, _players.Attacking.Count);
-            if (count.Defenders > _players.Defending.Count) return PickRules.Shortfall("defenders", count.Defenders, _players.Defending.Count);
+            int freeAttackers = scope.Free(_players.Attacking).Count;
+            int freeDefenders = scope.Free(_players.Defending).Count;
+            if (count.Attackers > freeAttackers) return PickRules.Shortfall("attackers", count.Attackers, freeAttackers);
+            if (count.Defenders > freeDefenders) return PickRules.Shortfall("defenders", count.Defenders, freeDefenders);
 
-            List<IPlayer> attackers = TakeNext(_players.Attacking, count.Attackers, ref _attackerIndex);
-            List<IPlayer> defenders = TakeNext(_players.Defending, count.Defenders, ref _defenderIndex);
+            List<IPlayer> attackers = _attackers.Take(_players.Attacking, count.Attackers, scope);
+            List<IPlayer> defenders = _defenders.Take(_players.Defending, count.Defenders, scope);
             return PickResult.Ok(new Lineup(PickRules.Shuffled(attackers, _random), PickRules.Shuffled(defenders, _random)));
         }
 
         public void Reset()
         {
-            _attackerIndex = 0;
-            _defenderIndex = 0;
+            _attackers.Reset();
+            _defenders.Reset();
         }
 
-        private static List<IPlayer> TakeNext(IReadOnlyList<IPlayer> team, int count, ref int index)
+        // Where one team's turn order has got to.
+        private sealed class Rotation
         {
-            var picked = new List<IPlayer>(count);
-            for (int i = 0; i < count; i++)
+            private int _index;
+
+            public void Reset() => _index = 0;
+
+            public List<IPlayer> Take(IReadOnlyList<IPlayer> team, int count, PickScope scope)
             {
-                index %= team.Count;
-                picked.Add(team[index]);
-                index++;
+                var picked = new List<IPlayer>(count);
+                for (int seen = 0; seen < team.Count && picked.Count < count; seen++)
+                {
+                    _index %= team.Count;
+                    if (scope.IsFree(team[_index])) picked.Add(team[_index]);
+                    _index++;
+                }
+                return picked;
             }
-            return picked;
         }
     }
 }

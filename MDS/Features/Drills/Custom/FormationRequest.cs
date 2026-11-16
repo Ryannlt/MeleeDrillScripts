@@ -25,6 +25,11 @@ namespace MDS.Features.Drills.Custom
         public System.Random Random { get; set; }
 
         public OpenMeleePlanner OpenMelee { get; set; }
+
+        // Every line takes the other team.
+        public bool Mirrored { get; set; }
+
+        public TeamSide SideOf(TeamSide written) => Mirrored ? Teams.Other(written) : written;
     }
 
     // The formation's players paired with their spots.

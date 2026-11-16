@@ -24,13 +24,17 @@ namespace MDS.Features.Drills
         // Everyone on the field is placed.
         public bool ClearsLeftovers => false;
 
+        public bool RunsInParallel(DrillOptions options) => false;
+
+        public Headcount Needs(DrillOptions options) => Headcount.Everyone;
+
         public bool Validate(DrillOptions options, out string error)
         {
             if (!_kit.HasArena(options, out error)) return false;
 
             PickStrategy strategy = options.GetStrategy(_kit.Settings.GroupfightStrategy.Value);
             if (!_selection.Allows(strategy)) error = $"A groupfight picks by random or repeat, not {strategy}.";
-            else if (_kit.Players.Attacking.Count == 0 || _kit.Players.Defending.Count == 0) error = "Both teams need players for a groupfight.";
+            else if (!HasBothTeams(_kit.Field(options.Scope))) error = "Both teams need players for a groupfight.";
             return error.Length == 0;
         }
 
@@ -38,7 +42,8 @@ namespace MDS.Features.Drills
         {
             LineFit lines = LinesFor(options);
             error = lines.Error;
-            preview = lines.Fits ? _kit.PreviewLines(lines, _kit.Players.Attacking.Count, _kit.Players.Defending.Count) : null;
+            Lineup field = _kit.Field(options.Scope);
+            preview = lines.Fits ? _kit.PreviewLines(lines, field.Attackers.Count, field.Defenders.Count) : null;
             return lines.Fits;
         }
 
@@ -49,7 +54,7 @@ namespace MDS.Features.Drills
             error = lines.Error;
             if (!lines.Fits) return false;
 
-            PickResult pick = _selection.Pick(options.GetStrategy(_kit.Settings.GroupfightStrategy.Value), Headcount.Everyone);
+            PickResult pick = _selection.Pick(options.GetStrategy(_kit.Settings.GroupfightStrategy.Value), Headcount.Everyone, options.Scope);
             error = pick.Error;
             if (!pick.Succeeded) return false;
 
@@ -58,11 +63,14 @@ namespace MDS.Features.Drills
             return true;
         }
 
+        private static bool HasBothTeams(Lineup field) => field.Attackers.Count > 0 && field.Defenders.Count > 0;
+
         // Everyone on the field is placed, so the longer team sets the line length.
         private LineFit LinesFor(DrillOptions options)
         {
             LineShape asked = _kit.ShapeFor(options, _kit.Settings.GroupfightDistance, _kit.Settings.GroupfightSpacing);
-            int longest = Math.Max(_kit.Players.Attacking.Count, _kit.Players.Defending.Count);
+            Lineup field = _kit.Field(options.Scope);
+            int longest = Math.Max(field.Attackers.Count, field.Defenders.Count);
             return LineFit.Into(_kit.ArenaFor(options), asked, longest);
         }
     }

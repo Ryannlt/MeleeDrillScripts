@@ -47,12 +47,15 @@ namespace MDS.Features.Drills.Picking
 
         public bool Allows(PickStrategy strategy) => _strategies.ContainsKey(strategy);
 
-        public PickResult Pick(PickStrategy strategy, Headcount count)
+        public PickResult Pick(PickStrategy strategy, Headcount count, PickScope scope)
         {
             if (!_strategies.TryGetValue(strategy, out ISelectionStrategy picker)) return PickResult.Failed($"This drill can't pick by {strategy}.");
 
-            PickResult result = picker.Pick(count);
-            if (result.Succeeded) _memory.Remember(result.Lineup);
+            PickResult result = picker.Pick(count, scope);
+            if (!result.Succeeded) return result;
+
+            _memory.Remember(scope.Arena, result.Lineup);
+            scope.Claim(result.Lineup);
             return result;
         }
 

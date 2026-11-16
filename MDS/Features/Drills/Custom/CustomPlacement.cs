@@ -21,6 +21,16 @@ namespace MDS.Features.Drills.Custom
         public Lineup Picked { get; set; }
 
         public DrillRun Run { get; set; }
+
+        // Who is free for this run.
+        public PickScope Scope { get; set; }
+
+        // Every spot and line takes the other team.
+        public bool Mirrored { get; set; }
+
+        public Headcount Count => Mirrored ? Drill.Count.Mirrored : Drill.Count;
+
+        public TeamSide SideOf(TeamSide written) => Mirrored ? Teams.Other(written) : written;
     }
 
     // Where everyone stands for one run: each team's static spots in the drill's order, and the formation's players with their spots.

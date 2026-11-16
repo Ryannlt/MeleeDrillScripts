@@ -18,6 +18,9 @@ namespace MDS.Features.Drills
         private readonly CustomDrillBook _book;
         private readonly SpotPreviewOverlay _preview;
 
+        // Programs start drills through this.
+        public DrillCatalog Catalog { get; private set; }
+
         public DrillsFeature(ModContext context, ArenaStore arenas)
         {
             _round = context.Round;
@@ -56,6 +59,7 @@ namespace MDS.Features.Drills
             context.Commands.Register(new CustomDrillCommand(_book, new DrillCommand(custom, runner, context.Replies), context.Replies));
             drills.Add(custom);
             context.Commands.Register(new PreviewCommand(drills, context.Replies));
+            Catalog = new DrillCatalog(drills, runner, kit);
         }
 
         public void Dispose()

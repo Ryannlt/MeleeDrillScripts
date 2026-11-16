@@ -46,7 +46,7 @@ namespace MDS.Features.Drills.Custom
             var plan = new FormationPlan { ShrinksWithSpots = true };
             foreach (FormationLine line in OrderedLines())
             {
-                IReadOnlyList<IPlayer> players = line.Side == TeamSide.Attacker ? request.Rest.Attackers : request.Rest.Defenders;
+                IReadOnlyList<IPlayer> players = request.SideOf(line.Side) == TeamSide.Attacker ? request.Rest.Attackers : request.Rest.Defenders;
                 LineShape shape = ShapeOf(line, request);
                 plan.Plan.Add(players, LinePlacement.AttackerSpots(shape, players.Count));
                 if (players.Count > 1) plan.SmallestSpacing = Mathf.Min(plan.SmallestSpacing, shape.Spacing);
@@ -89,11 +89,11 @@ namespace MDS.Features.Drills.Custom
             return toward.magnitude < SameSpot ? turn : Mathf.Atan2(toward.y, toward.x) * Mathf.Rad2Deg;
         }
 
-        private Vector2 MiddleOfOther(TeamSide side, FormationRequest request)
+        // Mirroring flips every spot and line alike, so the other written line still stands for the other team.
+        private Vector2 MiddleOfOther(TeamSide written, FormationRequest request)
         {
-            TeamSide other = side == TeamSide.Attacker ? TeamSide.Defender : TeamSide.Attacker;
-            var points = new List<Vector2>(request.Spots[other]);
-            if (_lines.TryGetValue(other, out FormationLine line)) points.Add(CenterOf(line, request));
+            var points = new List<Vector2>(request.Spots[Teams.Other(request.SideOf(written))]);
+            if (_lines.TryGetValue(Teams.Other(written), out FormationLine line)) points.Add(CenterOf(line, request));
             if (points.Count == 0) return request.Arena.Center;
 
             Vector2 sum = Vector2.zero;

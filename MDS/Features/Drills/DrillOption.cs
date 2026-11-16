@@ -26,7 +26,8 @@ namespace MDS.Features.Drills
         Name,
         Turn,
         Side,
-        Position
+        Position,
+        Mirror
     }
 
     public static class DrillOptionValues
@@ -49,8 +50,9 @@ namespace MDS.Features.Drills
             [DrillOption.Min] = IsFightSize,
             [DrillOption.Max] = IsFightSize,
 
-            // Any word but a pick word, which fills the strategy, so the name and the strategy can come in either order.
-            [DrillOption.Name] = text => !EnumParser.TryParseStrict(text, out PickStrategy _),
+            // Any word but a pick word or mirror, which fill their own slots, so the name and those can come in any order.
+            [DrillOption.Name] = text => !EnumParser.TryParseStrict(text, out PickStrategy _) && !IsMirror(text),
+            [DrillOption.Mirror] = IsMirror,
             [DrillOption.Turn] = text => Facing.TryParse(text, out _),
             [DrillOption.Side] = text => EnumParser.TryParseStrict(text, out TeamSide _),
 
@@ -62,6 +64,8 @@ namespace MDS.Features.Drills
 
         // A bare number after a custom drill's name would otherwise turn the drill instead of picking the arena.
         public static bool TakesBare(DrillOption option) => option != DrillOption.Turn;
+
+        private static bool IsMirror(string text) => text.Equals("mirror", StringComparison.OrdinalIgnoreCase);
 
         private static bool IsCount(string text) => int.TryParse(text, out int count) && count > 0;
 

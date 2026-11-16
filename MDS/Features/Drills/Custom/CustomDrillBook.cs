@@ -10,8 +10,7 @@ namespace MDS.Features.Drills.Custom
     // The mod reloads with every map, so a drill added by rc lasts until the next map.
     public sealed class CustomDrillBook
     {
-        private const int LongestName = 32;
-        private static readonly string[] Reserved = { "add", "remove", "show" };
+        private static readonly string[] Reserved = { "add", "remove", "show", "mirror" };
 
         private readonly List<CustomDrill> _drills = new();
         private readonly PlayerRegistry _players;
@@ -25,16 +24,11 @@ namespace MDS.Features.Drills.Custom
 
         public IReadOnlyList<CustomDrill> All => _drills;
 
-        // Letters, digits, - and _.
-        // Not a bare number, which picks a drill by its place in the list, nor a pick word, which fills the strategy, nor a word rc customdrill already uses.
+        // Not a pick word either, since it would fill the strategy.
         public static bool IsName(string name, out string error)
         {
-            bool shaped = !string.IsNullOrEmpty(name) && name.Length <= LongestName && Array.TrueForAll(name.ToCharArray(), c => char.IsLetterOrDigit(c) || c == '-' || c == '_');
-            if (!shaped) error = $"'{name}' isn't a drill name: use up to {LongestName} letters, digits, - and _.";
-            else if (int.TryParse(name, out _)) error = $"'{name}' would read as a drill number: give it a name with a letter in it.";
-            else if (EnumParser.TryParseStrict(name, out PickStrategy _)) error = $"'{name}' is a strategy word: pick another name.";
-            else if (Array.Exists(Reserved, word => word.Equals(name, StringComparison.OrdinalIgnoreCase))) error = $"'{name}' is a word rc customdrill uses: pick another name.";
-            else error = string.Empty;
+            if (!NameRules.TryCheck(name, Reserved, out error)) return false;
+            if (EnumParser.TryParseStrict(name, out PickStrategy _)) error = $"'{name}' is a strategy word: pick another name.";
             return error.Length == 0;
         }
 

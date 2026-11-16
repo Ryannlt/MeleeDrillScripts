@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using MDS.Features.Arenas;
 using MDS.Features.Drills.Picking;
 using MDS.Features.Drills.Popcorn;
 using MDS.Features.Drills.Spawning;
 using MDS.Shared;
+using MDS.Shared.Players;
 using UnityEngine;
 
 namespace MDS.Features.Drills
@@ -13,9 +15,19 @@ namespace MDS.Features.Drills
     {
         private readonly Dictionary<DrillOption, string> _values = new();
 
+        // Set by a program for the players already in one of its fights, and never read from text.
+        public BusyPlayers Busy { get; set; }
+
+        public PickScope Scope => new PickScope(GetArena(), Busy);
+
+        // The other team takes each side.
+        public bool IsMirrored => Has(DrillOption.Mirror);
+
         public bool Has(DrillOption option) => _values.ContainsKey(option);
 
         public void Set(DrillOption option, string text) => _values[option] = text;
+
+        public void Unset(DrillOption option) => _values.Remove(option);
 
         public int GetCount(DrillOption option) => _values.TryGetValue(option, out string text) ? int.Parse(text) : 0;
 

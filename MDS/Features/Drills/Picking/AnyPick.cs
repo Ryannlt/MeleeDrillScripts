@@ -15,10 +15,10 @@ namespace MDS.Features.Drills.Picking
             _random = random;
         }
 
-        public PickResult Pick(Headcount count)
+        public PickResult Pick(Headcount count, PickScope scope)
         {
-            var pool = new List<IPlayer>(_players.Attacking);
-            pool.AddRange(_players.Defending);
+            List<IPlayer> pool = scope.Free(_players.Attacking);
+            pool.AddRange(scope.Free(_players.Defending));
             int needed = count.Attackers + count.Defenders;
             if (needed > pool.Count) return PickRules.Shortfall("players", needed, pool.Count);
 

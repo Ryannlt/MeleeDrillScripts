@@ -5,4 +5,9 @@ namespace MDS.Features.Drills
         Attacker,
         Defender
     }
+
+    public static class Teams
+    {
+        public static TeamSide Other(TeamSide side) => side == TeamSide.Attacker ? TeamSide.Defender : TeamSide.Attacker;
+    }
 }
