@@ -10,9 +10,9 @@ namespace MDS.Features.Drills.Settings
     // The defaults are tuned for Palisade Arena A1.
     public sealed class DrillSettings
     {
-        private const float XvXDistanceDefault = 20f;
+        private const float XvXDistanceDefault = 15f;
         private const float GroupfightDistanceDefault = 25f;
-        private const float LineSpacingDefault = 2f;
+        private const float LineSpacingDefault = 1.5f;
         private const float OpenMeleeSpacingDefault = 1.5f;
         private const float OpenMeleeOffsetDefault = 2f;
         private const float PopcornDistanceDefault = 6f;
@@ -24,10 +24,10 @@ namespace MDS.Features.Drills.Settings
         {
             XvXDistance = new NumberSetting("xvxDistance", XvXDistanceDefault, replies);
             XvXSpacing = new NumberSetting("xvxSpacing", LineSpacingDefault, replies);
-            XvXStrategy = new StrategySetting("xvxStrategy", xvx.Allowed, replies);
+            XvXStrategy = new StrategySetting("xvxStrategy", xvx, replies);
             GroupfightDistance = new NumberSetting("groupfightDistance", GroupfightDistanceDefault, replies);
             GroupfightSpacing = new NumberSetting("groupfightSpacing", LineSpacingDefault, replies);
-            GroupfightStrategy = new StrategySetting("groupfightStrategy", groupfight.Allowed, replies);
+            GroupfightStrategy = new StrategySetting("groupfightStrategy", groupfight, replies);
             OpenMeleeSpacing = new NumberSetting("openMeleeSpacing", OpenMeleeSpacingDefault, replies);
             OpenMeleeOffset = new OffsetSetting("openMeleeOffset", OpenMeleeOffsetDefault, replies);
             OpenMeleeStrategy = new SpawnStrategySetting("openMeleeStrategy", replies);
@@ -38,6 +38,7 @@ namespace MDS.Features.Drills.Settings
             PopcornSpacing = new NumberSetting("popcornSpacing", LineSpacingDefault, replies);
             PopcornStrategy = new FightLayoutSetting("popcornStrategy", replies);
             Orientation = new FacingSetting(replies);
+            CountdownSeconds = new CountdownSetting(replies);
         }
 
         public NumberSetting XvXDistance { get; }
@@ -72,6 +73,8 @@ namespace MDS.Features.Drills.Settings
 
         public FacingSetting Orientation { get; }
 
+        public CountdownSetting CountdownSeconds { get; }
+
         public void RegisterWith(SettingsRegistry settings, ConfigRouter config)
         {
             foreach (ISetting setting in All())
@@ -87,7 +90,7 @@ namespace MDS.Features.Drills.Settings
             {
                 XvXDistance, XvXSpacing, XvXStrategy, GroupfightDistance, GroupfightSpacing, GroupfightStrategy,
                 OpenMeleeSpacing, OpenMeleeOffset, OpenMeleeStrategy, PopcornMin, PopcornMax, PopcornDistance, PopcornLineDistance, PopcornSpacing,
-                PopcornStrategy, Orientation,
+                PopcornStrategy, Orientation, CountdownSeconds,
             };
         }
     }

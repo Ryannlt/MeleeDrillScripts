@@ -8,9 +8,11 @@ namespace MDS.Features.Drills.Picking
     {
         private readonly PlayerRegistry _players;
         private readonly Random _random;
+        private readonly LineSlots _slots;
 
-        public AnyPick(PlayerRegistry players, Random random)
+        public AnyPick(PlayerRegistry players, Random random, LineSlots slots)
         {
+            _slots = slots;
             _players = players;
             _random = random;
         }
@@ -23,7 +25,7 @@ namespace MDS.Features.Drills.Picking
             if (needed > pool.Count) return PickRules.Shortfall("players", needed, pool.Count);
 
             List<IPlayer> shuffled = PickRules.Shuffled(pool, _random);
-            return PickResult.Ok(new Lineup(shuffled.GetRange(0, count.Attackers), shuffled.GetRange(count.Attackers, count.Defenders)));
+            return PickResult.Ok(_slots.Arrange(new Lineup(shuffled.GetRange(0, count.Attackers), shuffled.GetRange(count.Attackers, count.Defenders))));
         }
     }
 }

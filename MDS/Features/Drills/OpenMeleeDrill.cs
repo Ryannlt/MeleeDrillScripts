@@ -27,8 +27,8 @@ namespace MDS.Features.Drills
         public string Name => "openmelee";
 
         public DrillSyntax Syntax { get; } = new DrillSyntax(
-            "Usage: rc openmelee [scatter|spread|groups|teams|random] [spacing] [offset] [facing] [arena], numbers in that order, or by name: strategy=spread spacing=2 facing=90",
-            0, DrillOption.Spawn, DrillOption.Spacing, DrillOption.Offset, DrillOption.Facing);
+            "Usage: rc openmelee [scatter|spread|groups|teams|random] [spacing] [offset] [facing] [early|late] [arena], numbers in that order, or by name: strategy=spread spacing=2 facing=90 teleport=early",
+            0, DrillOption.Spawn, DrillOption.Spacing, DrillOption.Offset, DrillOption.Facing, DrillOption.Teleport);
 
         // Everyone on the field is placed.
         public bool ClearsLeftovers => false;
@@ -56,7 +56,8 @@ namespace MDS.Features.Drills
             if (error.Length > 0) return false;
 
             DrillRun started = new DrillRun(Name, _kit.ArenaFor(options));
-            _countdown.Start(new DrillTiming(Title, true, GodModeAfterMoveSeconds), () => Place(started, request, scope));
+            var timing = new DrillTiming(Title, true, GodModeAfterMoveSeconds) { Teleport = options.GetTeleport(TeleportTime.Late) };
+            _countdown.Start(timing, started, () => Place(started, request, scope));
             run = started;
             return true;
         }

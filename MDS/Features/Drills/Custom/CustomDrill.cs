@@ -11,8 +11,6 @@ namespace MDS.Features.Drills.Custom
         // Open melee's.
         public const float DefaultGodModeSeconds = 2f;
 
-        private readonly List<string> _spotLines = new();
-
         public CustomDrill(string name, Selection selection)
         {
             Name = name;
@@ -39,6 +37,9 @@ namespace MDS.Features.Drills.Custom
 
         public float GodModeSeconds { get; set; } = DefaultGodModeSeconds;
 
+        // The spots and formation lines as written, in order; Spots and Formation are rebuilt from them.
+        public List<string> Parts { get; } = new();
+
         public Headcount Count => new Headcount(CountOf(TeamSide.Attacker), CountOf(TeamSide.Defender));
 
         public bool IsEmpty => Spots.Count == 0 && Formation == null;
@@ -47,10 +48,28 @@ namespace MDS.Features.Drills.Custom
 
         public string Summary => $"{Name} ({Count}{(Formation != null ? $" + {Formation.Name}" : string.Empty)}, {Strategy.ToString().ToLowerInvariant()})";
 
-        public void AddSpots(IEnumerable<StaticSpot> spots, string written)
+        public void AddSpots(IEnumerable<StaticSpot> spots) => Spots.AddRange(spots);
+
+        // A formation part drops the earlier ones it replaces, so the list only ever shows parts that take effect.
+        public void AddPart(string text)
         {
-            Spots.AddRange(spots);
-            _spotLines.Add(written);
+            Parts.RemoveAll(part => CustomLineParser.Replaces(text, part));
+            Parts.Add(text);
+            Rebuild();
+        }
+
+        public void ReplacePart(int index, string text)
+        {
+            Parts.RemoveAt(index);
+            Parts.RemoveAll(part => CustomLineParser.Replaces(text, part));
+            Parts.Insert(System.Math.Min(index, Parts.Count), text);
+            Rebuild();
+        }
+
+        public void RemovePart(int index)
+        {
+            Parts.RemoveAt(index);
+            Rebuild();
         }
 
         public void SetLine(FormationLine line)
@@ -59,11 +78,10 @@ namespace MDS.Features.Drills.Custom
             else Formation = new LineFormation(line);
         }
 
-        // The drill as lines the config or rc customdrill add would take back.
+        // The drill as lines the config would take back: its parts, then its settings.
         public List<string> Lines()
         {
-            var lines = new List<string>(_spotLines);
-            if (Formation != null) lines.AddRange(Formation.Lines);
+            var lines = new List<string>(Parts);
             lines.Add($"strategy,{Strategy.ToString().ToLowerInvariant()}");
             lines.Add($"turn,{(Turn.IsRandom ? "random" : Numbers.Format(Turn.Degrees))}");
             lines.Add($"countdown,{(CountsDown ? "on" : "off")}");
@@ -73,5 +91,15 @@ namespace MDS.Features.Drills.Custom
         }
 
         private int CountOf(TeamSide side) => Spots.FindAll(spot => spot.Side == side).Count;
+
+        private void Rebuild()
+        {
+            Spots.Clear();
+            Formation = null;
+            foreach (string part in Parts)
+            {
+                if (CustomLineParser.TryParse(part, out System.Action<CustomDrill> apply, out _)) apply(this);
+            }
+        }
     }
 }

@@ -7,7 +7,7 @@ namespace MDS.Features.Programs
 {
     // One step running: a slot per drill line and arena, each holding at most one fight at a time.
     // Rolling deals an idle slot as soon as it is free; together waits for the whole round to end.
-    // Once the step's minutes or fights are reached no new fight starts, and the step is done when its last fight ends.
+    // Once the step's rounds, fights each or minutes are reached no new fight starts, and the step is done when its last fight ends.
     public sealed class StepRun
     {
         // How often idle slots try again when nothing has changed, such as while too few players are free.
@@ -27,7 +27,9 @@ namespace MDS.Features.Programs
         private float _startedAt;
         private float _nextDealAt;
         private int _started;
-        private int _limit;
+        private int _limit = int.MaxValue;
+        private int _rounds;
+        private readonly Dictionary<IPlayer, int> _fought = new();
         private string _lastRefusal = string.Empty;
 
         public StepRun(ProgramKit kit, ProgramStep step, BusyPlayers busy)
@@ -36,7 +38,6 @@ namespace MDS.Features.Programs
             _step = step;
             _busy = busy;
             foreach (ProgramDrill drill in step.Drills) _slots.AddRange(drill.Arenas.ConvertAll(arena => new Slot(drill, arena)));
-            _limit = step.Fights > 0 ? step.Fights : int.MaxValue;
         }
 
         public bool IsDone { get; private set; }
@@ -50,8 +51,8 @@ namespace MDS.Features.Programs
             return Summary();
         }
 
-        // Without minutes or fights, the step is the one round its first deal that starts anything starts.
-        private bool IsOneRound => _step.Fights <= 0 && _step.Minutes <= 0f;
+        // The step is the one round its first deal that starts anything starts.
+        private bool IsOneRound => _step.End == StepEnd.Round;
 
         public void Update(float now)
         {
@@ -72,7 +73,20 @@ namespace MDS.Features.Programs
             foreach (Slot slot in _slots) Free(slot);
         }
 
-        private bool IsOver(float now) => _started >= _limit || (_step.Minutes > 0f && now - _startedAt >= _step.Minutes * SecondsPerMinute);
+        private bool IsOver(float now)
+        {
+            if (_started >= _limit) return true;
+            if (_step.End == StepEnd.Rounds) return _rounds >= _step.Count;
+            if (_step.End == StepEnd.Minutes) return now - _startedAt >= _step.Count * SecondsPerMinute;
+            return _step.End == StepEnd.Each && _started > 0 && EveryoneFought();
+        }
+
+        // Players on the field now; one who left or sits out dead doesn't hold the step open.
+        private bool EveryoneFought()
+        {
+            List<IPlayer> field = _kit.Drills.Kit.Field().Everyone();
+            return field.TrueForAll(player => _fought.TryGetValue(player, out int fights) && fights >= _step.Count);
+        }
 
         private void CloseRound()
         {
@@ -91,10 +105,12 @@ namespace MDS.Features.Programs
         private void DealIdle(float now)
         {
             _nextDealAt = now + RetrySeconds;
+            int before = _started;
             foreach (Slot slot in _slots)
             {
                 if (slot.Fight == null && _started < _limit) TryDeal(slot);
             }
+            if (_started > before && _step.Mode == StepMode.Together) _rounds++;
             CloseRound();
         }
 
@@ -106,7 +122,7 @@ namespace MDS.Features.Programs
             DrillRun run = Started(slot.Drill.Drill, options);
             if (run == null) return;
 
-            slot.Fight = _kit.Watcher.Watch(run, _step.FightSeconds ?? _kit.Settings.FightSeconds.Value);
+            slot.Fight = _kit.Watcher.Watch(run, _step.FightSeconds);
             ClaimWhenPlaced(run);
             _started++;
         }
@@ -132,8 +148,14 @@ namespace MDS.Features.Programs
         // Drills that take everyone pick nobody through the pool, so their players count as busy once placed.
         private void ClaimWhenPlaced(DrillRun run)
         {
-            if (run.Lineup != null) _busy.Claim(run.Lineup.Everyone());
-            else run.PlayersPlaced += placed => _busy.Claim(placed.Lineup.Everyone());
+            if (run.Lineup != null) Claim(run.Lineup);
+            else run.PlayersPlaced += placed => Claim(placed.Lineup);
+        }
+
+        private void Claim(Lineup lineup)
+        {
+            _busy.Claim(lineup.Everyone());
+            foreach (IPlayer player in lineup.Everyone()) _fought[player] = _fought.TryGetValue(player, out int fights) ? fights + 1 : 1;
         }
 
         private bool EndFights(float now)

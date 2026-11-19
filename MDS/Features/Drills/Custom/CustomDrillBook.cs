@@ -10,7 +10,8 @@ namespace MDS.Features.Drills.Custom
     // The mod reloads with every map, so a drill added by rc lasts until the next map.
     public sealed class CustomDrillBook
     {
-        private static readonly string[] Reserved = { "add", "remove", "show", "mirror" };
+        // Names come first in rc customdrill, so no word needs keeping back.
+        private static readonly string[] Reserved = new string[0];
 
         private readonly List<CustomDrill> _drills = new();
         private readonly PlayerRegistry _players;
@@ -34,15 +35,23 @@ namespace MDS.Features.Drills.Custom
 
         public bool CanAdd(string name, string text, out string error) => Parsed(name, text, out error) != null;
 
-        // Makes the drill when the name is new.
+        // Makes the drill when the name is new; a spot or formation becomes one of its parts, anything else a setting.
         public bool TryAdd(string name, string text, out string error)
         {
             Action<CustomDrill> apply = Parsed(name, text, out error);
             if (apply == null) return false;
-            if (!TryFind(name, out CustomDrill drill)) _drills.Add(drill = new CustomDrill(name, Selection.ForXvX(_players, _random)));
 
-            apply(drill);
+            CustomDrill drill = TryFind(name, out CustomDrill found) ? found : Create(name);
+            if (CustomLineParser.IsPart(text)) drill.AddPart(text);
+            else apply(drill);
             return true;
+        }
+
+        public CustomDrill Create(string name)
+        {
+            var drill = new CustomDrill(name, Selection.ForXvX(_players, _random));
+            _drills.Add(drill);
+            return drill;
         }
 
         public bool Remove(string nameOrNumber) => TryFind(nameOrNumber, out CustomDrill drill) && _drills.Remove(drill);

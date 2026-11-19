@@ -16,6 +16,10 @@ namespace MDS.Features.Drills
 
         public float GodModeSeconds { get; }
 
+        public TeleportTime Teleport { get; set; }
+
+        public bool PlacesEarly => CountsDown && Teleport == TeleportTime.Early;
+
         // Neither needs a routine, so the drill places everyone at once.
         public bool IsInstant => !CountsDown && GodModeSeconds <= 0f;
     }

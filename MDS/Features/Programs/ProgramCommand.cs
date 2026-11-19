@@ -1,109 +1,132 @@
+using System;
 using System.Collections.Generic;
 using MDS.Shared.Commands;
 using MDS.Shared.Game;
 
 namespace MDS.Features.Programs
 {
-    // rc program alone lists the programs, or says how the running one is doing; run, stop, add, remove and show do the rest.
+    // rc program alone lists the programs, rc program stop stops the running one, and rc program <name> <verb> does the rest.
+    // A name alone shows the program.
     public sealed class ProgramCommand : IConsoleCommand
     {
-        public const string Usage = "Usage: rc program [run <name|number> [loop] | stop | add <name> <line> | show <name|number> | remove <name|number>]";
+        public const string Usage = "Usage: rc program [stop | <name> [create|set|add|edit|move|remove|try|run|delete] ...]";
 
-        private const string RunWord = "run";
         private const string StopWord = "stop";
-        private const string AddWord = "add";
-        private const string RemoveWord = "remove";
-        private const string ShowWord = "show";
-        private const string LoopWord = "loop";
+        private const string CreateWord = "create";
+        private const string RunWord = "run";
+        private const string TryWord = "try";
+        private const string DeleteWord = "delete";
 
-        // add, the name, and at least one word of the line.
-        private const int AddParts = 3;
-        private const int LineStart = 2;
-
-        // A verb and a name, and for run an optional loop.
-        private const int NameParts = 2;
-        private const int RunParts = 3;
+        private delegate string EditVerb(DrillProgram program, string[] args, out Action change);
 
         private readonly ProgramBook _book;
         private readonly ProgramRunner _runner;
         private readonly Replies _replies;
+        private readonly Dictionary<string, EditVerb> _edits;
 
-        public ProgramCommand(ProgramBook book, ProgramRunner runner, Replies replies)
+        public ProgramCommand(ProgramEdits edits, ProgramRunner runner, Replies replies)
         {
-            _book = book;
+            _book = edits.Book;
             _runner = runner;
             _replies = replies;
+            _edits = new Dictionary<string, EditVerb>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["set"] = edits.Set, ["add"] = edits.Add, ["edit"] = edits.Edit, ["move"] = edits.Move, ["remove"] = edits.Remove,
+            };
         }
 
         public string Name => "program";
 
         public bool Validate(string[] parameters, out string errorMessage)
         {
-            errorMessage = string.Empty;
-            string verb = VerbOf(parameters);
-            if (parameters.Length == 0 || (verb == StopWord && parameters.Length == 1)) return true;
-            if (verb == RunWord) return CanRun(parameters, out errorMessage);
-            if (verb == AddWord) return CanAdd(parameters, out errorMessage);
-            if ((verb == RemoveWord || verb == ShowWord) && parameters.Length == NameParts) return CanFind(parameters[1], out errorMessage);
-
-            errorMessage = Usage;
-            return false;
+            errorMessage = Check(parameters, out _);
+            return errorMessage.Length == 0;
         }
 
         public void Execute(int playerId, string[] parameters)
         {
-            string verb = VerbOf(parameters);
-            if (parameters.Length == 0) _replies.Send(playerId, Overview());
-            else if (verb == RunWord) _replies.Send(playerId, Run(parameters, playerId));
-            else if (verb == StopWord) _replies.Send(playerId, Stop());
-            else if (verb == AddWord) _replies.Send(playerId, Add(parameters));
-            else if (verb == RemoveWord) _replies.Send(playerId, Remove(parameters[1]));
-            else _replies.Send(playerId, Show(parameters[1]));
+            Check(parameters, out Func<int, string> act);
+            _replies.Send(playerId, act(playerId));
         }
 
-        private static string VerbOf(string[] parameters) => parameters.Length > 0 ? parameters[0].ToLowerInvariant() : string.Empty;
-
-        private static string LineOf(string[] parameters) => string.Join(" ", parameters, LineStart, parameters.Length - LineStart);
-
-        private static bool Loops(string[] parameters) => parameters.Length == RunParts && parameters[RunParts - 1].ToLowerInvariant() == LoopWord;
-
-        private bool CanRun(string[] parameters, out string error)
+        // Why the command can't run, or what running it does.
+        private string Check(string[] parameters, out Func<int, string> act)
         {
-            error = string.Empty;
-            if (parameters.Length < NameParts || parameters.Length > RunParts || (parameters.Length == RunParts && !Loops(parameters))) error = "Usage: rc program run <name|number> [loop]";
-            else if (!_book.TryFind(parameters[1], out DrillProgram program)) error = $"No program '{parameters[1]}'. rc program lists them.";
-            else if (_runner.Current != null) error = $"{_runner.Current.Name} is running. Stop it first with rc program stop.";
-            else error = _runner.Refusal(program);
-            return error.Length == 0;
+            act = null;
+            if (parameters.Length == 0) return Done(out act, _ => Overview());
+            if (parameters.Length == 1 && Is(parameters[0], StopWord)) return Done(out act, _ => Stop());
+
+            var words = new NamedVerb(parameters);
+            if (Is(words.Verb, CreateWord)) return CheckCreate(words.Name, words.Args, out act);
+            if (!_book.TryFind(words.Name, out DrillProgram program)) return $"No program '{words.Name}'. rc program lists them, and rc program {words.Name} create makes it.";
+
+            return CheckVerb(program, words, out act);
         }
 
-        private bool CanAdd(string[] parameters, out string error)
+        private string CheckVerb(DrillProgram program, NamedVerb words, out Func<int, string> act)
         {
-            error = $"Usage: rc program add <name> <line>, where a line is one of: {ProgramLineParser.Format}";
-            return parameters.Length >= AddParts && _book.CanAdd(parameters[1], LineOf(parameters), out error);
+            act = null;
+            string verb = words.Verb;
+            string[] args = words.Args;
+            if (verb.Length == 0) return Done(out act, _ => Show(program));
+            if (Is(verb, DeleteWord)) return Done(out act, _ => Delete(program));
+            if (Is(verb, RunWord)) return CheckRun(program.Plan(), args, out act);
+            if (Is(verb, TryWord)) return CheckTry(program, args, out act);
+            if (!_edits.TryGetValue(verb, out EditVerb edit)) return $"'{verb}' isn't something rc program does. {Usage}";
+
+            string error = edit(program, args, out Action change);
+            if (error.Length == 0) act = _ => Changed(change, program);
+            return error;
         }
 
-        private bool CanFind(string nameOrNumber, out string error)
+        private string CheckCreate(string name, string[] args, out Func<int, string> act)
         {
-            error = _book.TryFind(nameOrNumber, out _) ? string.Empty : $"No program '{nameOrNumber}'. rc program lists them.";
-            return error.Length == 0;
+            act = null;
+            if (!ProgramBook.IsName(name, out string error)) return error;
+            if (_book.TryFind(name, out DrillProgram existing)) return $"{existing.Name} already exists. Change it with rc program {existing.Name} set.";
+
+            var settings = new ProgramSettings();
+            error = ProgramLineParser.ReadSettings(args, settings);
+            if (error.Length == 0) act = _ => Created(name, settings);
+            return error;
         }
+
+        private string CheckRun(ProgramPlan plan, string[] args, out Func<int, string> act)
+        {
+            act = null;
+            if (args.Length > 1 || (args.Length == 1 && !Is(args[0], ProgramLineParser.LoopWord))) return "Usage: rc program <name> run [loop]";
+            if (_runner.Current != null) return $"{_runner.Current.Name} is running. Stop it first with rc program stop.";
+
+            string error = _runner.Refusal(plan);
+            plan.Loops |= args.Length == 1;
+            if (error.Length == 0) act = starter => Started(plan, starter);
+            return error;
+        }
+
+        private string CheckTry(DrillProgram program, string[] args, out Func<int, string> act)
+        {
+            act = null;
+            string error = args.Length == 1 && int.TryParse(args[0], out int number) && number >= 1 && number <= program.Drills.Count
+                ? string.Empty : $"Usage: rc program {program.Name} try <drill number, 1 to {program.Drills.Count}>";
+            return error.Length > 0 ? error : CheckRun(program.TryPlan(int.Parse(args[0]) - 1), new string[0], out act);
+        }
+
+        private static string Done(out Func<int, string> act, Func<int, string> reply)
+        {
+            act = reply;
+            return string.Empty;
+        }
+
+        private static bool Is(string word, string expected) => word.Equals(expected, StringComparison.OrdinalIgnoreCase);
 
         private string Overview()
         {
             if (_runner.Current != null) return _runner.Current.Status;
-            if (_book.All.Count == 0) return "No programs yet. Add one with rc program add <name> <line>, or an MDS:Program config line.";
+            if (_book.All.Count == 0) return "No programs yet. Make one with rc program <name> create, or an MDS:Program config line.";
 
             var entries = new List<string>();
             for (int i = 0; i < _book.All.Count; i++) entries.Add($"{i + 1} {_book.All[i].Summary}");
-            return $"Programs: {string.Join(", ", entries)}. Run one with rc program run <name|number>.";
-        }
-
-        private string Run(string[] parameters, int playerId)
-        {
-            _book.TryFind(parameters[1], out DrillProgram program);
-            _runner.Start(program, Loops(parameters), playerId);
-            return $"Starting {program.Name}{(Loops(parameters) ? " on a loop" : string.Empty)}.";
+            return $"Programs: {string.Join(", ", entries)}. Run one with rc program <name> run.";
         }
 
         private string Stop()
@@ -115,23 +138,35 @@ namespace MDS.Features.Programs
             return $"Stopped {name}. Fights already running carry on.";
         }
 
-        private string Add(string[] parameters)
+        private string Created(string name, ProgramSettings settings)
         {
-            _book.TryAdd(parameters[1], LineOf(parameters), out _);
-            return $"Added. {Show(parameters[1])}";
+            DrillProgram program = _book.Create(name);
+            program.Settings = settings;
+            return $"Made {program.Name}. Add drills with rc program {program.Name} add <drill>.";
         }
 
-        private string Remove(string nameOrNumber)
+        private string Started(ProgramPlan plan, int starter)
         {
-            _book.TryFind(nameOrNumber, out DrillProgram program);
-            _book.Remove(nameOrNumber);
-            return $"Removed {program.Name}. A program from the config comes back with the next map.";
+            _runner.Start(plan, starter);
+            return $"Starting {plan.Name}{(plan.Loops ? " on a loop" : string.Empty)}.";
         }
 
-        private string Show(string nameOrNumber)
+        private string Changed(Action change, DrillProgram program)
         {
-            _book.TryFind(nameOrNumber, out DrillProgram program);
-            return $"{program.Summary}: {string.Join(" | ", program.Lines())}";
+            change();
+            return $"Done. {Show(program)}";
+        }
+
+        private string Delete(DrillProgram program)
+        {
+            _book.Delete(program);
+            return $"Deleted {program.Name}. A program from the config comes back with the next map.";
+        }
+
+        private static string Show(DrillProgram program)
+        {
+            List<string> lines = program.Lines();
+            return lines.Count == 0 ? $"{program.Summary}: nothing yet." : $"{program.Summary}: {string.Join(" | ", lines)}";
         }
     }
 }

@@ -17,9 +17,12 @@ namespace MDS.Features.Drills
         private readonly Selection _groupfight;
         private readonly CustomDrillBook _book;
         private readonly SpotPreviewOverlay _preview;
+        private DrillCountdown _countdown;
 
         // Programs start drills through this.
         public DrillCatalog Catalog { get; private set; }
+
+        public CustomDrillBook Book => _book;
 
         public DrillsFeature(ModContext context, ArenaStore arenas)
         {
@@ -51,12 +54,12 @@ namespace MDS.Features.Drills
         private void RegisterCommands(ModContext context, DrillKit kit)
         {
             var runner = new DrillRunner(new LeftoverClearing(kit));
-            var countdown = new DrillCountdown(context.Console, context.Routines);
+            var countdown = _countdown = new DrillCountdown(context.Console, context.Routines, kit.Settings.CountdownSeconds);
             var drills = new List<IDrill>(DrillsOf(kit, countdown));
             foreach (IDrill drill in drills) context.Commands.Register(new DrillCommand(drill, runner, context.Replies));
 
             var custom = new CustomDrills(kit, _book, countdown);
-            context.Commands.Register(new CustomDrillCommand(_book, new DrillCommand(custom, runner, context.Replies), context.Replies));
+            context.Commands.Register(new CustomDrillCommand(_book, new DrillCommand(custom, runner, context.Replies), kit));
             drills.Add(custom);
             context.Commands.Register(new PreviewCommand(drills, context.Replies));
             Catalog = new DrillCatalog(drills, runner, kit);
@@ -65,6 +68,7 @@ namespace MDS.Features.Drills
         public void Dispose()
         {
             _round.RoundStarted -= OnRoundStarted;
+            _countdown.ReleaseHeld();
             _preview?.Dispose();
         }
 
@@ -73,6 +77,7 @@ namespace MDS.Features.Drills
             _xvx.Reset();
             _groupfight.Reset();
             _book.ResetSelections();
+            _countdown.ReleaseHeld();
         }
     }
 }

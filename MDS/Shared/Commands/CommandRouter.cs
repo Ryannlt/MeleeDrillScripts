@@ -6,6 +6,13 @@ using MDS.Shared.Players;
 
 namespace MDS.Shared.Commands
 {
+    public enum HandleResult
+    {
+        NotMine,
+        Refused,
+        Ran,
+    }
+
     // A command that isn't this mod's passes silently, which is what lets several mods share the console.
     // Every entry point goes through Handle, so the admin check here covers rc today and a UI later.
     public sealed class CommandRouter
@@ -37,22 +44,26 @@ namespace MDS.Shared.Commands
             _commands[command.Name] = command;
         }
 
-        public void Handle(int playerId, string input)
+        // The result lets the panel's door tell a refusal from a command that ran; rc ignores it.
+        public HandleResult Handle(int playerId, string input)
         {
-            if (!TryFind(input, out IConsoleCommand command, out string[] parameters)) return;
+            if (!TryFind(input, out IConsoleCommand command, out string[] parameters)) return HandleResult.NotMine;
 
-            if (!command.Validate(parameters, out string errorMessage)) Refuse(playerId, command, errorMessage);
-            else if (!_admins.IsAdmin(playerId)) Refuse(playerId, command, AdminsOnly);
-            else command.Execute(playerId, parameters);
+            if (!command.Validate(parameters, out string errorMessage)) return Refuse(playerId, command, errorMessage);
+            if (!_admins.IsAdmin(playerId)) return Refuse(playerId, command, AdminsOnly);
+
+            command.Execute(playerId, parameters);
+            return HandleResult.Ran;
         }
 
         // An empty message means the command turned out not to be this mod's, as with another mod's rc get key.
-        private void Refuse(int playerId, IConsoleCommand command, string message)
+        private HandleResult Refuse(int playerId, IConsoleCommand command, string message)
         {
-            if (string.IsNullOrEmpty(message)) return;
+            if (string.IsNullOrEmpty(message)) return HandleResult.NotMine;
 
             _log.Warning($"'{command.Name}' from player {playerId} refused: {message}");
             _replies.Send(playerId, message);
+            return HandleResult.Refused;
         }
 
         private bool TryFind(string input, out IConsoleCommand command, out string[] parameters)

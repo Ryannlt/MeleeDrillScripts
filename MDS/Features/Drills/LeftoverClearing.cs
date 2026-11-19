@@ -12,16 +12,14 @@ namespace MDS.Features.Drills
         // A step or two past the outermost spots, for a survivor who moved off their spot while fighting.
         private const float ZoneMargin = 3f;
 
-        // About two players' width, so players sent to one spawn don't land inside each other.
-        private const float RingSpacing = 1f;
-        private const float FullTurn = 2f * Mathf.PI;
-
         private readonly DrillKit _kit;
+        private readonly ExitSpots _spots;
         private readonly Dictionary<FactionCountry, List<QuerySpawnSectionInfo>> _sectionsByFaction = new();
 
         public LeftoverClearing(DrillKit kit)
         {
             _kit = kit;
+            _spots = new ExitSpots(kit.Random);
         }
 
         private static Rect ZoneOf(DrillRun run)
@@ -37,14 +35,16 @@ namespace MDS.Features.Drills
             _sectionsByFaction.Clear();
             Rect zone = ZoneOf(run);
             var exits = new Dictionary<int, SpawnExit>();
-            foreach (Leftover leftover in Leftovers(run, zone))
+            List<Leftover> leftovers = Leftovers(run, zone);
+            foreach (Leftover leftover in leftovers)
             {
                 if (TryFindExit(leftover, zone, out QuerySpawnSectionInfo section)) ExitFor(exits, section).Players.Add(leftover.Player);
                 else _kit.Log.Warning($"{run.Drill}: {leftover.Player} stays, since no spawn of theirs lies outside the drill's area.");
             }
 
             int moved = 0;
-            foreach (SpawnExit exit in exits.Values) moved += MoveAround(exit, zone);
+            List<Vector2> taken = Standing(leftovers);
+            foreach (SpawnExit exit in exits.Values) moved += MoveAround(exit, new ExitArea(Flat(exit.Position), zone, taken));
             if (exits.Count > 0) _kit.Log.Info($"{run.Drill}: {moved} leftover player(s) sent to {exits.Count} spawn(s).");
         }
 
@@ -56,32 +56,10 @@ namespace MDS.Features.Drills
             return exit;
         }
 
-        // The spawn itself first, then rings 1 m apart, skipping any spot in the drill's area: a spawn just outside it would otherwise send some of them back in.
-        private static List<Vector2> SpotsAround(Vector2 spawn, int count, Rect zone)
-        {
-            var spots = new List<Vector2>(count) { spawn };
-            int ring = 1;
-            int step = 0;
-            while (spots.Count < count)
-            {
-                int onRing = Mathf.FloorToInt(FullTurn * ring);
-                float angle = FullTurn * step / onRing;
-                Vector2 spot = spawn + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * (ring * RingSpacing);
-                if (!zone.Contains(spot)) spots.Add(spot);
-                if (++step < onRing) continue;
-
-                ring++;
-                step = 0;
-            }
-            return spots;
-        }
-
         private List<Leftover> Leftovers(DrillRun run, Rect zone)
         {
-            var field = new List<IPlayer>(_kit.Players.Attacking);
-            field.AddRange(_kit.Players.Defending);
             var leftovers = new List<Leftover>();
-            foreach (IPlayer player in field)
+            foreach (IPlayer player in Field())
             {
                 if (!player.IsAlive || run.Lineup.Includes(player) || !_kit.Queries.TryGetPosition(player.PlayerId, out Vector3 at)) continue;
                 if (zone.Contains(Flat(at))) leftovers.Add(new Leftover(player, Flat(at)));
@@ -124,9 +102,27 @@ namespace MDS.Features.Drills
             return sections;
         }
 
-        private int MoveAround(SpawnExit exit, Rect zone)
+        // Everyone alive who stays where they are, so nobody cleared lands inside them.
+        private List<Vector2> Standing(List<Leftover> leftovers)
         {
-            List<Vector2> spots = SpotsAround(Flat(exit.Position), exit.Players.Count, zone);
+            var standing = new List<Vector2>();
+            foreach (IPlayer player in Field())
+            {
+                if (player.IsAlive && !leftovers.Exists(l => l.Player == player) && _kit.Queries.TryGetPosition(player.PlayerId, out Vector3 at)) standing.Add(Flat(at));
+            }
+            return standing;
+        }
+
+        private List<IPlayer> Field()
+        {
+            var field = new List<IPlayer>(_kit.Players.Attacking);
+            field.AddRange(_kit.Players.Defending);
+            return field;
+        }
+
+        private int MoveAround(SpawnExit exit, ExitArea area)
+        {
+            List<Vector2> spots = _spots.Around(area, exit.Players.Count);
             int moved = 0;
             for (int i = 0; i < spots.Count; i++)
             {

@@ -9,7 +9,7 @@ namespace MDS.Features.Programs
     public sealed class ProgramRun
     {
         private readonly ProgramKit _kit;
-        private readonly DrillProgram _program;
+        private readonly ProgramPlan _plan;
         private readonly int _starter;
         private readonly BusyPlayers _busy = new();
         private Phase _phase = Phase.Pausing;
@@ -17,10 +17,10 @@ namespace MDS.Features.Programs
         private float _resumeAt;
         private StepRun _step;
 
-        public ProgramRun(ProgramKit kit, DrillProgram program, int starter)
+        public ProgramRun(ProgramKit kit, ProgramPlan plan, int starter)
         {
             _kit = kit;
-            _program = program;
+            _plan = plan;
             _starter = starter;
         }
 
@@ -31,16 +31,16 @@ namespace MDS.Features.Programs
             Done
         }
 
-        public string Name => _program.Name;
+        public string Name => _plan.Name;
 
         // Starts over after the last step instead of ending.
-        public bool Loops { get; set; }
+        public bool Loops => _plan.Loops;
 
         public bool IsDone => _phase == Phase.Done;
 
         public string Status => _phase == Phase.Running
-            ? $"{Name} is on step {_index + 1} of {_program.Steps.Count}, with {_step.Running} fight(s) running."
-            : $"{Name} is pausing before step {_index + 1} of {_program.Steps.Count}.";
+            ? $"{Name} is on step {_index + 1} of {_plan.Steps.Count}, with {_step.Running} fight(s) running."
+            : $"{Name} is pausing before step {_index + 1} of {_plan.Steps.Count}.";
 
         public IEnumerator Body()
         {
@@ -73,15 +73,15 @@ namespace MDS.Features.Programs
         private void NextStep(float now)
         {
             _index++;
-            if (_index >= _program.Steps.Count && Loops) _index = 0;
-            if (_index >= _program.Steps.Count)
+            if (_index >= _plan.Steps.Count && Loops) _index = 0;
+            if (_index >= _plan.Steps.Count)
             {
                 _phase = Phase.Done;
                 _kit.Console.Execute($"broadcast Program {Name} is done.");
                 return;
             }
 
-            float pause = _program.Steps[_index].PauseSeconds ?? _kit.Settings.Pause.Value;
+            float pause = _plan.Steps[_index].PauseSeconds;
             _kit.Console.Execute($"broadcast Next: step {_index + 1} of {Name} in {Numbers.Format(pause)} s.");
             _phase = Phase.Pausing;
             _resumeAt = now + pause;
@@ -89,7 +89,7 @@ namespace MDS.Features.Programs
 
         private void Begin(float now)
         {
-            _step = new StepRun(_kit, _program.Steps[_index], _busy);
+            _step = new StepRun(_kit, _plan.Steps[_index], _busy);
             _kit.Replies.Send(_starter, $"Step {_index + 1} of {Name}: {_step.Begin(now)}");
             _phase = Phase.Running;
         }

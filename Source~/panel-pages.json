@@ -1,0 +1,2563 @@
+{
+  "title": "MDS",
+  "choices": {
+    "PICK": [
+      {
+        "value": "random",
+        "label": "Random from each team",
+        "description": "Each side is drawn at random from its own team."
+      },
+      {
+        "value": "any",
+        "label": "Random from anyone",
+        "description": "Drawn at random from everyone on the field, whatever their team."
+      },
+      {
+        "value": "next",
+        "label": "Round robin",
+        "description": "The next players in each team's order, carrying on from the last drill. In a program, whoever has waited longest goes first."
+      },
+      {
+        "value": "repeat",
+        "label": "Same as last time",
+        "description": "The same players as this drill's last run this round."
+      }
+    ],
+    "PICK_TEAMS": [
+      {
+        "value": "random",
+        "label": "Random from each team",
+        "description": "Each team's line in a random order."
+      },
+      {
+        "value": "repeat",
+        "label": "Same as last time",
+        "description": "The same players as the last groupfight this round."
+      }
+    ],
+    "FACING": [
+      {
+        "value": "NorthSouth",
+        "label": "Attackers north",
+        "description": "Attackers to the north, facing south toward the defenders."
+      },
+      {
+        "value": "SouthNorth",
+        "label": "Attackers south",
+        "description": "Attackers to the south, facing north toward the defenders."
+      },
+      {
+        "value": "EastWest",
+        "label": "Attackers east",
+        "description": "Attackers to the east, facing west toward the defenders."
+      },
+      {
+        "value": "WestEast",
+        "label": "Attackers west",
+        "description": "Attackers to the west, facing east toward the defenders."
+      },
+      {
+        "value": "Random",
+        "label": "Random each run",
+        "description": "A new direction every time the drill runs."
+      }
+    ],
+    "MELEE": [
+      {
+        "value": "Scatter",
+        "label": "Pockets",
+        "description": "Everyone in uneven pockets grown from one random spot, so fights start at once."
+      },
+      {
+        "value": "Spread",
+        "label": "Even spread",
+        "description": "Everyone evenly over the whole arena, as far apart as the player count allows. Good for regroup practice."
+      },
+      {
+        "value": "Groups",
+        "label": "Small groups",
+        "description": "Both teams shuffled into groups of 2 to 4 standing close together, the groups spread over the arena."
+      },
+      {
+        "value": "Teams",
+        "label": "Team halves",
+        "description": "Each team scattered over its own half of the arena, split across the facing."
+      },
+      {
+        "value": "Random",
+        "label": "Random each run",
+        "description": "One of the four, drawn again each run. The log and the preview name it."
+      }
+    ],
+    "POPCORN": [
+      {
+        "value": "Scatter",
+        "label": "Clumps",
+        "description": "Fights in uneven clumps grown from one random spot."
+      },
+      {
+        "value": "Spread",
+        "label": "Even spread",
+        "description": "Fights evenly over the whole arena, as far apart as the count allows."
+      },
+      {
+        "value": "Tight",
+        "label": "Packed",
+        "description": "Fights packed together around a random spot, as close as the gap allows."
+      },
+      {
+        "value": "Random",
+        "label": "Random each run",
+        "description": "One of the three, drawn again each run."
+      }
+    ],
+    "SMALLEST": [
+      {
+        "value": "1v1",
+        "label": "1v1"
+      },
+      {
+        "value": "2v1",
+        "label": "2v1"
+      },
+      {
+        "value": "2v2",
+        "label": "2v2"
+      },
+      {
+        "value": "3v2",
+        "label": "3v2"
+      },
+      {
+        "value": "3v3",
+        "label": "3v3"
+      },
+      {
+        "value": "4v3",
+        "label": "4v3"
+      },
+      {
+        "value": "4v4",
+        "label": "4v4"
+      },
+      {
+        "value": "5v4",
+        "label": "5v4"
+      },
+      {
+        "value": "5v5",
+        "label": "5v5"
+      },
+      {
+        "value": "6v5",
+        "label": "6v5"
+      },
+      {
+        "value": "6v6",
+        "label": "6v6"
+      }
+    ],
+    "LARGEST": [
+      {
+        "value": "1v1",
+        "label": "1v1"
+      },
+      {
+        "value": "2v1",
+        "label": "2v1"
+      },
+      {
+        "value": "2v2",
+        "label": "2v2"
+      },
+      {
+        "value": "3v2",
+        "label": "3v2"
+      },
+      {
+        "value": "3v3",
+        "label": "3v3"
+      },
+      {
+        "value": "4v3",
+        "label": "4v3"
+      },
+      {
+        "value": "4v4",
+        "label": "4v4"
+      },
+      {
+        "value": "5v4",
+        "label": "5v4"
+      },
+      {
+        "value": "5v5",
+        "label": "5v5"
+      },
+      {
+        "value": "6v5",
+        "label": "6v5"
+      },
+      {
+        "value": "6v6",
+        "label": "6v6"
+      }
+    ],
+    "SIDES": [
+      {
+        "value": "fill",
+        "label": "As written",
+        "description": "Every fight as written: in a 2v1 the attackers are always the 2."
+      },
+      {
+        "value": "balance",
+        "label": "Use the most players",
+        "description": "Each fight's sides are chosen to play the most people, so a 2v1 can run as a 1v2."
+      }
+    ],
+    "DEAL": [
+      {
+        "value": "together",
+        "label": "All together",
+        "description": "A new round of fights starts once every fight of the last round is over."
+      },
+      {
+        "value": "rolling",
+        "label": "As soon as free",
+        "description": "Each arena starts its next fight as soon as its last one is over."
+      }
+    ],
+    "TEAM": [
+      {
+        "value": "attacker",
+        "label": "Attackers",
+        "description": "A spot or line for the attacking team."
+      },
+      {
+        "value": "defender",
+        "label": "Defenders",
+        "description": "A spot or line for the defending team."
+      }
+    ],
+    "ONOFF": [
+      {
+        "value": "on",
+        "label": "On"
+      },
+      {
+        "value": "off",
+        "label": "Off"
+      }
+    ],
+    "CORNER": [
+      {
+        "value": "corner1",
+        "label": "First corner",
+        "description": "One corner of the arena."
+      },
+      {
+        "value": "corner2",
+        "label": "Opposite corner",
+        "description": "The corner diagonally across from the first."
+      }
+    ],
+    "DRILL_SETTING": [
+      {
+        "value": "strategy",
+        "label": "Selection strategy, by default",
+        "description": "The pick the drill uses when it's run without one. Value: random, any, next or repeat."
+      },
+      {
+        "value": "turn",
+        "label": "Turn, by default",
+        "description": "Degrees the drill turns around the arena center, or random. Value: 0 to 359 or random."
+      },
+      {
+        "value": "countdown",
+        "label": "Countdown",
+        "description": "Counts 3, 2, 1 before anyone moves. Value: on or off."
+      },
+      {
+        "value": "godmode",
+        "label": "God mode on landing",
+        "description": "Players can't be hurt for a moment after they land. Value: on or off."
+      },
+      {
+        "value": "godModeSeconds",
+        "label": "God mode time",
+        "description": "How long god mode lasts, in seconds."
+      }
+    ],
+    "WHOLE_TEAM": [
+      {
+        "value": "groupfight",
+        "label": "Groupfight",
+        "description": "Each whole team in a line."
+      },
+      {
+        "value": "openmelee",
+        "label": "Open melee",
+        "description": "Everyone spread over the arena."
+      },
+      {
+        "value": "popcorn",
+        "label": "Popcorn",
+        "description": "Small fights of mixed sizes."
+      }
+    ],
+    "REPEAT": [
+      {
+        "value": "once",
+        "label": "Run once",
+        "description": "The program ends after its last drill."
+      },
+      {
+        "value": "loop",
+        "label": "Repeat forever",
+        "description": "Starts over after the last drill, until stopped."
+      }
+    ],
+    "ENDS": [
+      {
+        "value": "round",
+        "label": "One round",
+        "description": "Every arena runs one fight, then the next drill starts.",
+        "when": {
+          "deal": [
+            "",
+            "together"
+          ]
+        }
+      },
+      {
+        "value": "rounds",
+        "label": "Rounds",
+        "description": "A round is one fight in every arena. Ends after this many rounds.",
+        "when": {
+          "deal": [
+            "",
+            "together"
+          ]
+        }
+      },
+      {
+        "value": "each",
+        "label": "Everyone has fought",
+        "description": "Ends once every player has fought this many times. Fair with any player count.",
+        "when": {
+          "drill": [
+            "xvx",
+            "customdrill"
+          ]
+        }
+      },
+      {
+        "value": "minutes",
+        "label": "Time",
+        "description": "No new fight starts after this many minutes."
+      }
+    ],
+    "PROGRAM_DRILLS": [
+      {
+        "value": "xvx",
+        "label": "xvx",
+        "description": "Two lines of picked players facing each other."
+      },
+      {
+        "value": "groupfight",
+        "label": "Groupfight",
+        "description": "Each whole team in a line."
+      },
+      {
+        "value": "openmelee",
+        "label": "Open melee",
+        "description": "Everyone spread over the arena."
+      },
+      {
+        "value": "popcorn",
+        "label": "Popcorn",
+        "description": "Small fights of mixed sizes."
+      }
+    ],
+    "PART_KINDS": [
+      {
+        "value": "attacker",
+        "label": "Attacker spot",
+        "description": "One picked attacker stands here."
+      },
+      {
+        "value": "defender",
+        "label": "Defender spot",
+        "description": "One picked defender stands here."
+      },
+      {
+        "value": "line attacker",
+        "label": "Attacker line",
+        "description": "Every attacker not on a spot, in a line centered here."
+      },
+      {
+        "value": "line defender",
+        "label": "Defender line",
+        "description": "Every defender not on a spot, in a line centered here."
+      },
+      {
+        "value": "scatter",
+        "label": "Open melee: Pockets",
+        "description": "Everyone in uneven pockets grown from one random spot, so fights start at once."
+      },
+      {
+        "value": "spread",
+        "label": "Open melee: Even spread",
+        "description": "Everyone evenly over the whole arena, as far apart as the player count allows. Good for regroup practice."
+      },
+      {
+        "value": "groups",
+        "label": "Open melee: Small groups",
+        "description": "Both teams shuffled into groups of 2 to 4 standing close together, the groups spread over the arena."
+      },
+      {
+        "value": "teams",
+        "label": "Open melee: Team halves",
+        "description": "Each team scattered over its own half of the arena, split across the facing."
+      },
+      {
+        "value": "random",
+        "label": "Open melee: Random each run",
+        "description": "One of the four, drawn again each run. The log and the preview name it."
+      }
+    ],
+    "TELEPORT": [
+      {
+        "value": "early",
+        "label": "As the countdown starts",
+        "description": "Everyone is moved at once and held still until the countdown ends, so they can find their fight."
+      },
+      {
+        "value": "late",
+        "label": "As the countdown ends",
+        "description": "Everyone is moved as the drill starts."
+      }
+    ]
+  },
+  "arenas": [
+    {
+      "n": 1,
+      "color": "#ff0000"
+    },
+    {
+      "n": 2,
+      "color": "#0000ff"
+    },
+    {
+      "n": 3,
+      "color": "#ffeb04"
+    },
+    {
+      "n": 4,
+      "color": "#00ff00"
+    },
+    {
+      "n": 5,
+      "color": "#ff00ff"
+    },
+    {
+      "n": 6,
+      "color": "#00ffff"
+    },
+    {
+      "n": 7,
+      "color": "#ffffff"
+    }
+  ],
+  "tabs": [
+    {
+      "name": "Drills",
+      "icon": "D",
+      "empty": "No drills to run. Check that MDS loaded on this server.",
+      "groups": [
+        {
+          "name": "Lines",
+          "entries": [
+            {
+              "label": "xvx",
+              "meta": "two lines",
+              "command": "xvx",
+              "run": "Run",
+              "help": "Places two lines of picked players facing each other across the arena center. Anyone else standing where the lines go is sent back to their spawn.",
+              "secondary": {
+                "label": "Preview",
+                "prefix": "preview"
+              },
+              "options": [
+                {
+                  "name": "attackers",
+                  "label": "Attackers",
+                  "description": "Players on the attacking line.",
+                  "type": "number",
+                  "min": 1,
+                  "max": 20,
+                  "hardMax": 50,
+                  "step": 1,
+                  "value": 2,
+                  "positional": true
+                },
+                {
+                  "name": "defenders",
+                  "label": "Defenders",
+                  "description": "Players on the defending line.",
+                  "type": "number",
+                  "min": 1,
+                  "max": 20,
+                  "hardMax": 50,
+                  "step": 1,
+                  "value": 1,
+                  "positional": true
+                },
+                {
+                  "name": "strategy",
+                  "label": "Selection strategy",
+                  "description": "How the players are chosen.",
+                  "type": "set",
+                  "values": "@PICK",
+                  "word": true,
+                  "setting": "xvxStrategy"
+                },
+                {
+                  "name": "distance",
+                  "label": "Line distance",
+                  "description": "Distance between the two lines, in meters. Shrinks to fit the arena if needed.",
+                  "type": "number",
+                  "min": 1,
+                  "max": 60,
+                  "hardMax": 200,
+                  "setting": "xvxDistance"
+                },
+                {
+                  "name": "spacing",
+                  "label": "Line spacing",
+                  "description": "Distance between neighbors on a line, in meters.",
+                  "type": "number",
+                  "min": 0.5,
+                  "max": 5,
+                  "hardMax": 20,
+                  "setting": "xvxSpacing"
+                },
+                {
+                  "name": "facing",
+                  "label": "Facing",
+                  "description": "Which way the lines face each other.",
+                  "type": "set",
+                  "values": "@FACING",
+                  "word": true,
+                  "setting": "DrillOrientation"
+                },
+                {
+                  "name": "arena",
+                  "label": "Arena",
+                  "description": "The arena the drill runs in.",
+                  "type": "arena"
+                },
+                {
+                  "name": "mirror",
+                  "label": "Swap sides",
+                  "description": "Swaps the counts between the teams: a 2v1 runs as 1v2.",
+                  "type": "flag"
+                }
+              ]
+            },
+            {
+              "label": "groupfight",
+              "meta": "whole teams",
+              "command": "groupfight",
+              "help": "Places each whole team in a line, facing the other.",
+              "secondary": {
+                "label": "Preview",
+                "prefix": "preview"
+              },
+              "options": [
+                {
+                  "name": "strategy",
+                  "label": "Selection strategy",
+                  "description": "How each team's line is ordered.",
+                  "type": "set",
+                  "values": "@PICK_TEAMS",
+                  "word": true,
+                  "setting": "groupfightStrategy"
+                },
+                {
+                  "name": "distance",
+                  "label": "Line distance",
+                  "description": "Distance between the two lines, in meters.",
+                  "type": "number",
+                  "min": 1,
+                  "max": 60,
+                  "hardMax": 200,
+                  "setting": "groupfightDistance"
+                },
+                {
+                  "name": "spacing",
+                  "label": "Line spacing",
+                  "description": "Distance between neighbors on a line, in meters.",
+                  "type": "number",
+                  "min": 0.5,
+                  "max": 5,
+                  "hardMax": 20,
+                  "setting": "groupfightSpacing"
+                },
+                {
+                  "name": "facing",
+                  "label": "Facing",
+                  "description": "Which way the lines face each other.",
+                  "type": "set",
+                  "values": "@FACING",
+                  "word": true,
+                  "setting": "DrillOrientation"
+                },
+                {
+                  "name": "arena",
+                  "label": "Arena",
+                  "description": "The arena the drill runs in.",
+                  "type": "arena"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Free for all",
+          "entries": [
+            {
+              "label": "openmelee",
+              "meta": "everyone",
+              "command": "openmelee",
+              "help": "Counts down, then places everyone on the field across the arena.",
+              "secondary": {
+                "label": "Preview",
+                "prefix": "preview"
+              },
+              "options": [
+                {
+                  "name": "strategy",
+                  "label": "Placement strategy",
+                  "description": "How players are spread over the arena.",
+                  "type": "set",
+                  "values": "@MELEE",
+                  "word": true,
+                  "setting": "openMeleeStrategy"
+                },
+                {
+                  "name": "spacing",
+                  "label": "Player spacing",
+                  "description": "The least distance between any two players, in meters.",
+                  "type": "number",
+                  "min": 0.5,
+                  "max": 5,
+                  "hardMax": 20,
+                  "setting": "openMeleeSpacing"
+                },
+                {
+                  "name": "offset",
+                  "label": "Edge margin",
+                  "description": "How far in from the arena edges everyone is kept, in meters. 0 uses the arena edge to edge.",
+                  "type": "number",
+                  "min": 0,
+                  "max": 10,
+                  "hardMax": 50,
+                  "setting": "openMeleeOffset"
+                },
+                {
+                  "name": "facing",
+                  "label": "Facing",
+                  "description": "For team halves: which half each team takes.",
+                  "type": "set",
+                  "values": "@FACING",
+                  "word": true,
+                  "setting": "DrillOrientation"
+                },
+                {
+                  "name": "teleport",
+                  "label": "Teleport",
+                  "description": "When players are moved to their spots.",
+                  "type": "set",
+                  "values": "@TELEPORT",
+                  "word": true,
+                  "value": "late"
+                },
+                {
+                  "name": "arena",
+                  "label": "Arena",
+                  "description": "The arena the drill runs in.",
+                  "type": "arena"
+                }
+              ]
+            },
+            {
+              "label": "popcorn",
+              "meta": "small fights",
+              "command": "popcorn",
+              "help": "Counts down, then splits both teams into small fights of mixed sizes across the arena.",
+              "secondary": {
+                "label": "Preview",
+                "prefix": "preview"
+              },
+              "options": [
+                {
+                  "name": "strategy",
+                  "label": "Placement strategy",
+                  "description": "How the fights are laid out over the arena.",
+                  "type": "set",
+                  "values": "@POPCORN",
+                  "word": true,
+                  "setting": "popcornStrategy"
+                },
+                {
+                  "name": "min",
+                  "label": "Smallest fight",
+                  "description": "The smallest fight drawn. Only the total counts.",
+                  "type": "set",
+                  "values": "@SMALLEST",
+                  "setting": "popcornMin",
+                  "stepper": true
+                },
+                {
+                  "name": "max",
+                  "label": "Largest fight",
+                  "description": "The largest fight drawn. 4v4 suits 10v10 and under.",
+                  "type": "set",
+                  "values": "@LARGEST",
+                  "setting": "popcornMax",
+                  "stepper": true
+                },
+                {
+                  "name": "distance",
+                  "label": "Fight distance",
+                  "description": "The least distance between players of different fights, in meters.",
+                  "type": "number",
+                  "min": 1,
+                  "max": 30,
+                  "hardMax": 100,
+                  "setting": "popcornDistance"
+                },
+                {
+                  "name": "lineDistance",
+                  "label": "Line distance",
+                  "description": "Distance between a fight's two lines, in meters.",
+                  "type": "number",
+                  "min": 1,
+                  "max": 30,
+                  "hardMax": 100,
+                  "setting": "popcornLineDistance"
+                },
+                {
+                  "name": "spacing",
+                  "label": "Line spacing",
+                  "description": "Distance between neighbors on a fight's line, in meters.",
+                  "type": "number",
+                  "min": 0.5,
+                  "max": 5,
+                  "hardMax": 20,
+                  "setting": "popcornSpacing"
+                },
+                {
+                  "name": "teleport",
+                  "label": "Teleport",
+                  "description": "When players are moved to their spots.",
+                  "type": "set",
+                  "values": "@TELEPORT",
+                  "word": true,
+                  "value": "early"
+                },
+                {
+                  "name": "arena",
+                  "label": "Arena",
+                  "description": "The arena the drill runs in.",
+                  "type": "arena"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Custom",
+          "entries": [
+            {
+              "label": "flank",
+              "meta": "2v1",
+              "command": "customdrill flank",
+              "help": "Your custom drill: picked players on its spots, everyone else in its formation. Build it on the Custom drills tab.",
+              "secondary": {
+                "label": "Preview",
+                "prefix": "preview"
+              },
+              "lines": [
+                "attacker,(-6,-1),(-6,1)",
+                "defender,(6,0)"
+              ],
+              "options": [
+                {
+                  "name": "strategy",
+                  "label": "Selection strategy",
+                  "description": "How the players for the spots are chosen.",
+                  "type": "set",
+                  "values": "@PICK",
+                  "word": true,
+                  "defaultLabel": "the drill's own"
+                },
+                {
+                  "name": "turn",
+                  "label": "Turn",
+                  "description": "Turns the whole drill around the arena center, in degrees.",
+                  "type": "number",
+                  "min": 0,
+                  "max": 359,
+                  "step": 1
+                },
+                {
+                  "name": "teleport",
+                  "label": "Teleport",
+                  "description": "When players are moved to their spots.",
+                  "type": "set",
+                  "values": "@TELEPORT",
+                  "word": true,
+                  "value": "late"
+                },
+                {
+                  "name": "arena",
+                  "label": "Arena",
+                  "description": "The arena the drill runs in.",
+                  "type": "arena"
+                },
+                {
+                  "name": "mirror",
+                  "label": "Swap sides",
+                  "description": "The attackers' spots and lines go to the defenders, and the other way round.",
+                  "type": "flag"
+                }
+              ]
+            },
+            {
+              "label": "wall",
+              "meta": "everyone",
+              "command": "customdrill wall",
+              "help": "Your custom drill: picked players on its spots, everyone else in its formation. Build it on the Custom drills tab.",
+              "secondary": {
+                "label": "Preview",
+                "prefix": "preview"
+              },
+              "lines": [
+                "line,attacker,(0,-6)",
+                "line,defender,(0,6)"
+              ],
+              "options": [
+                {
+                  "name": "strategy",
+                  "label": "Selection strategy",
+                  "description": "How the players for the spots are chosen.",
+                  "type": "set",
+                  "values": "@PICK",
+                  "word": true,
+                  "defaultLabel": "the drill's own"
+                },
+                {
+                  "name": "turn",
+                  "label": "Turn",
+                  "description": "Turns the whole drill around the arena center, in degrees.",
+                  "type": "number",
+                  "min": 0,
+                  "max": 359,
+                  "step": 1
+                },
+                {
+                  "name": "teleport",
+                  "label": "Teleport",
+                  "description": "When players are moved to their spots.",
+                  "type": "set",
+                  "values": "@TELEPORT",
+                  "word": true,
+                  "value": "late"
+                },
+                {
+                  "name": "arena",
+                  "label": "Arena",
+                  "description": "The arena the drill runs in.",
+                  "type": "arena"
+                },
+                {
+                  "name": "mirror",
+                  "label": "Swap sides",
+                  "description": "The attackers' spots and lines go to the defenders, and the other way round.",
+                  "type": "flag"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Training",
+          "entries": [
+            {
+              "label": "Shooting training",
+              "template": "shootingTraining {state}",
+              "run": "Apply",
+              "help": "Infinite firearm ammo and drawn bullet paths for the current map.",
+              "options": [
+                {
+                  "name": "state",
+                  "label": "Shooting training",
+                  "description": "On gives infinite ammo and draws each bullet's path.",
+                  "type": "set",
+                  "values": "@ONOFF"
+                }
+              ]
+            },
+            {
+              "label": "Clear preview",
+              "help": "Clears the rings and borders a preview drew. Only you see a preview.",
+              "actions": [
+                {
+                  "label": "Clear preview",
+                  "text": "preview off"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Custom drills",
+      "icon": "C",
+      "empty": "No custom drills yet. Press New custom drill to start one.",
+      "groups": [
+        {
+          "name": "Custom drills",
+          "entries": [
+            {
+              "label": "New custom drill",
+              "kind": "add",
+              "run": "Create drill",
+              "help": "Name the drill and set how it picks; add its spots once it exists.",
+              "template": "customdrill {name} create strategy={strategy} turn={turn} countdown={countdown} godmode={godmode} godModeSeconds={godModeSeconds}",
+              "options": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "description": "The drill's name. rc customdrill <name> runs it.",
+                  "placeholder": "drill name",
+                  "free": true
+                },
+                {
+                  "name": "strategy",
+                  "label": "Selection",
+                  "type": "set",
+                  "description": "How the spots' players are picked.",
+                  "values": "@PICK",
+                  "value": "random"
+                },
+                {
+                  "name": "turn",
+                  "label": "Turn",
+                  "type": "number",
+                  "description": "Turns the whole drill around the arena center, in degrees.",
+                  "min": 0,
+                  "max": 359,
+                  "hardMax": 359,
+                  "step": 1,
+                  "defaultLabel": "0°"
+                },
+                {
+                  "name": "countdown",
+                  "label": "Countdown",
+                  "type": "set",
+                  "description": "Counts 3, 2, 1 before placing.",
+                  "values": "@ONOFF",
+                  "value": "off"
+                },
+                {
+                  "name": "godmode",
+                  "label": "God mode",
+                  "type": "set",
+                  "description": "God mode for a moment as players land.",
+                  "values": "@ONOFF",
+                  "value": "off"
+                },
+                {
+                  "name": "godModeSeconds",
+                  "label": "God mode time",
+                  "type": "number",
+                  "description": "How long god mode lasts, in seconds.",
+                  "min": 0.5,
+                  "max": 10,
+                  "hardMax": 30,
+                  "step": 0.5,
+                  "defaultLabel": "2 s",
+                  "when": {
+                    "godmode": [
+                      "on"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "prototype": "CustomDrill",
+              "label": "flank",
+              "meta": "2v1",
+              "run": "Save",
+              "open": true,
+              "help": "What the whole drill shares. Its spots and formation are listed under it.",
+              "template": "customdrill flank set strategy={strategy} turn={turn} countdown={countdown} godmode={godmode} godModeSeconds={godModeSeconds}",
+              "options": [
+                {
+                  "name": "strategy",
+                  "label": "Selection",
+                  "type": "set",
+                  "description": "How the spots' players are picked.",
+                  "values": "@PICK",
+                  "value": "random"
+                },
+                {
+                  "name": "turn",
+                  "label": "Turn",
+                  "type": "number",
+                  "description": "Turns the whole drill around the arena center, in degrees.",
+                  "min": 0,
+                  "max": 359,
+                  "hardMax": 359,
+                  "step": 1,
+                  "defaultLabel": "0°"
+                },
+                {
+                  "name": "countdown",
+                  "label": "Countdown",
+                  "type": "set",
+                  "description": "Counts 3, 2, 1 before placing.",
+                  "values": "@ONOFF",
+                  "value": "off"
+                },
+                {
+                  "name": "godmode",
+                  "label": "God mode",
+                  "type": "set",
+                  "description": "God mode for a moment as players land.",
+                  "values": "@ONOFF",
+                  "value": "off"
+                },
+                {
+                  "name": "godModeSeconds",
+                  "label": "God mode time",
+                  "type": "number",
+                  "description": "How long god mode lasts, in seconds.",
+                  "min": 0.5,
+                  "max": 10,
+                  "hardMax": 30,
+                  "step": 0.5,
+                  "defaultLabel": "2 s",
+                  "when": {
+                    "godmode": [
+                      "on"
+                    ]
+                  }
+                }
+              ],
+              "children": [
+                {
+                  "prototype": "CustomPart",
+                  "label": "Attacker spot",
+                  "prefix": "1",
+                  "meta": "(-6,-1)",
+                  "run": "Save",
+                  "help": "A spot holds one picked player. A line or open melee area takes everyone else, and a drill has one.",
+                  "template": "customdrill flank edit 1 {kind} {at} spacing={spacing} facing={facing}",
+                  "options": [
+                    {
+                      "name": "kind",
+                      "label": "Kind",
+                      "type": "set",
+                      "description": "What this part of the drill places.",
+                      "values": "@PART_KINDS",
+                      "defaultLabel": "Pick one"
+                    },
+                    {
+                      "name": "at",
+                      "label": "Where",
+                      "type": "point",
+                      "description": "Meters east (x) and north (z) of the arena center. Where I stand reads your spot when you add it.",
+                      "hereValue": "here",
+                      "when": {
+                        "kind": [
+                          "attacker",
+                          "defender",
+                          "line attacker",
+                          "line defender"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "spacing",
+                      "label": "Spacing",
+                      "type": "number",
+                      "description": "Distance between neighbors, in meters.",
+                      "min": 0.5,
+                      "max": 5,
+                      "hardMax": 20,
+                      "step": 0.5,
+                      "defaultLabel": "2 m",
+                      "when": {
+                        "kind": [
+                          "line attacker",
+                          "line defender",
+                          "scatter",
+                          "spread",
+                          "groups",
+                          "teams",
+                          "random"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "facing",
+                      "label": "Facing",
+                      "type": "number",
+                      "description": "Which way the line faces, in degrees. Empty faces the other team.",
+                      "min": 0,
+                      "max": 359,
+                      "hardMax": 359,
+                      "step": 1,
+                      "defaultLabel": "Other team",
+                      "when": {
+                        "kind": [
+                          "line attacker",
+                          "line defender"
+                        ]
+                      }
+                    }
+                  ],
+                  "more": [
+                    {
+                      "label": "Preview drill",
+                      "text": "preview customdrill flank"
+                    },
+                    {
+                      "label": "Remove",
+                      "text": "customdrill flank remove 1",
+                      "confirm": true
+                    }
+                  ]
+                },
+                {
+                  "prototype": "CustomPartAdd",
+                  "label": "Add spot or formation",
+                  "kind": "add",
+                  "run": "Add",
+                  "help": "A spot holds one picked player. A line or open melee area takes everyone else, and a drill has one.",
+                  "template": "customdrill flank add {kind} {at} spacing={spacing} facing={facing}",
+                  "options": [
+                    {
+                      "name": "kind",
+                      "label": "Kind",
+                      "type": "set",
+                      "description": "What this part of the drill places.",
+                      "values": "@PART_KINDS",
+                      "defaultLabel": "Pick one"
+                    },
+                    {
+                      "name": "at",
+                      "label": "Where",
+                      "type": "point",
+                      "description": "Meters east (x) and north (z) of the arena center. Where I stand reads your spot when you add it.",
+                      "hereValue": "here",
+                      "when": {
+                        "kind": [
+                          "attacker",
+                          "defender",
+                          "line attacker",
+                          "line defender"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "spacing",
+                      "label": "Spacing",
+                      "type": "number",
+                      "description": "Distance between neighbors, in meters.",
+                      "min": 0.5,
+                      "max": 5,
+                      "hardMax": 20,
+                      "step": 0.5,
+                      "defaultLabel": "2 m",
+                      "when": {
+                        "kind": [
+                          "line attacker",
+                          "line defender",
+                          "scatter",
+                          "spread",
+                          "groups",
+                          "teams",
+                          "random"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "facing",
+                      "label": "Facing",
+                      "type": "number",
+                      "description": "Which way the line faces, in degrees. Empty faces the other team.",
+                      "min": 0,
+                      "max": 359,
+                      "hardMax": 359,
+                      "step": 1,
+                      "defaultLabel": "Other team",
+                      "when": {
+                        "kind": [
+                          "line attacker",
+                          "line defender"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "more": [
+                {
+                  "label": "Run",
+                  "text": "customdrill flank"
+                },
+                {
+                  "label": "Preview",
+                  "text": "preview customdrill flank"
+                },
+                {
+                  "label": "Delete",
+                  "text": "customdrill flank delete",
+                  "confirm": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Programs",
+      "icon": "P",
+      "empty": "No programs yet. Press New program to start one.",
+      "status": {
+        "text": "Running pits, step 1 of 1: 2 fights in arenas 4 and 5, 2 players waiting.",
+        "action": {
+          "label": "Stop",
+          "text": "program stop"
+        }
+      },
+      "groups": [
+        {
+          "name": "Programs",
+          "entries": [
+            {
+              "label": "New program",
+              "kind": "add",
+              "run": "Create program",
+              "help": "Name the program and set what every drill shares; add drills once it exists.",
+              "template": "program {name} create {repeat} {pick} {sides} {deal} pause={pause} fightSeconds={fightSeconds}",
+              "options": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "description": "The program's name. rc program <name> run starts it.",
+                  "placeholder": "program name",
+                  "free": true
+                },
+                {
+                  "name": "repeat",
+                  "label": "Repeat",
+                  "type": "set",
+                  "description": "Whether the program starts over after its last drill.",
+                  "values": "@REPEAT",
+                  "value": "once"
+                },
+                {
+                  "name": "pick",
+                  "label": "Selection",
+                  "type": "set",
+                  "description": "How every drill picks its players, unless the drill says otherwise. Drills that take everyone ignore it.",
+                  "values": "@PICK",
+                  "value": "next"
+                },
+                {
+                  "name": "sides",
+                  "label": "Sides",
+                  "type": "set",
+                  "description": "Whether fights may flip sides to use more players.",
+                  "values": "@SIDES",
+                  "value": "fill"
+                },
+                {
+                  "name": "deal",
+                  "label": "Start fights",
+                  "type": "set",
+                  "description": "When the next fights of a drill start.",
+                  "values": "@DEAL",
+                  "value": "together"
+                },
+                {
+                  "name": "pause",
+                  "label": "Pause",
+                  "type": "number",
+                  "description": "Seconds of countdown before each drill.",
+                  "min": 0,
+                  "max": 30,
+                  "hardMax": 300,
+                  "step": 1,
+                  "defaultLabel": "5 s"
+                },
+                {
+                  "name": "fightSeconds",
+                  "label": "Fight time",
+                  "type": "number",
+                  "description": "Seconds before a fight is called over, if neither side has fallen. 0 is no limit.",
+                  "min": 0,
+                  "max": 300,
+                  "hardMax": 1800,
+                  "step": 5,
+                  "defaultLabel": "No limit"
+                }
+              ]
+            },
+            {
+              "prototype": "Program",
+              "label": "pits",
+              "meta": "2 drills",
+              "run": "Save",
+              "open": true,
+              "help": "What every drill in the program shares. Each drill can set its own selection and timing.",
+              "template": "program pits set name={name} {repeat} {pick} {sides} {deal} pause={pause} fightSeconds={fightSeconds}",
+              "options": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "description": "The program's name. rc program <name> run starts it.",
+                  "placeholder": "program name",
+                  "free": true
+                },
+                {
+                  "name": "repeat",
+                  "label": "Repeat",
+                  "type": "set",
+                  "description": "Whether the program starts over after its last drill.",
+                  "values": "@REPEAT",
+                  "value": "once"
+                },
+                {
+                  "name": "pick",
+                  "label": "Selection",
+                  "type": "set",
+                  "description": "How every drill picks its players, unless the drill says otherwise. Drills that take everyone ignore it.",
+                  "values": "@PICK",
+                  "value": "next"
+                },
+                {
+                  "name": "sides",
+                  "label": "Sides",
+                  "type": "set",
+                  "description": "Whether fights may flip sides to use more players.",
+                  "values": "@SIDES",
+                  "value": "fill"
+                },
+                {
+                  "name": "deal",
+                  "label": "Start fights",
+                  "type": "set",
+                  "description": "When the next fights of a drill start.",
+                  "values": "@DEAL",
+                  "value": "together"
+                },
+                {
+                  "name": "pause",
+                  "label": "Pause",
+                  "type": "number",
+                  "description": "Seconds of countdown before each drill.",
+                  "min": 0,
+                  "max": 30,
+                  "hardMax": 300,
+                  "step": 1,
+                  "defaultLabel": "5 s"
+                },
+                {
+                  "name": "fightSeconds",
+                  "label": "Fight time",
+                  "type": "number",
+                  "description": "Seconds before a fight is called over, if neither side has fallen. 0 is no limit.",
+                  "min": 0,
+                  "max": 300,
+                  "hardMax": 1800,
+                  "step": 5,
+                  "defaultLabel": "No limit"
+                }
+              ],
+              "children": [
+                {
+                  "prototype": "ProgramDrill",
+                  "label": "xvx 2v1",
+                  "prefix": "1",
+                  "meta": "arenas 4,5,6,7",
+                  "run": "Save",
+                  "help": "A drill runs once its turn comes, with its own timing. Empty timing rows use the program's.",
+                  "template": "program pits edit 1 {drill} {attackers} {defenders} distance={distance} spacing={spacing} {placement} {teleport} ({arenas}) arena={arena} {mirror} {with} pick={pick} deal={deal} {ends} {rounds} {each} {minutes} pause={pause} fightSeconds={fightSeconds}",
+                  "options": [
+                    {
+                      "name": "drill",
+                      "label": "Drill",
+                      "type": "set",
+                      "description": "Which drill runs.",
+                      "values": "@PROGRAM_DRILLS",
+                      "defaultLabel": "Pick a drill"
+                    },
+                    {
+                      "name": "attackers",
+                      "label": "Attackers",
+                      "type": "number",
+                      "description": "Players on the attacking line.",
+                      "min": 1,
+                      "max": 20,
+                      "hardMax": 50,
+                      "step": 1,
+                      "value": "2",
+                      "when": {
+                        "drill": [
+                          "xvx"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "defenders",
+                      "label": "Defenders",
+                      "type": "number",
+                      "description": "Players on the defending line.",
+                      "min": 1,
+                      "max": 20,
+                      "hardMax": 50,
+                      "step": 1,
+                      "value": "1",
+                      "when": {
+                        "drill": [
+                          "xvx"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "distance",
+                      "label": "Line distance",
+                      "type": "number",
+                      "description": "Distance between the two lines, in meters.",
+                      "min": 1,
+                      "max": 60,
+                      "hardMax": 200,
+                      "step": 1,
+                      "defaultLabel": "Setting",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "groupfight"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "spacing",
+                      "label": "Line spacing",
+                      "type": "number",
+                      "description": "Distance between neighbors on a line, in meters.",
+                      "min": 0.5,
+                      "max": 5,
+                      "hardMax": 20,
+                      "step": 0.5,
+                      "defaultLabel": "Setting",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "groupfight"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "placement",
+                      "label": "Placement",
+                      "type": "set",
+                      "description": "How players are spread.",
+                      "values": "@MELEE",
+                      "defaultLabel": "Setting",
+                      "when": {
+                        "drill": [
+                          "openmelee"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "teleport",
+                      "label": "Teleport",
+                      "description": "When players are moved to their spots.",
+                      "type": "set",
+                      "values": "@TELEPORT",
+                      "word": true,
+                      "when": {
+                        "drill": [
+                          "popcorn",
+                          "openmelee",
+                          "customdrill"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "arenas",
+                      "label": "Arenas",
+                      "type": "arenas",
+                      "description": "A fight runs in each arena picked, as players allow.",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "customdrill"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "arena",
+                      "label": "Arena",
+                      "type": "arena",
+                      "description": "It takes everyone, so it runs in one arena.",
+                      "when": {
+                        "drill": [
+                          "groupfight",
+                          "openmelee",
+                          "popcorn"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "mirror",
+                      "label": "Swap sides",
+                      "type": "flag",
+                      "description": "The attackers' places go to the defenders, so a 2v1 runs as 1v2.",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "customdrill"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "with",
+                      "label": "With drill above",
+                      "type": "flag",
+                      "description": "Runs at the same time as the drill above, on the players it leaves free, and takes its timing."
+                    },
+                    {
+                      "name": "pick",
+                      "label": "Selection",
+                      "type": "set",
+                      "description": "How this drill picks players.",
+                      "values": "@PICK",
+                      "defaultLabel": "Program's",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "customdrill"
+                        ],
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "deal",
+                      "label": "Start fights",
+                      "type": "set",
+                      "description": "When this drill's next fights start. As soon as free has no rounds.",
+                      "values": "@DEAL",
+                      "defaultLabel": "Program's",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "customdrill"
+                        ],
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "ends",
+                      "label": "Ends after",
+                      "type": "set",
+                      "description": "When the drill is over and the next one starts.",
+                      "values": "@ENDS",
+                      "defaultLabel": "One round",
+                      "when": {
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "rounds",
+                      "label": "Rounds",
+                      "type": "number",
+                      "description": "How many rounds.",
+                      "min": 1,
+                      "max": 20,
+                      "hardMax": 100,
+                      "step": 1,
+                      "value": "3",
+                      "when": {
+                        "ends": [
+                          "rounds"
+                        ],
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "each",
+                      "label": "Fights each",
+                      "type": "number",
+                      "description": "How many fights every player gets.",
+                      "min": 1,
+                      "max": 10,
+                      "hardMax": 50,
+                      "step": 1,
+                      "value": "1",
+                      "when": {
+                        "ends": [
+                          "each"
+                        ],
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "minutes",
+                      "label": "Minutes",
+                      "type": "number",
+                      "description": "No new fight starts after this many minutes.",
+                      "min": 1,
+                      "max": 30,
+                      "hardMax": 120,
+                      "step": 1,
+                      "value": "5",
+                      "when": {
+                        "ends": [
+                          "minutes"
+                        ],
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "pause",
+                      "label": "Pause",
+                      "type": "number",
+                      "description": "Seconds before this drill starts.",
+                      "min": 0,
+                      "max": 30,
+                      "hardMax": 300,
+                      "step": 1,
+                      "defaultLabel": "Program's",
+                      "when": {
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "fightSeconds",
+                      "label": "Fight time",
+                      "type": "number",
+                      "description": "Seconds before a fight is called over. 0 is no limit.",
+                      "min": 0,
+                      "max": 300,
+                      "hardMax": 1800,
+                      "step": 5,
+                      "defaultLabel": "Program's",
+                      "when": {
+                        "with": [
+                          ""
+                        ]
+                      }
+                    }
+                  ],
+                  "more": [
+                    {
+                      "label": "Try it once",
+                      "text": "program pits try 1"
+                    },
+                    {
+                      "label": "Move up",
+                      "text": "program pits move 1 1"
+                    },
+                    {
+                      "label": "Move down",
+                      "text": "program pits move 1 2"
+                    },
+                    {
+                      "label": "Remove",
+                      "text": "program pits remove 1",
+                      "confirm": true
+                    }
+                  ]
+                },
+                {
+                  "prototype": "ProgramDrillAdd",
+                  "label": "Add drill",
+                  "kind": "add",
+                  "run": "Add drill",
+                  "help": "A drill runs once its turn comes, with its own timing. Empty timing rows use the program's.",
+                  "template": "program pits add {drill} {attackers} {defenders} distance={distance} spacing={spacing} {placement} {teleport} ({arenas}) arena={arena} {mirror} {with} pick={pick} deal={deal} {ends} {rounds} {each} {minutes} pause={pause} fightSeconds={fightSeconds}",
+                  "options": [
+                    {
+                      "name": "drill",
+                      "label": "Drill",
+                      "type": "set",
+                      "description": "Which drill runs.",
+                      "values": "@PROGRAM_DRILLS",
+                      "defaultLabel": "Pick a drill"
+                    },
+                    {
+                      "name": "attackers",
+                      "label": "Attackers",
+                      "type": "number",
+                      "description": "Players on the attacking line.",
+                      "min": 1,
+                      "max": 20,
+                      "hardMax": 50,
+                      "step": 1,
+                      "value": "2",
+                      "when": {
+                        "drill": [
+                          "xvx"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "defenders",
+                      "label": "Defenders",
+                      "type": "number",
+                      "description": "Players on the defending line.",
+                      "min": 1,
+                      "max": 20,
+                      "hardMax": 50,
+                      "step": 1,
+                      "value": "1",
+                      "when": {
+                        "drill": [
+                          "xvx"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "distance",
+                      "label": "Line distance",
+                      "type": "number",
+                      "description": "Distance between the two lines, in meters.",
+                      "min": 1,
+                      "max": 60,
+                      "hardMax": 200,
+                      "step": 1,
+                      "defaultLabel": "Setting",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "groupfight"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "spacing",
+                      "label": "Line spacing",
+                      "type": "number",
+                      "description": "Distance between neighbors on a line, in meters.",
+                      "min": 0.5,
+                      "max": 5,
+                      "hardMax": 20,
+                      "step": 0.5,
+                      "defaultLabel": "Setting",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "groupfight"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "placement",
+                      "label": "Placement",
+                      "type": "set",
+                      "description": "How players are spread.",
+                      "values": "@MELEE",
+                      "defaultLabel": "Setting",
+                      "when": {
+                        "drill": [
+                          "openmelee"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "teleport",
+                      "label": "Teleport",
+                      "description": "When players are moved to their spots.",
+                      "type": "set",
+                      "values": "@TELEPORT",
+                      "word": true,
+                      "when": {
+                        "drill": [
+                          "popcorn",
+                          "openmelee",
+                          "customdrill"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "arenas",
+                      "label": "Arenas",
+                      "type": "arenas",
+                      "description": "A fight runs in each arena picked, as players allow.",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "customdrill"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "arena",
+                      "label": "Arena",
+                      "type": "arena",
+                      "description": "It takes everyone, so it runs in one arena.",
+                      "when": {
+                        "drill": [
+                          "groupfight",
+                          "openmelee",
+                          "popcorn"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "mirror",
+                      "label": "Swap sides",
+                      "type": "flag",
+                      "description": "The attackers' places go to the defenders, so a 2v1 runs as 1v2.",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "customdrill"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "with",
+                      "label": "With drill above",
+                      "type": "flag",
+                      "description": "Runs at the same time as the drill above, on the players it leaves free, and takes its timing."
+                    },
+                    {
+                      "name": "pick",
+                      "label": "Selection",
+                      "type": "set",
+                      "description": "How this drill picks players.",
+                      "values": "@PICK",
+                      "defaultLabel": "Program's",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "customdrill"
+                        ],
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "deal",
+                      "label": "Start fights",
+                      "type": "set",
+                      "description": "When this drill's next fights start. As soon as free has no rounds.",
+                      "values": "@DEAL",
+                      "defaultLabel": "Program's",
+                      "when": {
+                        "drill": [
+                          "xvx",
+                          "customdrill"
+                        ],
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "ends",
+                      "label": "Ends after",
+                      "type": "set",
+                      "description": "When the drill is over and the next one starts.",
+                      "values": "@ENDS",
+                      "defaultLabel": "One round",
+                      "when": {
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "rounds",
+                      "label": "Rounds",
+                      "type": "number",
+                      "description": "How many rounds.",
+                      "min": 1,
+                      "max": 20,
+                      "hardMax": 100,
+                      "step": 1,
+                      "value": "3",
+                      "when": {
+                        "ends": [
+                          "rounds"
+                        ],
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "each",
+                      "label": "Fights each",
+                      "type": "number",
+                      "description": "How many fights every player gets.",
+                      "min": 1,
+                      "max": 10,
+                      "hardMax": 50,
+                      "step": 1,
+                      "value": "1",
+                      "when": {
+                        "ends": [
+                          "each"
+                        ],
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "minutes",
+                      "label": "Minutes",
+                      "type": "number",
+                      "description": "No new fight starts after this many minutes.",
+                      "min": 1,
+                      "max": 30,
+                      "hardMax": 120,
+                      "step": 1,
+                      "value": "5",
+                      "when": {
+                        "ends": [
+                          "minutes"
+                        ],
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "pause",
+                      "label": "Pause",
+                      "type": "number",
+                      "description": "Seconds before this drill starts.",
+                      "min": 0,
+                      "max": 30,
+                      "hardMax": 300,
+                      "step": 1,
+                      "defaultLabel": "Program's",
+                      "when": {
+                        "with": [
+                          ""
+                        ]
+                      }
+                    },
+                    {
+                      "name": "fightSeconds",
+                      "label": "Fight time",
+                      "type": "number",
+                      "description": "Seconds before a fight is called over. 0 is no limit.",
+                      "min": 0,
+                      "max": 300,
+                      "hardMax": 1800,
+                      "step": 5,
+                      "defaultLabel": "Program's",
+                      "when": {
+                        "with": [
+                          ""
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ],
+              "more": [
+                {
+                  "label": "Run",
+                  "text": "program pits run"
+                },
+                {
+                  "label": "Delete",
+                  "text": "program pits delete",
+                  "confirm": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Arenas",
+      "icon": "A",
+      "empty": "No arenas set. Stand in a corner and use New arena.",
+      "groups": [
+        {
+          "name": "Arenas",
+          "entries": [
+            {
+              "label": "New arena",
+              "template": "arena {number} {corner} {x} {z}",
+              "run": "Set corner",
+              "help": "Makes the next arena from its first corner. Set the opposite corner the same way.",
+              "options": [
+                {
+                  "name": "number",
+                  "label": "Number",
+                  "description": "The new arena's number.",
+                  "type": "number",
+                  "min": 8,
+                  "max": 20,
+                  "step": 1,
+                  "value": 8
+                },
+                {
+                  "name": "corner",
+                  "label": "Corner",
+                  "description": "Which corner to set.",
+                  "type": "set",
+                  "values": "@CORNER"
+                },
+                {
+                  "name": "x",
+                  "label": "x (east)",
+                  "description": "Meters east on the map. Empty uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                },
+                {
+                  "name": "z",
+                  "label": "z (north)",
+                  "description": "Meters north on the map. Empty uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                }
+              ],
+              "kind": "add"
+            },
+            {
+              "label": "Arena 1",
+              "meta": "38 x 37 m",
+              "template": "arena 1 {corner} {x} {z}",
+              "run": "Set corner",
+              "lines": [
+                "first corner (-40.99, 42.69)",
+                "opposite corner (-3.35, 5.38)"
+              ],
+              "help": "Palisade A1.",
+              "options": [
+                {
+                  "name": "corner",
+                  "label": "Corner",
+                  "description": "Which corner to move.",
+                  "type": "set",
+                  "values": "@CORNER"
+                },
+                {
+                  "name": "x",
+                  "label": "x (east)",
+                  "description": "Meters east on the map. Empty, with z empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                },
+                {
+                  "name": "z",
+                  "label": "z (north)",
+                  "description": "Meters north on the map. Empty, with x empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                }
+              ]
+            },
+            {
+              "label": "Arena 2",
+              "meta": "37 x 37 m",
+              "template": "arena 2 {corner} {x} {z}",
+              "run": "Set corner",
+              "lines": [
+                "first corner (-3.35, 42.69)",
+                "opposite corner (33.80, 5.38)"
+              ],
+              "help": "The arena east of arena 1.",
+              "options": [
+                {
+                  "name": "corner",
+                  "label": "Corner",
+                  "description": "Which corner to move.",
+                  "type": "set",
+                  "values": "@CORNER"
+                },
+                {
+                  "name": "x",
+                  "label": "x (east)",
+                  "description": "Meters east on the map. Empty, with z empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                },
+                {
+                  "name": "z",
+                  "label": "z (north)",
+                  "description": "Meters north on the map. Empty, with x empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                }
+              ]
+            },
+            {
+              "label": "Arena 3",
+              "meta": "75 x 37 m",
+              "template": "arena 3 {corner} {x} {z}",
+              "run": "Set corner",
+              "lines": [
+                "first corner (-40.99, 42.69)",
+                "opposite corner (33.80, 5.38)"
+              ],
+              "help": "Arenas 1 and 2 together.",
+              "options": [
+                {
+                  "name": "corner",
+                  "label": "Corner",
+                  "description": "Which corner to move.",
+                  "type": "set",
+                  "values": "@CORNER"
+                },
+                {
+                  "name": "x",
+                  "label": "x (east)",
+                  "description": "Meters east on the map. Empty, with z empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                },
+                {
+                  "name": "z",
+                  "label": "z (north)",
+                  "description": "Meters north on the map. Empty, with x empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                }
+              ]
+            },
+            {
+              "label": "Arena 4",
+              "meta": "19 x 19 m",
+              "template": "arena 4 {corner} {x} {z}",
+              "run": "Set corner",
+              "lines": [
+                "first corner (-40.99, 5.38)",
+                "opposite corner (-22.17, 24.04)"
+              ],
+              "help": "The south-west quarter of arena 1.",
+              "options": [
+                {
+                  "name": "corner",
+                  "label": "Corner",
+                  "description": "Which corner to move.",
+                  "type": "set",
+                  "values": "@CORNER"
+                },
+                {
+                  "name": "x",
+                  "label": "x (east)",
+                  "description": "Meters east on the map. Empty, with z empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                },
+                {
+                  "name": "z",
+                  "label": "z (north)",
+                  "description": "Meters north on the map. Empty, with x empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                }
+              ]
+            },
+            {
+              "label": "Arena 5",
+              "meta": "19 x 19 m",
+              "template": "arena 5 {corner} {x} {z}",
+              "run": "Set corner",
+              "lines": [
+                "first corner (-22.17, 5.38)",
+                "opposite corner (-3.35, 24.04)"
+              ],
+              "help": "The south-east quarter of arena 1.",
+              "options": [
+                {
+                  "name": "corner",
+                  "label": "Corner",
+                  "description": "Which corner to move.",
+                  "type": "set",
+                  "values": "@CORNER"
+                },
+                {
+                  "name": "x",
+                  "label": "x (east)",
+                  "description": "Meters east on the map. Empty, with z empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                },
+                {
+                  "name": "z",
+                  "label": "z (north)",
+                  "description": "Meters north on the map. Empty, with x empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                }
+              ]
+            },
+            {
+              "label": "Arena 6",
+              "meta": "19 x 19 m",
+              "template": "arena 6 {corner} {x} {z}",
+              "run": "Set corner",
+              "lines": [
+                "first corner (-40.99, 24.04)",
+                "opposite corner (-22.17, 42.69)"
+              ],
+              "help": "The north-west quarter of arena 1.",
+              "options": [
+                {
+                  "name": "corner",
+                  "label": "Corner",
+                  "description": "Which corner to move.",
+                  "type": "set",
+                  "values": "@CORNER"
+                },
+                {
+                  "name": "x",
+                  "label": "x (east)",
+                  "description": "Meters east on the map. Empty, with z empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                },
+                {
+                  "name": "z",
+                  "label": "z (north)",
+                  "description": "Meters north on the map. Empty, with x empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                }
+              ]
+            },
+            {
+              "label": "Arena 7",
+              "meta": "19 x 19 m",
+              "template": "arena 7 {corner} {x} {z}",
+              "run": "Set corner",
+              "lines": [
+                "first corner (-22.17, 24.04)",
+                "opposite corner (-3.35, 42.69)"
+              ],
+              "help": "The north-east quarter of arena 1.",
+              "options": [
+                {
+                  "name": "corner",
+                  "label": "Corner",
+                  "description": "Which corner to move.",
+                  "type": "set",
+                  "values": "@CORNER"
+                },
+                {
+                  "name": "x",
+                  "label": "x (east)",
+                  "description": "Meters east on the map. Empty, with z empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                },
+                {
+                  "name": "z",
+                  "label": "z (north)",
+                  "description": "Meters north on the map. Empty, with x empty, uses where you stand.",
+                  "type": "text",
+                  "placeholder": "where you stand"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Outlines",
+          "entries": [
+            {
+              "label": "Arena outlines",
+              "template": "arena show {state}",
+              "run": "Apply",
+              "help": "Paints every arena on the ground with its number and color. Only you see it.",
+              "options": [
+                {
+                  "name": "state",
+                  "label": "Outlines",
+                  "description": "On paints the arenas; off clears them.",
+                  "type": "set",
+                  "values": "@ONOFF"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "icon": "S",
+      "staged": true,
+      "empty": "No settings. Check that MDS loaded on this server.",
+      "groups": [
+        {
+          "name": "All drills",
+          "entries": [
+            {
+              "key": "DrillOrientation",
+              "label": "Facing",
+              "meta": "Attackers north",
+              "type": "set",
+              "values": "@FACING",
+              "value": "NorthSouth",
+              "help": "The facing every drill uses when it doesn't say. rc: DrillOrientation"
+            },
+            {
+              "key": "countdownSeconds",
+              "label": "Countdown",
+              "meta": "3 s",
+              "type": "number",
+              "min": 1,
+              "max": 10,
+              "hardMax": 30,
+              "step": 1,
+              "value": "3",
+              "help": "Seconds open melee, popcorn and custom drills count down on screen before they start. rc: countdownSeconds"
+            }
+          ]
+        },
+        {
+          "name": "xvx",
+          "entries": [
+            {
+              "key": "xvxDistance",
+              "label": "Line distance",
+              "meta": "15 m",
+              "type": "number",
+              "min": 1,
+              "max": 60,
+              "hardMax": 200,
+              "value": "15",
+              "help": "Distance between the two xvx lines when a drill doesn't say, in meters. rc: xvxDistance"
+            },
+            {
+              "key": "xvxSpacing",
+              "label": "Line spacing",
+              "meta": "1.5 m",
+              "type": "number",
+              "min": 0.5,
+              "max": 5,
+              "hardMax": 20,
+              "value": "1.5",
+              "help": "Distance between neighbors on an xvx line, in meters. rc: xvxSpacing"
+            },
+            {
+              "key": "xvxStrategy",
+              "label": "Selection strategy",
+              "meta": "Round robin",
+              "type": "set",
+              "values": "@PICK",
+              "value": "next",
+              "help": "How xvx chooses players when the drill doesn't say. rc: xvxStrategy"
+            }
+          ]
+        },
+        {
+          "name": "groupfight",
+          "entries": [
+            {
+              "key": "groupfightDistance",
+              "label": "Line distance",
+              "meta": "25 m",
+              "type": "number",
+              "min": 1,
+              "max": 60,
+              "hardMax": 200,
+              "value": 25,
+              "help": "Distance between the two groupfight lines, in meters. rc: groupfightDistance"
+            },
+            {
+              "key": "groupfightSpacing",
+              "label": "Line spacing",
+              "meta": "1.5 m",
+              "type": "number",
+              "min": 0.5,
+              "max": 5,
+              "hardMax": 20,
+              "value": "1.5",
+              "help": "Distance between neighbors on a groupfight line, in meters. rc: groupfightSpacing"
+            },
+            {
+              "key": "groupfightStrategy",
+              "label": "Selection strategy",
+              "meta": "Random",
+              "type": "set",
+              "values": "@PICK_TEAMS",
+              "value": "random",
+              "help": "How each groupfight line is ordered. rc: groupfightStrategy"
+            }
+          ]
+        },
+        {
+          "name": "openmelee",
+          "entries": [
+            {
+              "key": "openMeleeSpacing",
+              "label": "Player spacing",
+              "meta": "1.5 m",
+              "type": "number",
+              "min": 0.5,
+              "max": 5,
+              "hardMax": 20,
+              "value": 1.5,
+              "help": "The least distance between any two players in open melee, in meters. rc: openMeleeSpacing"
+            },
+            {
+              "key": "openMeleeOffset",
+              "label": "Edge margin",
+              "meta": "2 m",
+              "type": "number",
+              "min": 0,
+              "max": 10,
+              "hardMax": 50,
+              "value": 2,
+              "help": "How far in from the arena edges everyone is kept, in meters. rc: openMeleeOffset"
+            },
+            {
+              "key": "openMeleeStrategy",
+              "label": "Placement strategy",
+              "meta": "Pockets",
+              "type": "set",
+              "values": "@MELEE",
+              "value": "Scatter",
+              "help": "How open melee spreads players when the drill doesn't say. rc: openMeleeStrategy"
+            }
+          ]
+        },
+        {
+          "name": "popcorn",
+          "entries": [
+            {
+              "key": "popcornMin",
+              "label": "Smallest fight",
+              "meta": "2v1",
+              "type": "set",
+              "values": "@SMALLEST",
+              "value": "2v1",
+              "help": "The smallest popcorn fight. Only the total counts. rc: popcornMin",
+              "stepper": true
+            },
+            {
+              "key": "popcornMax",
+              "label": "Largest fight",
+              "meta": "4v4",
+              "type": "set",
+              "values": "@LARGEST",
+              "value": "4v4",
+              "help": "The largest popcorn fight. 4v4 suits 10v10 and under. rc: popcornMax",
+              "stepper": true
+            },
+            {
+              "key": "popcornDistance",
+              "label": "Fight distance",
+              "meta": "6 m",
+              "type": "number",
+              "min": 1,
+              "max": 30,
+              "hardMax": 100,
+              "value": 6,
+              "help": "The least distance between players of different fights, in meters. rc: popcornDistance"
+            },
+            {
+              "key": "popcornLineDistance",
+              "label": "Line distance",
+              "meta": "6 m",
+              "type": "number",
+              "min": 1,
+              "max": 30,
+              "hardMax": 100,
+              "value": 6,
+              "help": "Distance between a fight's two lines, in meters. rc: popcornLineDistance"
+            },
+            {
+              "key": "popcornSpacing",
+              "label": "Line spacing",
+              "meta": "1.5 m",
+              "type": "number",
+              "min": 0.5,
+              "max": 5,
+              "hardMax": 20,
+              "value": "1.5",
+              "help": "Distance between neighbors on a fight's line, in meters. rc: popcornSpacing"
+            },
+            {
+              "key": "popcornStrategy",
+              "label": "Placement strategy",
+              "meta": "Even spread",
+              "type": "set",
+              "values": "@POPCORN",
+              "value": "Spread",
+              "help": "How popcorn lays out its fights when the drill doesn't say. rc: popcornStrategy"
+            }
+          ]
+        },
+        {
+          "name": "Logging",
+          "entries": [
+            {
+              "key": "MDSDebugLogging",
+              "label": "Debug logging",
+              "meta": "Off",
+              "type": "set",
+              "values": [
+                {
+                  "value": "true",
+                  "label": "On"
+                },
+                {
+                  "value": "false",
+                  "label": "Off"
+                }
+              ],
+              "value": "false",
+              "help": "Writes MDS's debug lines to the server log. rc: MDSDebugLogging"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

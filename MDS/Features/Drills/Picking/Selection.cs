@@ -18,19 +18,22 @@ namespace MDS.Features.Drills.Picking
         private readonly Dictionary<PickStrategy, ISelectionStrategy> _strategies = new();
         private readonly LineupMemory _memory = new();
         private readonly NextPick _next;
+        private readonly LineSlots _slots;
 
         private Selection(PlayerRegistry players, Random random)
         {
             _next = new NextPick(players, random);
-            _strategies[PickStrategy.Random] = new RandomPick(players, random);
+            _slots = new LineSlots(random);
+            _strategies[PickStrategy.Random] = new RandomPick(players, random, _slots);
         }
 
         public static Selection ForXvX(PlayerRegistry players, Random random)
         {
             var selection = new Selection(players, random);
-            selection._strategies[PickStrategy.Any] = new AnyPick(players, random);
+            selection._strategies[PickStrategy.Any] = new AnyPick(players, random, selection._slots);
             selection._strategies[PickStrategy.Next] = selection._next;
             selection._strategies[PickStrategy.Repeat] = new RepeatPick(selection._memory, players);
+            selection.Default = PickStrategy.Next;
             return selection;
         }
 
@@ -42,8 +45,10 @@ namespace MDS.Features.Drills.Picking
             return selection;
         }
 
-        // StrategySetting takes the first as the default, so the order matters.
         public IEnumerable<PickStrategy> Allowed => _strategies.Keys;
+
+        // What the drill's strategy setting starts at.
+        public PickStrategy Default { get; private set; } = PickStrategy.Random;
 
         public bool Allows(PickStrategy strategy) => _strategies.ContainsKey(strategy);
 
@@ -64,6 +69,7 @@ namespace MDS.Features.Drills.Picking
         {
             _memory.Clear();
             _next.Reset();
+            _slots.Clear();
         }
     }
 }

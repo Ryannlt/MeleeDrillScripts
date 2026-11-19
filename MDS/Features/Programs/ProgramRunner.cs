@@ -21,22 +21,22 @@ namespace MDS.Features.Programs
         public ProgramRun Current => _current != null && !_current.IsDone ? _current : null;
 
         // Every drill line is checked in every arena with its step's pick before anything starts, so a program never stops halfway on a typo.
-        public string Refusal(DrillProgram program)
+        public string Refusal(ProgramPlan plan)
         {
-            if (program.Steps.Count == 0) return $"{program.Name} has no steps yet.";
+            if (plan.Steps.Count == 0) return $"{plan.Name} has no drills yet.";
 
-            for (int i = 0; i < program.Steps.Count; i++)
+            for (int i = 0; i < plan.Steps.Count; i++)
             {
-                string error = StepRefusal(program.Steps[i]);
-                if (error.Length > 0) return $"Step {i + 1} of {program.Name}: {error}";
+                string error = StepRefusal(plan.Steps[i]);
+                if (error.Length > 0) return $"Step {i + 1} of {plan.Name}: {error}";
             }
             return string.Empty;
         }
 
-        public void Start(DrillProgram program, bool loops, int starter)
+        public void Start(ProgramPlan plan, int starter)
         {
-            _current = new ProgramRun(_kit, program, starter) { Loops = loops };
-            _routine = _routines.Start(_current.Body(), $"program {program.Name}");
+            _current = new ProgramRun(_kit, plan, starter);
+            _routine = _routines.Start(_current.Body(), $"program {plan.Name}");
         }
 
         public void Stop()
@@ -65,14 +65,14 @@ namespace MDS.Features.Programs
             foreach (ProgramDrill line in step.Drills)
             {
                 int shared = line.Arenas.Find(arena => !used.Add(arena));
-                if (shared > 0) return $"arena {shared} is used by two drill lines.";
+                if (shared > 0) return $"arena {shared} is used by two drills at once.";
             }
             return string.Empty;
         }
 
         private static string StepRefusal(ProgramStep step)
         {
-            if (step.Drills.Count == 0) return "it has no drill lines.";
+            if (step.Drills.Count == 0) return "it has no drills.";
             if (SharedArena(step).Length > 0) return SharedArena(step);
 
             foreach (ProgramDrill line in step.Drills)

@@ -27,7 +27,8 @@ namespace MDS.Features.Drills
         Turn,
         Side,
         Position,
-        Mirror
+        Mirror,
+        Teleport
     }
 
     public static class DrillOptionValues
@@ -51,8 +52,9 @@ namespace MDS.Features.Drills
             [DrillOption.Max] = IsFightSize,
 
             // Any word but a pick word or mirror, which fill their own slots, so the name and those can come in any order.
-            [DrillOption.Name] = text => !EnumParser.TryParseStrict(text, out PickStrategy _) && !IsMirror(text),
+            [DrillOption.Name] = text => !EnumParser.TryParseStrict(text, out PickStrategy _) && !IsMirror(text) && !IsTeleport(text),
             [DrillOption.Mirror] = IsMirror,
+            [DrillOption.Teleport] = IsTeleport,
             [DrillOption.Turn] = text => Facing.TryParse(text, out _),
             [DrillOption.Side] = text => EnumParser.TryParseStrict(text, out TeamSide _),
 
@@ -66,6 +68,8 @@ namespace MDS.Features.Drills
         public static bool TakesBare(DrillOption option) => option != DrillOption.Turn;
 
         private static bool IsMirror(string text) => text.Equals("mirror", StringComparison.OrdinalIgnoreCase);
+
+        private static bool IsTeleport(string text) => EnumParser.TryParseStrict(text, out TeleportTime _);
 
         private static bool IsCount(string text) => int.TryParse(text, out int count) && count > 0;
 

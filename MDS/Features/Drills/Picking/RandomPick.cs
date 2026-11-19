@@ -8,9 +8,11 @@ namespace MDS.Features.Drills.Picking
     {
         private readonly PlayerRegistry _players;
         private readonly Random _random;
+        private readonly LineSlots _slots;
 
-        public RandomPick(PlayerRegistry players, Random random)
+        public RandomPick(PlayerRegistry players, Random random, LineSlots slots)
         {
+            _slots = slots;
             _players = players;
             _random = random;
         }
@@ -27,7 +29,7 @@ namespace MDS.Features.Drills.Picking
             var lineup = new Lineup(
                 PickRules.Shuffled(attacking, _random).GetRange(0, attackers),
                 PickRules.Shuffled(defending, _random).GetRange(0, defenders));
-            return PickResult.Ok(lineup);
+            return PickResult.Ok(_slots.Arrange(lineup));
         }
     }
 }

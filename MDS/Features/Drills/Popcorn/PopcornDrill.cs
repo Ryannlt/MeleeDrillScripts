@@ -34,8 +34,8 @@ namespace MDS.Features.Drills.Popcorn
         public string Name => "popcorn";
 
         public DrillSyntax Syntax { get; } = new DrillSyntax(
-            "Usage: rc popcorn [scatter|spread|tight|random] [min] [max] [distance] [lineDistance] [spacing] [arena], numbers in that order, or by name: strategy=tight min=2v1 max=5v5 distance=10",
-            0, DrillOption.Layout, DrillOption.Min, DrillOption.Max, DrillOption.Distance, DrillOption.LineDistance, DrillOption.Spacing);
+            "Usage: rc popcorn [scatter|spread|tight|random] [min] [max] [distance] [lineDistance] [spacing] [early|late] [arena], numbers in that order, or by name: strategy=tight min=2v1 max=5v5 distance=10 teleport=late",
+            0, DrillOption.Layout, DrillOption.Min, DrillOption.Max, DrillOption.Distance, DrillOption.LineDistance, DrillOption.Spacing, DrillOption.Teleport);
 
         // Everyone on the field fights.
         public bool ClearsLeftovers => false;
@@ -65,7 +65,8 @@ namespace MDS.Features.Drills.Popcorn
 
             var started = new DrillRun(Name, _kit.ArenaFor(options));
             started.Note = NoteFor(started.Arena.Number, request, draw);
-            _countdown.Start(new DrillTiming(Title, true, GodModeAfterMoveSeconds), () => Place(started, request));
+            var timing = new DrillTiming(Title, true, GodModeAfterMoveSeconds) { Teleport = options.GetTeleport(TeleportTime.Early) };
+            _countdown.Start(timing, started, () => Place(started, request));
             run = started;
             return true;
         }

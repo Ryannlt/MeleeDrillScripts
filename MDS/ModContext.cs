@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Holdfast.Modding;
 using MDS.Features.Arenas;
 using MDS.Features.Drills;
+using MDS.Features.Panel;
 using MDS.Features.Programs;
 using MDS.Features.ShootingTraining;
 using MDS.Features.Status;
@@ -28,6 +29,7 @@ namespace MDS
         public ModContext(ModHandles handles, IRuntime runtime, GameSide side)
         {
             Runtime = runtime;
+            Networking = handles.Networking;
             Log = new ModLog("MDS", runtime.CreateLogSink());
             Clock = runtime.CreateClock();
             IsServer = side == GameSide.Server;
@@ -49,6 +51,11 @@ namespace MDS
         public bool IsServer { get; }
 
         public IRuntime Runtime { get; }
+
+        // Only the panel link uses the channel directly; other code reaches clients through Replies.
+        public IModNetworking Networking { get; }
+
+        public PanelFeature Panel { get; private set; }
 
         public ModLog Log { get; }
 
@@ -97,9 +104,12 @@ namespace MDS
             _features.Add(arena);
             var drills = new DrillsFeature(this, arena.Store);
             _features.Add(drills);
-            _features.Add(new ProgramsFeature(this, drills.Catalog));
+            var programs = new ProgramsFeature(this, drills.Catalog);
+            _features.Add(programs);
             _features.Add(new ShootingTrainingFeature(this));
             _features.Add(new StatusFeature(this, arena.Store));
+            Panel = new PanelFeature(this, new PanelLists(arena.Store, drills.Book, programs));
+            _features.Add(Panel);
         }
 
         private void LogSide(GameSide side)

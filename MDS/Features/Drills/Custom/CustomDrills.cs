@@ -26,8 +26,8 @@ namespace MDS.Features.Drills.Custom
         public string Name => "customdrill";
 
         public DrillSyntax Syntax { get; } = new DrillSyntax(
-            "Usage: rc customdrill <name|number> [strategy] [mirror] [arena], or by name: strategy=next turn=90 arena=2. A turn goes by name only. rc customdrill alone lists them",
-            1, DrillOption.Name, DrillOption.Strategy, DrillOption.Turn, DrillOption.Mirror);
+            "Usage: rc customdrill <name|number> [strategy] [mirror] [early|late] [arena], or by name: strategy=next turn=90 arena=2 teleport=early. A turn goes by name only. rc customdrill alone lists them",
+            1, DrillOption.Name, DrillOption.Strategy, DrillOption.Turn, DrillOption.Mirror, DrillOption.Teleport);
 
         // Anyone standing where the drill puts players who isn't on a spot or in the formation is sent back to a spawn.
         public bool ClearsLeftovers => true;
@@ -48,7 +48,7 @@ namespace MDS.Features.Drills.Custom
             if (!_kit.HasArena(options, out error)) return false;
 
             if (!_book.TryFind(options.GetName(), out CustomDrill drill)) error = $"No custom drill '{options.GetName()}'. rc customdrill lists them.";
-            else if (drill.IsEmpty) error = $"{drill.Name} has nothing to place yet. Add a spot or a formation with rc customdrill add {drill.Name} <line>.";
+            else if (drill.IsEmpty) error = $"{drill.Name} has nothing to place yet. Add a spot or a formation with rc customdrill {drill.Name} add <part>.";
             return error.Length == 0;
         }
 
@@ -66,8 +66,10 @@ namespace MDS.Features.Drills.Custom
 
             custom.Picked = pick.Lineup;
             run = custom.Run = new DrillRun($"{Name} {custom.Drill.Name}", custom.Arena);
-            if (custom.Drill.Timing.IsInstant) Place(custom);
-            else _countdown.Start(custom.Drill.Timing, () => Place(custom));
+            DrillTiming timing = custom.Drill.Timing;
+            timing.Teleport = options.GetTeleport(TeleportTime.Late);
+            if (timing.IsInstant) Place(custom);
+            else _countdown.Start(timing, run, () => Place(custom));
             return true;
         }
 

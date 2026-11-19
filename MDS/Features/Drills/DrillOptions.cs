@@ -29,6 +29,20 @@ namespace MDS.Features.Drills
 
         public void Unset(DrillOption option) => _values.Remove(option);
 
+        // The value as written, or empty.
+        public string Get(DrillOption option) => _values.TryGetValue(option, out string text) ? text : string.Empty;
+
+        // A "-" keeps a slot's default: it holds the slot while the rest are filled, then goes.
+        public void Skip(DrillOption option) => _values[option] = DrillSyntax.Skip;
+
+        public void DropSkipped()
+        {
+            foreach (DrillOption option in new List<DrillOption>(_values.Keys))
+            {
+                if (_values[option] == DrillSyntax.Skip) _values.Remove(option);
+            }
+        }
+
         public int GetCount(DrillOption option) => _values.TryGetValue(option, out string text) ? int.Parse(text) : 0;
 
         public int GetArena() => _values.TryGetValue(DrillOption.Arena, out string text) ? int.Parse(text) : ArenaStore.First;
@@ -36,6 +50,11 @@ namespace MDS.Features.Drills
         public float GetNumber(DrillOption option, float fallback)
         {
             return _values.TryGetValue(option, out string text) && Numbers.TryParse(text, out float value) ? value : fallback;
+        }
+
+        public TeleportTime GetTeleport(TeleportTime fallback)
+        {
+            return _values.TryGetValue(DrillOption.Teleport, out string text) && EnumParser.TryParseStrict(text, out TeleportTime value) ? value : fallback;
         }
 
         public PickStrategy GetStrategy(PickStrategy fallback)

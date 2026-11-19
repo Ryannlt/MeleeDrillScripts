@@ -39,6 +39,36 @@ namespace MDS.Features.Drills.Custom
 
         private delegate string SettingReader(string value, out Action<CustomDrill> apply);
 
+        public static bool IsPart(string text)
+        {
+            string head = HeadOf(text);
+            return EnumParser.TryParseStrict(head, out TeamSide _) || head.Equals(LineWord, StringComparison.OrdinalIgnoreCase) || EnumParser.TryParseStrict(head, out SpawnStrategy _);
+        }
+
+        // An open melee formation replaces any formation; a line replaces open melee and the line for its own team.
+        public static bool Replaces(string newer, string older)
+        {
+            string kind = FormationKind(newer), old = FormationKind(older);
+            if (kind.Length == 0 || old.Length == 0) return false;
+            return kind == OpenKind || old == OpenKind || kind == old;
+        }
+
+        private const string OpenKind = "open";
+
+        private static string HeadOf(string text)
+        {
+            string[] parts = CommaParts.Split(text);
+            return parts.Length > 0 ? parts[0] : string.Empty;
+        }
+
+        private static string FormationKind(string text)
+        {
+            string[] parts = CommaParts.Split(text);
+            if (parts.Length == 0) return string.Empty;
+            if (EnumParser.TryParseStrict(parts[0], out SpawnStrategy _)) return OpenKind;
+            return parts[0].Equals(LineWord, StringComparison.OrdinalIgnoreCase) && parts.Length > 1 ? parts[1].ToLowerInvariant() : string.Empty;
+        }
+
         public static bool TryParse(string text, out Action<CustomDrill> apply, out string error)
         {
             string[] parts = CommaParts.Split(text);
@@ -65,8 +95,7 @@ namespace MDS.Features.Drills.Custom
             }
             if (spots.Count == 0) return $"{parts[0]} needs a position, like {parts[0]},(-5,0).";
 
-            string written = string.Join(",", parts);
-            apply = drill => drill.AddSpots(spots, written);
+            apply = drill => drill.AddSpots(spots);
             return string.Empty;
         }
 

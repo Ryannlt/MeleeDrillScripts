@@ -9,15 +9,10 @@ namespace MDS.Features.Drills.Settings
     {
         private readonly List<PickStrategy> _allowed;
 
-        public StrategySetting(string key, IEnumerable<PickStrategy> allowed, Replies replies)
-            : this(key, new List<PickStrategy>(allowed), replies)
+        public StrategySetting(string key, Selection selection, Replies replies)
+            : base(key, selection.Default, replies)
         {
-        }
-
-        private StrategySetting(string key, List<PickStrategy> allowed, Replies replies)
-            : base(key, allowed[0], replies)
-        {
-            _allowed = allowed;
+            _allowed = new List<PickStrategy>(selection.Allowed);
         }
 
         protected override string Accepted => string.Join("|", _allowed);

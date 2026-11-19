@@ -7,7 +7,7 @@ using MDS.Shared.Players;
 
 namespace MDS.Features.Programs
 {
-    // One drill run a program waits on: over when one side has all fallen since it was placed, or when its time is up.
+    // One drill run a program waits on: over when one side has all fallen since it was placed, or when its time limit, if any, is up.
     // A player who died stays fallen for this fight even after respawning.
     public sealed class Fight
     {
@@ -33,7 +33,10 @@ namespace MDS.Features.Programs
             if (IsPlaced && Run.Lineup.Includes(player)) _fallen.Add(player);
         }
 
-        public bool IsOver(float now) => IsPlaced && (AllFallen(Run.Lineup.Attackers) || AllFallen(Run.Lineup.Defenders) || now - _placedAt >= _seconds);
+        public bool IsOver(float now) => IsPlaced && (AllFallen(Run.Lineup.Attackers) || AllFallen(Run.Lineup.Defenders) || IsTimeUp(now));
+
+        // 0 seconds is no time limit.
+        private bool IsTimeUp(float now) => _seconds > 0f && now - _placedAt >= _seconds;
 
         private bool AllFallen(IReadOnlyList<IPlayer> side) => side.Count > 0 && new List<IPlayer>(side).TrueForAll(_fallen.Contains);
     }

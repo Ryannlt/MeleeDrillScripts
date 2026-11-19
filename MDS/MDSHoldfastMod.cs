@@ -38,6 +38,16 @@ namespace MDS
             _context.ClientMessages.Handle(messageName, data);
         }
 
+        public void OnServerModMessage(int playerId, uint modId, string messageName, byte[] data)
+        {
+            if (OnServer) _context.Panel.OnServerModMessage(playerId, modId, messageName, data);
+        }
+
+        public void OnServerModSyncedSessionDataChanged(uint modId, string key, byte[] value)
+        {
+            if (OnServer) _context.Panel.OnServerStoreChanged(modId, key);
+        }
+
         public void OnRCCommand(int playerId, string input, string output, bool success)
         {
             if (!OnServer) return;
