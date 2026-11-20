@@ -45,8 +45,11 @@ namespace MDS.Shared.Panel.Protocol
         // A page over one message's room, in order: "index\ncount\ntext".
         public const string PagePart = "Panel.PagePart";
 
-        // The game refuses a mod message over 64 KB, and UTF-8 spends at most 3 bytes on a character in one char, so 16000 leaves room for the header.
-        public const int PageChars = 16000;
+        // The game refuses a mod message over 64 KB (Holdfast.Modding.xml, IModNetworking).
+        public const int MessageBytes = 64 * 1024;
+
+        // A part's text in UTF-8 bytes, leaving room under MessageBytes for the "index\ncount\n" header and the message name.
+        public const int PageBytes = 60000;
 
         // Over 3 MB of page, far past anything a panel needs.
         public const int MaxPageParts = 200;
@@ -73,24 +76,49 @@ namespace MDS.Shared.Panel.Protocol
         public static List<(string Name, byte[] Data)> PageMessages(string json)
         {
             var messages = new List<(string Name, byte[] Data)>();
-            if (json.Length <= PageChars) messages.Add((Page, Bytes(json)));
+            byte[] whole = Bytes(json);
+            if (whole.Length <= PageBytes) messages.Add((Page, whole));
             else AddParts(json, messages);
             return messages;
         }
 
-        // A part never ends between the two halves of a surrogate pair.
         private static void AddParts(string json, List<(string Name, byte[] Data)> messages)
         {
             var chunks = new List<string>();
             for (int start = 0; start < json.Length;)
             {
-                int length = System.Math.Min(PageChars, json.Length - start);
-                if (start + length < json.Length && char.IsHighSurrogate(json[start + length - 1])) length--;
+                int length = CharsThatFit(json, start);
                 chunks.Add(json.Substring(start, length));
                 start += length;
             }
             for (int i = 0; i < chunks.Count; i++) messages.Add((PagePart, Bytes($"{i}\n{chunks.Count}\n{chunks[i]}")));
         }
+
+        // A part never ends between the two halves of a surrogate pair.
+        private static int CharsThatFit(string json, int start)
+        {
+            int bytes = 0, at = start;
+            while (at < json.Length)
+            {
+                bool pair = char.IsHighSurrogate(json[at]) && at + 1 < json.Length;
+                int size = pair ? Utf8PairBytes : Utf8Bytes(json[at]);
+                if (bytes + size > PageBytes) break;
+
+                bytes += size;
+                at += pair ? PairChars : 1;
+            }
+            return at - start;
+        }
+
+        // UTF-8 widths: below U+0080 one byte, below U+0800 two, any other char three, a surrogate pair four.
+        private const int PairChars = 2;
+        private const int Utf8PairBytes = 4;
+        private const int OneByteBelow = 0x80;
+        private const int TwoBytesBelow = 0x800;
+        private const int TwoBytes = 2;
+        private const int ThreeBytes = 3;
+
+        private static int Utf8Bytes(char c) => c < OneByteBelow ? 1 : c < TwoBytesBelow ? TwoBytes : ThreeBytes;
 
         public static byte[] WriteRun(string module, int seq, string command) => Bytes($"{module}\n{seq}\n{command}");
 
